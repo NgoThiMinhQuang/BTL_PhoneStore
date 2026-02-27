@@ -12,38 +12,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PhoneStore"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false" />
         <!-- Màn chào mừng: launcher -->
         <activity
             android:name=".ui.auth.WelcomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Auth -->
+        </activity> <!-- Auth -->
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Home theo role (nếu bạn đã tạo) -->
+            android:windowSoftInputMode="adjustResize" /> <!-- Home theo role (nếu bạn đã tạo) -->
         <activity
             android:name=".ui.home.AdminHomeActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.home.CustomerHomeActivity"
-            android:exported="false" />
-
-        <!-- (Tuỳ chọn) Nếu bạn vẫn giữ MainActivity nhưng không dùng làm launcher -->
+            android:exported="false" /> <!-- (Tuỳ chọn) Nếu bạn vẫn giữ MainActivity nhưng không dùng làm launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />

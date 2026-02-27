@@ -13,6 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.phonestore.R;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.ui.profile.ProfileActivity;   // <-- THÊM DÒNG NÀY
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.navigation.NavigationView;
 
@@ -69,6 +70,12 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
                 session.clear();
                 startActivity(new Intent(this, WelcomeActivity.class));
                 finish();
+                return true;
+            }
+
+            if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                drawerLayout.closeDrawers();
                 return true;
             }
 

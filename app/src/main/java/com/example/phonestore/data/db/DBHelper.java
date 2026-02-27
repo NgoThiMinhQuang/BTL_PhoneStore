@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 2;
 
     public static final String TBL_USERS = "users";
     public static final String COL_ID = "id";
@@ -36,12 +36,20 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(sqlUsers);
 
         // Seed ADMIN mặc định
-        ContentValues v = new ContentValues();
-        v.put(COL_FULLNAME, "Administrator");
-        v.put(COL_USERNAME, "admin");
-        v.put(COL_PASSWORD, "admin123");
-        v.put(COL_ROLE, ROLE_ADMIN);
-        db.insert(TBL_USERS, null, v);
+        ContentValues admin = new ContentValues();
+        admin.put(COL_FULLNAME, "Administrator");
+        admin.put(COL_USERNAME, "admin");
+        admin.put(COL_PASSWORD, "admin123");
+        admin.put(COL_ROLE, ROLE_ADMIN);
+        db.insert(TBL_USERS, null, admin);
+
+        // Seed CUSTOMER mặc định
+        ContentValues customer = new ContentValues();
+        customer.put(COL_FULLNAME, "Khachhang");
+        customer.put(COL_USERNAME, "khachhang");
+        customer.put(COL_PASSWORD, "khachhang123");
+        customer.put(COL_ROLE, ROLE_CUSTOMER);
+        db.insert(TBL_USERS, null, customer);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

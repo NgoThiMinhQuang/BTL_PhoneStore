@@ -23,6 +23,9 @@ public class SessionManager {
         return sp.getString("username", null) != null;
     }
 
+    public long getUserId() {
+        return sp.getLong("userId", -1);
+    }
     public String getUsername() {
         return sp.getString("username", null);
     }

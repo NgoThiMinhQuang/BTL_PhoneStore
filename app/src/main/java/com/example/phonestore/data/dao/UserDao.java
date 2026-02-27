@@ -59,4 +59,47 @@ public class UserDao {
         c.close();
         return u;
     }
+    public User getById(long id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
+                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE +
+                        " FROM " + DBHelper.TBL_USERS +
+                        " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
+                new String[]{String.valueOf(id)}
+        );
+
+        User u = null;
+        if (c.moveToFirst()) {
+            u = new User(
+                    c.getLong(0),
+                    c.getString(1),
+                    c.getString(2),
+                    c.getString(3)
+            );
+        }
+        c.close();
+        return u;
+    }
+
+    public boolean updateFullName(long id, String fullname) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_FULLNAME, fullname);
+        return db.update(DBHelper.TBL_USERS, v, DBHelper.COL_ID + "=?",
+                new String[]{String.valueOf(id)}) > 0;
+    }
+
+    // Đổi mật khẩu: bắt nhập đúng mật khẩu cũ
+    public boolean changePassword(long id, String oldPassword, String newPassword) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_PASSWORD, newPassword);
+        return db.update(
+                DBHelper.TBL_USERS,
+                v,
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_PASSWORD + "=?",
+                new String[]{String.valueOf(id), oldPassword}
+        ) > 0;
+    }
 }
