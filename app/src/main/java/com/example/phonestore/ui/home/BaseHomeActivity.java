@@ -16,7 +16,7 @@ import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.profile.ProfileActivity;   // <-- THÊM DÒNG NÀY
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.navigation.NavigationView;
-
+import com.example.phonestore.ui.products.ProductsActivity;
 public abstract class BaseHomeActivity extends AppCompatActivity {
 
     protected SessionManager session;
@@ -75,6 +75,11 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
 
             if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
+                drawerLayout.closeDrawers();
+                return true;
+            }
+            if (id == R.id.nav_products) {
+                startActivity(new Intent(this, ProductsActivity.class));
                 drawerLayout.closeDrawers();
                 return true;
             }

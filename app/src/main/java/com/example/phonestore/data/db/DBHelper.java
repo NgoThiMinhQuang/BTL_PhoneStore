@@ -8,8 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 2;
+    public static final int DB_VERSION = 3; // tăng để upgrade
 
+    // users
     public static final String TBL_USERS = "users";
     public static final String COL_ID = "id";
     public static final String COL_FULLNAME = "fullname";
@@ -20,12 +21,24 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_CUSTOMER = "CUSTOMER";
 
+    // products
+    public static final String TBL_PRODUCTS = "products";
+    public static final String COL_P_NAME = "name";
+    public static final String COL_P_BRAND = "brand";
+    public static final String COL_P_PRICE = "price";
+    public static final String COL_P_STOCK = "stock";
+    public static final String COL_P_DISCOUNT = "discount";
+    public static final String COL_P_DESC = "description";
+    public static final String COL_P_IMAGE = "image_name"; // tên ảnh trong mipmap (tuỳ chọn)
+
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
+        // 1) users
         String sqlUsers = "CREATE TABLE " + TBL_USERS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_FULLNAME + " TEXT, " +
@@ -35,7 +48,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 ");";
         db.execSQL(sqlUsers);
 
-        // Seed ADMIN mặc định
+        // Seed ADMIN
         ContentValues admin = new ContentValues();
         admin.put(COL_FULLNAME, "Administrator");
         admin.put(COL_USERNAME, "admin");
@@ -43,16 +56,61 @@ public class DBHelper extends SQLiteOpenHelper {
         admin.put(COL_ROLE, ROLE_ADMIN);
         db.insert(TBL_USERS, null, admin);
 
-        // Seed CUSTOMER mặc định
+        // Seed CUSTOMER
         ContentValues customer = new ContentValues();
         customer.put(COL_FULLNAME, "Khachhang");
         customer.put(COL_USERNAME, "khachhang");
         customer.put(COL_PASSWORD, "khachhang123");
         customer.put(COL_ROLE, ROLE_CUSTOMER);
         db.insert(TBL_USERS, null, customer);
+
+        // 2) products
+        String sqlProducts = "CREATE TABLE " + TBL_PRODUCTS + " (" +
+                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_P_NAME + " TEXT NOT NULL, " +
+                COL_P_BRAND + " TEXT, " +
+                COL_P_PRICE + " INTEGER NOT NULL, " +
+                COL_P_STOCK + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_P_DISCOUNT + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_P_DESC + " TEXT, " +
+                COL_P_IMAGE + " TEXT" +
+                ");";
+        db.execSQL(sqlProducts);
+
+        // Seed sản phẩm mẫu (để test danh sách)
+        themSanPhamMau(db, "iPhone 15 Pro Max", "Apple", 28990000, 10, 10,
+                "Flagship, pin trau, camera manh", null);
+        themSanPhamMau(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 20,
+                "Zoom xa, man dep", null);
+        themSanPhamMau(db, "Xiaomi 14", "Xiaomi", 15990000, 15, 0,
+                "Hieu nang/gia tot", null);
     }
+
+    // Hàm seed (tham số tiếng Việt không dấu)
+    private void themSanPhamMau(SQLiteDatabase db,
+                                String tenSanPham,
+                                String hang,
+                                int gia,
+                                int tonKho,
+                                int giamGia,
+                                String moTa,
+                                String tenAnh) {
+
+        ContentValues giaTri = new ContentValues();
+        giaTri.put(COL_P_NAME, tenSanPham);
+        giaTri.put(COL_P_BRAND, hang);
+        giaTri.put(COL_P_PRICE, gia);
+        giaTri.put(COL_P_STOCK, tonKho);
+        giaTri.put(COL_P_DISCOUNT, giamGia);
+        giaTri.put(COL_P_DESC, moTa);
+        giaTri.put(COL_P_IMAGE, tenAnh);
+
+        db.insert(TBL_PRODUCTS, null, giaTri);
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TBL_PRODUCTS);
         db.execSQL("DROP TABLE IF EXISTS " + TBL_USERS);
         onCreate(db);
     }
