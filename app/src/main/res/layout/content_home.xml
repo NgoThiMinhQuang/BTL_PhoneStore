@@ -2,109 +2,131 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="@color/home_background"
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="24dp">
 
-        <!-- Search -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Find your next phone today"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Discover top brands, real prices, and trusted warranty in one place."
+            android:textColor="@color/text_sub"
+            android:textSize="13sp" />
+
         <EditText
             android:id="@+id/edtSearch"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:hint="Search your item here..."
-            android:background="@android:drawable/editbox_background"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp" />
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_edittext"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="10dp"
+            android:hint="Search phones, brands..."
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint" />
 
-        <!-- Popular Products -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_panel"
             android:gravity="center_vertical"
-            android:layout_marginTop="14dp">
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Special Offers"
+                    android:textColor="@color/red_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Up to 20% off selected flagship phones this week."
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Shop now"
+                    android:textColor="@color/red_dark"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:layout_marginStart="12dp"
+                android:contentDescription="promo image"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_welcom" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Popular Phones"
-                android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvViewAllPopular"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="View All"
+                android:text="View all"
                 android:textColor="@color/red_primary"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- 1 card demo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@android:color/white"
-            android:padding="12dp"
-            android:layout_marginTop="10dp">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_gallery" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="iPhone 15 Pro Max"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Giảm giá 10% - Bảo hành 12 tháng"
-                android:textColor="#777777"/>
-        </LinearLayout>
-
-        <!-- Categories -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="18dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Explore Brands"
-                android:textStyle="bold"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/tvViewAllBrands"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View All"
-                android:textColor="@color/red_primary"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Brand row demo -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
             android:scrollbars="none">
 
             <LinearLayout
@@ -112,38 +134,165 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
-                    android:layout_width="120dp"
-                    android:layout_height="80dp"
-                    android:text="Samsung"
-                    android:backgroundTint="@color/red_primary"
-                    android:textColor="@android:color/white" />
+                <LinearLayout
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel"
+                    android:orientation="vertical">
 
-                <Button
-                    android:layout_width="120dp"
-                    android:layout_height="80dp"
-                    android:text="iPhone"
-                    android:layout_marginLeft="10dp"
-                    android:backgroundTint="@color/red_primary"
-                    android:textColor="@android:color/white" />
+                    <ImageView
+                        android:layout_width="142dp"
+                        android:layout_height="128dp"
+                        android:contentDescription="phone"
+                        android:scaleType="centerCrop"
+                        android:src="@mipmap/ic_iphone17" />
 
-                <Button
-                    android:layout_width="120dp"
-                    android:layout_height="80dp"
-                    android:text="Xiaomi"
-                    android:layout_marginLeft="10dp"
-                    android:backgroundTint="@color/red_primary"
-                    android:textColor="@android:color/white" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="iPhone 15 Pro Max"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
-                <Button
-                    android:layout_width="120dp"
-                    android:layout_height="80dp"
-                    android:text="OPPO"
-                    android:layout_marginLeft="10dp"
-                    android:backgroundTint="@color/red_primary"
-                    android:textColor="@android:color/white" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="From 28.990.000đ"
+                        android:textColor="@color/red_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_panel"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="110dp"
+                        android:contentDescription="phone"
+                        android:scaleType="centerCrop"
+                        android:src="@android:drawable/ic_menu_gallery" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Samsung S24 Ultra"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="From 24.490.000đ"
+                        android:textColor="@color/red_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
         </HorizontalScrollView>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Explore Brands"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvViewAllBrands"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View all"
+                android:textColor="@color/red_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_edittext"
+                    android:paddingStart="18dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="10dp"
+                    android:text="Samsung"
+                    android:textColor="@color/red_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_edittext"
+                    android:paddingStart="18dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="10dp"
+                    android:text="iPhone"
+                    android:textColor="@color/red_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_edittext"
+                    android:paddingStart="18dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="10dp"
+                    android:text="Xiaomi"
+                    android:textColor="@color/red_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_edittext"
+                    android:paddingStart="18dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="18dp"
+                    android:paddingBottom="10dp"
+                    android:text="OPPO"
+                    android:textColor="@color/red_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </HorizontalScrollView>
     </LinearLayout>
 </ScrollView>

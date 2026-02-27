@@ -28,6 +28,6 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     @Override
     protected String screenTitle() {
-        return "Home (Admin)";
+        return "Home";
     }
 }
