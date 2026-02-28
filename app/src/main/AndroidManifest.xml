@@ -41,6 +41,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.products.ProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.products.ProductDetailActivity"
             android:exported="false" /> <!-- (Tuỳ chọn) Nếu bạn vẫn giữ MainActivity nhưng không dùng làm launcher -->
         <activity
             android:name=".MainActivity"

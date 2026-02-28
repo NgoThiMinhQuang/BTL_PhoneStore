@@ -90,6 +90,23 @@ public class ProductDao {
         return list;
     }
 
+    // ✅ Lấy 1 sản phẩm theo ID (dùng cho màn chi tiết)
+    public Product getById(long id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
+                        " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
+                new String[]{String.valueOf(id)}
+        );
+
+        Product p = null;
+        if (c.moveToFirst()) {
+            p = docSanPham(c);
+        }
+        c.close();
+        return p;
+    }
+
     private Product docSanPham(Cursor c) {
         Product p = new Product();
         p.maSanPham = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_ID));

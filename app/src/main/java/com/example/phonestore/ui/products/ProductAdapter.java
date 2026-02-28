@@ -1,12 +1,12 @@
 package com.example.phonestore.ui.products;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,9 +66,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         }
         h.ivThumb.setImageResource(resId != 0 ? resId : android.R.drawable.ic_menu_gallery);
 
-        h.itemView.setOnClickListener(v ->
-                Toast.makeText(ctx, "Bạn chọn: " + ten, Toast.LENGTH_SHORT).show()
-        );
+        // ✅ Click mở màn chi tiết
+        h.itemView.setOnClickListener(v -> {
+            Intent i = new Intent(ctx, ProductDetailActivity.class);
+            i.putExtra(ProductDetailActivity.EXTRA_PRODUCT_ID, p.maSanPham);
+            ctx.startActivity(i);
+        });
     }
 
     @Override
