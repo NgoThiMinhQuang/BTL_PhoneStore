@@ -33,6 +33,24 @@ public class ProductDao {
         return list;
     }
 
+    public ArrayList<Product> layTheoHang(String hang) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Product> list = new ArrayList<>();
+
+        Cursor c = db.rawQuery(
+                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
+                        " WHERE " + DBHelper.COL_P_BRAND + " = ?" +
+                        " ORDER BY " + DBHelper.COL_ID + " DESC",
+                new String[]{hang}
+        );
+
+        while (c.moveToNext()) {
+            list.add(docSanPham(c));
+        }
+        c.close();
+        return list;
+    }
+
     public ArrayList<Product> timKiem(String tuKhoa) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<Product> list = new ArrayList<>();
@@ -43,6 +61,26 @@ public class ProductDao {
                         " WHERE " + DBHelper.COL_P_NAME + " LIKE ? OR " + DBHelper.COL_P_BRAND + " LIKE ?" +
                         " ORDER BY " + DBHelper.COL_ID + " DESC",
                 new String[]{k, k}
+        );
+
+        while (c.moveToNext()) {
+            list.add(docSanPham(c));
+        }
+        c.close();
+        return list;
+    }
+
+    // Search trong 1 hãng (để khi bạn đang lọc Samsung mà gõ search vẫn đúng)
+    public ArrayList<Product> timKiemTheoHang(String hang, String tuKhoa) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Product> list = new ArrayList<>();
+
+        String k = "%" + tuKhoa + "%";
+        Cursor c = db.rawQuery(
+                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
+                        " WHERE " + DBHelper.COL_P_BRAND + " = ? AND " + DBHelper.COL_P_NAME + " LIKE ?" +
+                        " ORDER BY " + DBHelper.COL_ID + " DESC",
+                new String[]{hang, k}
         );
 
         while (c.moveToNext()) {

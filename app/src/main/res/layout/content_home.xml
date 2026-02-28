@@ -239,6 +239,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tvBrandSamsung"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_edittext"
@@ -249,9 +250,13 @@
                     android:text="Samsung"
                     android:textColor="@color/red_primary"
                     android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:tag="Samsung" />
 
                 <TextView
+                    android:id="@+id/tvBrandIphone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -263,9 +268,13 @@
                     android:text="iPhone"
                     android:textColor="@color/red_primary"
                     android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:tag="Apple" />
 
                 <TextView
+                    android:id="@+id/tvBrandXiaomi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -277,9 +286,13 @@
                     android:text="Xiaomi"
                     android:textColor="@color/red_primary"
                     android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:tag="Xiaomi" />
 
                 <TextView
+                    android:id="@+id/tvBrandOppo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -291,7 +304,10 @@
                     android:text="OPPO"
                     android:textColor="@color/red_primary"
                     android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:tag="OPPO" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

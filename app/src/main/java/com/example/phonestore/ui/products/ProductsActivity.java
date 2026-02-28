@@ -14,8 +14,13 @@ import com.example.phonestore.data.dao.ProductDao;
 
 public class ProductsActivity extends AppCompatActivity {
 
+    public static final String EXTRA_BRAND = "extra_brand"; // dùng để query DB
+    public static final String EXTRA_TITLE = "extra_title"; // dùng để hiển thị title
+
     private ProductDao productDao;
     private ProductAdapter adapter;
+
+    private String selectedBrand; // null nếu "View all"
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +28,19 @@ public class ProductsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_products);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Sản phẩm");
+
+        // Nhận filter từ Home
+        selectedBrand = getIntent().getStringExtra(EXTRA_BRAND);
+        String title = getIntent().getStringExtra(EXTRA_TITLE);
+
+        if (title != null && !title.trim().isEmpty()) {
+            toolbar.setTitle("Sản phẩm - " + title);
+        } else if (selectedBrand != null && !selectedBrand.trim().isEmpty()) {
+            toolbar.setTitle("Sản phẩm - " + selectedBrand);
+        } else {
+            toolbar.setTitle("Sản phẩm");
+        }
+
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -35,7 +52,7 @@ public class ProductsActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         // load lần đầu
-        adapter.setData(productDao.layTatCa());
+        loadData("");
 
         // search
         android.widget.EditText edtSearch = findViewById(R.id.edtSearch);
@@ -43,10 +60,20 @@ public class ProductsActivity extends AppCompatActivity {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) {
-                String key = s.toString().trim();
-                adapter.setData(key.isEmpty() ? productDao.layTatCa() : productDao.timKiem(key));
+                loadData(s.toString().trim());
             }
         });
+    }
+
+    private void loadData(String key) {
+        boolean hasBrand = selectedBrand != null && !selectedBrand.trim().isEmpty();
+
+        if (!hasBrand) {
+            adapter.setData(key.isEmpty() ? productDao.layTatCa() : productDao.timKiem(key));
+        } else {
+            adapter.setData(key.isEmpty() ? productDao.layTheoHang(selectedBrand)
+                    : productDao.timKiemTheoHang(selectedBrand, key));
+        }
     }
 
     @Override
