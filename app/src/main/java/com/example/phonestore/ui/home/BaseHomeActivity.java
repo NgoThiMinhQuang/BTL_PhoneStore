@@ -216,6 +216,47 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (tvOppo != null) tvOppo.setOnClickListener(brandClick);
     }
 
+    private void setupHomeFeaturedProductClicks() {
+        View imgProduct1 = findViewById(R.id.imgProduct1Placeholder);
+        if (imgProduct1 != null) {
+            imgProduct1.setOnClickListener(v -> openFeaturedProductDetail("iPhone 15 Pro Max"));
+        }
+
+        View imgProduct2 = findViewById(R.id.imgProduct2Placeholder);
+        if (imgProduct2 != null) {
+            imgProduct2.setOnClickListener(v -> openFeaturedProductDetail("Samsung S24 Ultra"));
+        }
+
+        View imgProduct3 = findViewById(R.id.imgProduct3Placeholder);
+        if (imgProduct3 != null) {
+            imgProduct3.setOnClickListener(v -> openFeaturedProductDetail("Xiaomi 14"));
+        }
+    }
+
+    private void openFeaturedProductDetail(String productName) {
+        ProductDao productDao = new ProductDao(this);
+        ArrayList<Product> products = productDao.timKiem(productName);
+        if (products == null || products.isEmpty()) {
+            openProducts(null, null);
+            return;
+        }
+
+        String normalizedTarget = productName.trim().toLowerCase(Locale.ROOT);
+        Product target = products.get(0);
+
+        for (Product p : products) {
+            if (p == null || p.tenSanPham == null) continue;
+            if (p.tenSanPham.trim().toLowerCase(Locale.ROOT).equals(normalizedTarget)) {
+                target = p;
+                break;
+            }
+        }
+
+        Intent i = new Intent(this, ProductDetailActivity.class);
+        i.putExtra(ProductDetailActivity.EXTRA_PRODUCT_ID, target.maSanPham);
+        startActivity(i);
+    }
+
     private void openProducts(@Nullable String brandKey, @Nullable String title) {
         Intent i = new Intent(this, ProductsActivity.class);
         if (brandKey != null && !brandKey.isEmpty()) i.putExtra(ProductsActivity.EXTRA_BRAND, brandKey);
