@@ -26,9 +26,15 @@ import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
 import com.example.phonestore.ui.orders.OrdersActivity;
+import com.example.phonestore.data.dao.ProductDao;
+import com.example.phonestore.data.model.Product;
+import com.example.phonestore.ui.products.ProductDetailActivity;
 import com.example.phonestore.ui.products.ProductsActivity;
 import com.example.phonestore.ui.profile.ProfileActivity;
 import com.example.phonestore.utils.SessionManager;
+
+import java.util.ArrayList;
+import java.util.Locale;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public abstract class BaseHomeActivity extends AppCompatActivity {
@@ -124,6 +130,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_home);
 
         setupHomeBrandClicks();
+        setupHomeFeaturedProductClicks();
         setupHomeScrollSupport();
     }
 
