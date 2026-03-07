@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary (rose modern) -->
+    <color name="red_primary">#E11D48</color>
+    <color name="red_dark">#9F1239</color>
+
+    <!-- Surfaces -->
+    <color name="panel_light">#FFFFFF</color>
+    <color name="panel_stroke">#FFE4E6</color>
+    <color name="home_background">#FFF5F7</color>
+    <color name="panel_soft">#FFF1F2</color>
+    <color name="product_card_bg">#FFFFFF</color>
+    <color name="product_card_active_bg">#FCE7EC</color>
+
+    <!-- Icon accents -->
+    <color name="hint_icon_tint">#E11D48</color>
+
+    <!-- Bottom nav -->
+    <color name="bottom_nav_bg">#FFFFFF</color>
+    <color name="bottom_nav_active">#E11D48</color>
+    <color name="bottom_nav_inactive">#9CA3AF</color>
+    <!-- Ripple/indicator (alpha) -->
+    <color name="bottom_nav_indicator">#22E11D48</color>
+
+    <!-- Text -->
+    <color name="white">#FFFFFF</color>
+    <color name="text_primary">#111827</color>
+    <color name="text_sub">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+</resources>

@@ -1,0 +1,102 @@
+<resources>
+    <string name="app_name">PhoneStore</string>
+
+    <string name="logout">Đăng xuất</string>
+    <string name="profile">Hồ sơ</string>
+    <string name="logout_confirm_message">Bạn có muốn đăng xuất không?</string>
+    <string name="admin_customers">Quản lý khách hàng</string>
+    <string name="admin_reports">Báo cáo</string>
+
+    <string name="admin_products_title">Quản lý sản phẩm</string>
+    <string name="admin_customers_title">Khách hàng</string>
+    <string name="admin_reports_title">Báo cáo</string>
+
+    <string name="search_products_hint">Tìm theo tên máy / hãng...</string>
+    <string name="search_customers_hint">Tìm theo họ tên / tài khoản...</string>
+
+    <string name="add_product">Thêm sản phẩm</string>
+    <string name="edit_product">Sửa sản phẩm</string>
+    <string name="delete_product">Xóa sản phẩm</string>
+    <string name="delete_product_confirm">Bạn có chắc muốn xóa %1$s?</string>
+    <string name="product_added">Đã thêm sản phẩm</string>
+    <string name="product_updated">Đã cập nhật sản phẩm</string>
+    <string name="product_deleted">Đã xóa sản phẩm</string>
+
+    <string name="product_name">Tên sản phẩm</string>
+    <string name="product_brand">Hãng</string>
+    <string name="product_price">Giá</string>
+    <string name="product_stock">Tồn kho</string>
+    <string name="product_discount">Giảm giá (%)</string>
+    <string name="product_desc">Mô tả</string>
+    <string name="product_image">Tên ảnh (mipmap)</string>
+
+    <string name="save">Lưu</string>
+    <string name="cancel">Hủy</string>
+    <string name="edit">Sửa</string>
+    <string name="delete">Xóa</string>
+    <string name="update_status">Đổi trạng thái</string>
+
+    <string name="action_failed">Thao tác thất bại</string>
+    <string name="err_name_required">Tên sản phẩm không được trống</string>
+    <string name="username">Tên đăng nhập</string>
+    <string name="password_edit_hint">Mật khẩu (để trống nếu không đổi khi sửa)</string>
+    <string name="confirm_password">Nhập lại mật khẩu</string>
+    <string name="err_price_required">Giá không được trống</string>
+    <string name="err_stock_required">Tồn kho không được trống</string>
+    <string name="err_number_format">Vui lòng nhập đúng định dạng số</string>
+    <string name="err_price_invalid">Giá phải lớn hơn 0</string>
+    <string name="err_stock_invalid">Tồn kho phải từ 0 trở lên</string>
+    <string name="err_discount_invalid">Giảm giá phải trong khoảng 0-100</string>
+
+    <string name="kpi_revenue_value">Tổng doanh thu: %1$s</string>
+    <string name="kpi_orders_value">Số đơn hàng: %1$d</string>
+    <string name="kpi_customers_value">Số khách hàng: %1$d</string>
+
+    <string name="add_customer">Thêm khách hàng</string>
+    <string name="edit_customer">Sửa khách hàng</string>
+    <string name="delete_customer">Xóa khách hàng</string>
+    <string name="delete_customer_confirm">Bạn chắc chắn muốn xóa @%1$s ?</string>
+
+    <string name="customer_added">Đã thêm khách hàng</string>
+    <string name="customer_updated">Đã cập nhật khách hàng</string>
+    <string name="customer_deleted">Đã xóa khách hàng</string>
+
+    <string name="err_fullname_required">Vui lòng nhập họ tên</string>
+    <string name="err_username_required">Vui lòng nhập tên đăng nhập</string>
+    <string name="err_password_required">Vui lòng nhập mật khẩu</string>
+    <string name="err_confirm_password_required">Vui lòng nhập lại mật khẩu</string>
+    <string name="err_password_not_match">Mật khẩu nhập lại không khớp</string>
+    <string name="err_add_customer_failed">Không thêm được (trùng tên đăng nhập?)</string>
+    <string name="customer_update_failed">Cập nhật thất bại</string>
+    <string name="err_delete_customer_failed">Không thể xóa (khách có thể đã có hóa đơn)</string>
+
+    <string name="checkout_title">Thanh toán</string>
+    <string name="checkout_total">Tổng tiền: %1$s</string>
+    <string name="checkout_total_placeholder">Tổng tiền: 0đ</string>
+    <string name="empty_cart">Giỏ hàng đang rỗng</string>
+    <string name="checkout_required_fields">Vui lòng nhập đủ Người nhận / SĐT / Địa chỉ</string>
+    <string name="invalid_phone">Số điện thoại không hợp lệ</string>
+    <string name="bank_transfer">Chuyển khoản</string>
+    <string name="bank_transfer_confirm">Giả lập thanh toán chuyển khoản THÀNH CÔNG?</string>
+    <string name="abort">Huỷ</string>
+    <string name="success">Thành công</string>
+    <string name="checkout_failed">Thanh toán thất bại (giỏ rỗng / không đủ tồn kho)</string>
+    <string name="checkout_success">Đặt hàng thành công</string>
+
+    <string name="shipping_info">Thông tin nhận hàng</string>
+    <string name="receiver_name">Người nhận</string>
+    <string name="receiver_phone">Số điện thoại</string>
+    <string name="receiver_address">Địa chỉ nhận hàng</string>
+    <string name="note_optional">Ghi chú (tuỳ chọn)</string>
+    <string name="payment_method">Phương thức thanh toán</string>
+    <string name="payment_cod">Thanh toán khi nhận hàng (COD)</string>
+    <string name="confirm_order">XÁC NHẬN ĐẶT HÀNG</string>
+
+    <string name="cart_title">Giỏ hàng của tôi</string>
+    <string name="exceed_stock">Vượt tồn kho</string>
+    <string name="cart_select_at_least_one">Vui lòng chọn ít nhất 1 sản phẩm để thanh toán</string>
+
+    <string name="order_detail_title">Chi tiết đơn hàng</string>
+    <string name="order_not_found">Không tìm thấy đơn hàng</string>
+    <string name="order_header">Đơn #%1$d | %2$d sản phẩm | Tổng: %3$s</string>
+</resources>

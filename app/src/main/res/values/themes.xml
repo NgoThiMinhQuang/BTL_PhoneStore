@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.PhoneStore" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/red_primary</item>
+        <item name="colorSecondary">@color/red_dark</item>
+    </style>
+</resources>
