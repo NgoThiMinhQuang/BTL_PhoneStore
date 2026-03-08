@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
-import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Order;
 import com.example.phonestore.ui.auth.WelcomeActivity;
@@ -37,11 +36,8 @@ public class OrdersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_orders);
 
         session = new SessionManager(this);
-        UserDao userDao = new UserDao(this);
 
-        if (!session.isLoggedIn()
-                || session.getUserId() <= 0
-                || userDao.getById(session.getUserId()) == null) {
+        if (!session.isLoggedIn() || session.getUserId() <= 0) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();

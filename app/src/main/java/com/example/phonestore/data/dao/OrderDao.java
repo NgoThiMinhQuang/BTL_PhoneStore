@@ -135,13 +135,23 @@ public class OrderDao {
             }
 
             if (selectedOnly) {
-                cartDao.deleteItems(userId, selectedProductIds);
+                deleteCartItemsInTransaction(db, userId, selectedProductIds);
             } else {
-                cartDao.clear(userId);
+                clearCartInTransaction(db, userId);
             }
+
+            clearLastCheckoutError();
 
             db.setTransactionSuccessful();
             return orderId;
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg != null && msg.toLowerCase().contains("foreign key")) {
+                setLastCheckoutError("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại");
+            } else {
+                setLastCheckoutError("Lỗi đặt hàng: " + (msg == null ? "không xác định" : msg));
+            }
+            return -1;
         } finally {
             db.endTransaction();
         }
@@ -423,5 +433,33 @@ public class OrderDao {
                 || OrderStatus.STATUS_DANG_XU_LY.equals(status)
                 || OrderStatus.STATUS_DA_GIAO.equals(status)
                 || OrderStatus.STATUS_DA_HUY.equals(status);
+    }
+
+    private void clearCartInTransaction(SQLiteDatabase db, long userId) {
+        db.delete(
+                DBHelper.TBL_CART,
+                DBHelper.COL_C_USER_ID + "=?",
+                new String[]{String.valueOf(userId)}
+        );
+    }
+
+    private void deleteCartItemsInTransaction(SQLiteDatabase db, long userId, List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) return;
+
+        StringBuilder inClause = new StringBuilder();
+        String[] args = new String[productIds.size() + 1];
+        args[0] = String.valueOf(userId);
+
+        for (int i = 0; i < productIds.size(); i++) {
+            if (i > 0) inClause.append(",");
+            inClause.append("?");
+            args[i + 1] = String.valueOf(productIds.get(i));
+        }
+
+        db.delete(
+                DBHelper.TBL_CART,
+                DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + " IN (" + inClause + ")",
+                args
+        );
     }
 }

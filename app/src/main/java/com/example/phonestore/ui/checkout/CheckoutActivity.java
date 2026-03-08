@@ -9,14 +9,12 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.CartDao;
 import com.example.phonestore.data.dao.OrderDao;
-import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.cart.CartActivity;
@@ -46,11 +44,7 @@ public class CheckoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
 
         session = new SessionManager(this);
-        UserDao userDao = new UserDao(this);
-
-        if (!session.isLoggedIn()
-                || session.getUserId() <= 0
-                || userDao.getById(session.getUserId()) == null) {
+        if (!session.isLoggedIn() || session.getUserId() <= 0) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
@@ -91,21 +85,15 @@ public class CheckoutActivity extends AppCompatActivity {
 
         if (total <= 0) {
             Toast.makeText(this, R.string.empty_cart, Toast.LENGTH_SHORT).show();
+            Intent ordersIntent = new Intent(this, OrdersActivity.class);
+            ordersIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(ordersIntent);
             finish();
             return;
         }
 
         MaterialButton btnConfirm = findViewById(R.id.btnConfirm);
         btnConfirm.setOnClickListener(v -> submitCheckout());
-
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                Intent intent = new Intent(CheckoutActivity.this, CartActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
     }
 
     private void submitCheckout() {
@@ -153,20 +141,26 @@ public class CheckoutActivity extends AppCompatActivity {
                 : orderDao.checkout(session.getUserId(), info, selectedProductIds);
 
         if (orderId == -1) {
-            Toast.makeText(this, R.string.checkout_failed, Toast.LENGTH_SHORT).show();
+            String error = orderDao.getLastCheckoutError();
+            if (error == null || error.trim().isEmpty()) {
+                error = getString(R.string.checkout_failed);
+            }
+            Toast.makeText(this, error, Toast.LENGTH_LONG).show();
             return;
         }
 
         Intent ordersIntent = new Intent(this, OrdersActivity.class);
         ordersIntent.putExtra(OrdersActivity.EXTRA_SHOW_CHECKOUT_SUCCESS, true);
         ordersIntent.putExtra(OrdersActivity.EXTRA_CREATED_ORDER_ID, orderId);
+        ordersIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(ordersIntent);
         finish();
+        overridePendingTransition(0, 0);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        getOnBackPressedDispatcher().onBackPressed();
+        finish();
         return true;
     }
 }
