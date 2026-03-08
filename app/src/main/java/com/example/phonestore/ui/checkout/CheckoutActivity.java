@@ -18,7 +18,6 @@ import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.cart.CartActivity;
-import com.example.phonestore.ui.orders.OrderDetailActivity;
 import com.example.phonestore.ui.orders.OrdersActivity;
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
@@ -139,11 +138,8 @@ public class CheckoutActivity extends AppCompatActivity {
 
         Toast.makeText(this, R.string.checkout_success, Toast.LENGTH_SHORT).show();
 
-        Intent detailIntent = new Intent(this, OrderDetailActivity.class);
-        detailIntent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, orderId);
-        startActivity(detailIntent);
-
         Intent ordersIntent = new Intent(this, OrdersActivity.class);
+        ordersIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(ordersIntent);
 
         finish();
