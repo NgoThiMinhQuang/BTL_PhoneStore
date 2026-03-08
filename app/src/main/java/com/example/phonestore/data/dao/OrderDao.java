@@ -19,10 +19,23 @@ public class OrderDao {
 
     private final DBHelper dbHelper;
     private final CartDao cartDao;
+    private String lastCheckoutError;
 
     public OrderDao(Context ctx) {
         dbHelper = new DBHelper(ctx);
         cartDao = new CartDao(ctx);
+    }
+
+    public String getLastCheckoutError() {
+        return lastCheckoutError;
+    }
+
+    private void setLastCheckoutError(String error) {
+        lastCheckoutError = error;
+    }
+
+    private void clearLastCheckoutError() {
+        lastCheckoutError = null;
     }
 
     // GIỮ LẠI để code cũ không vỡ (checkout nhanh như hiện tại)
@@ -49,10 +62,18 @@ public class OrderDao {
 
     private long checkoutWithItems(long userId, CheckoutInfo info, ArrayList<CartItem> items,
                                    boolean selectedOnly, List<Long> selectedProductIds) {
-        if (items.isEmpty()) return -1;
+        clearLastCheckoutError();
+
+        if (items.isEmpty()) {
+            setLastCheckoutError("Giỏ hàng trống hoặc sản phẩm đã bị bỏ chọn");
+            return -1;
+        }
 
         for (CartItem it : items) {
-            if (it.soLuong > it.tonKho) return -1;
+            if (it.soLuong > it.tonKho) {
+                setLastCheckoutError("Sản phẩm " + it.tenSanPham + " không đủ tồn kho");
+                return -1;
+            }
         }
 
         int total = 0;
@@ -78,7 +99,10 @@ public class OrderDao {
             o.put(DBHelper.COL_O_NOTE, info.note);
 
             long orderId = db.insert(DBHelper.TBL_ORDERS, null, o);
-            if (orderId == -1) return -1;
+            if (orderId == -1) {
+                setLastCheckoutError("Không tạo được đơn hàng");
+                return -1;
+            }
 
             for (CartItem it : items) {
                 ContentValues oi = new ContentValues();
@@ -89,14 +113,25 @@ public class OrderDao {
                 oi.put(DBHelper.COL_OI_DISCOUNT, it.giamGia);
                 oi.put(DBHelper.COL_OI_QTY, it.soLuong);
                 oi.put(DBHelper.COL_OI_AMOUNT, it.thanhTien());
-                if (db.insert(DBHelper.TBL_ORDER_ITEMS, null, oi) == -1) return -1;
+                if (db.insert(DBHelper.TBL_ORDER_ITEMS, null, oi) == -1) {
+                    setLastCheckoutError("Không tạo được chi tiết đơn hàng");
+                    return -1;
+                }
 
-                db.execSQL(
-                        "UPDATE " + DBHelper.TBL_PRODUCTS +
-                                " SET " + DBHelper.COL_P_STOCK + " = " + DBHelper.COL_P_STOCK + " - ?" +
-                                " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_P_STOCK + " >= ?",
-                        new Object[]{it.soLuong, it.productId, it.soLuong}
+                ContentValues p = new ContentValues();
+                p.put(DBHelper.COL_P_STOCK, it.tonKho - it.soLuong);
+                int updated = db.update(
+                        DBHelper.TBL_PRODUCTS,
+                        p,
+                        DBHelper.COL_ID + "=? AND " + DBHelper.COL_P_STOCK + " >= ?",
+                        new String[]{String.valueOf(it.productId), String.valueOf(it.soLuong)}
                 );
+                if (updated <= 0) {
+                    setLastCheckoutError("Không thể trừ tồn kho cho sản phẩm " + it.tenSanPham);
+                    return -1;
+                }
+
+                it.tonKho = it.tonKho - it.soLuong;
             }
 
             if (selectedOnly) {

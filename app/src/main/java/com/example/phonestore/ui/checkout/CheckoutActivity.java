@@ -9,12 +9,14 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.CartDao;
 import com.example.phonestore.data.dao.OrderDao;
+import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.cart.CartActivity;
@@ -44,7 +46,11 @@ public class CheckoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
 
         session = new SessionManager(this);
-        if (!session.isLoggedIn() || session.getUserId() <= 0) {
+        UserDao userDao = new UserDao(this);
+
+        if (!session.isLoggedIn()
+                || session.getUserId() <= 0
+                || userDao.getById(session.getUserId()) == null) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
@@ -57,7 +63,9 @@ public class CheckoutActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.checkout_title);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         tvTotal = findViewById(R.id.tvTotal);
         edtName = findViewById(R.id.edtNguoiNhan);
@@ -69,7 +77,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         long[] selectedIds = getIntent().getLongArrayExtra(CartActivity.EXTRA_SELECTED_PRODUCT_IDS);
         if (selectedIds != null) {
-            for (long id : selectedIds) selectedProductIds.add(id);
+            for (long id : selectedIds) {
+                selectedProductIds.add(id);
+            }
         }
 
         int total = selectedProductIds.isEmpty()
@@ -87,6 +97,15 @@ public class CheckoutActivity extends AppCompatActivity {
 
         MaterialButton btnConfirm = findViewById(R.id.btnConfirm);
         btnConfirm.setOnClickListener(v -> submitCheckout());
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent intent = new Intent(CheckoutActivity.this, CartActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void submitCheckout() {
@@ -99,6 +118,7 @@ public class CheckoutActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.checkout_required_fields, Toast.LENGTH_SHORT).show();
             return;
         }
+
         if (phone.length() < 9 || phone.length() > 11) {
             Toast.makeText(this, R.string.invalid_phone, Toast.LENGTH_SHORT).show();
             return;
@@ -120,7 +140,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     .setTitle(R.string.bank_transfer)
                     .setMessage(R.string.bank_transfer_confirm)
                     .setNegativeButton(R.string.abort, null)
-                    .setPositiveButton(R.string.success, (d, w) -> createOrder(info))
+                    .setPositiveButton(R.string.success, (dialog, which) -> createOrder(info))
                     .show();
         } else {
             createOrder(info);
@@ -137,25 +157,16 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, R.string.checkout_success, Toast.LENGTH_SHORT).show();
-
         Intent ordersIntent = new Intent(this, OrdersActivity.class);
-        ordersIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(ordersIntent);
-
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent ordersIntent = new Intent(this, OrdersActivity.class);
+        ordersIntent.putExtra(OrdersActivity.EXTRA_SHOW_CHECKOUT_SUCCESS, true);
+        ordersIntent.putExtra(OrdersActivity.EXTRA_CREATED_ORDER_ID, orderId);
         startActivity(ordersIntent);
         finish();
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

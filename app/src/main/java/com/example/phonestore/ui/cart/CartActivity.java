@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.CartDao;
+import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.model.CartItem;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
@@ -43,7 +44,8 @@ public class CartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cart);
 
         session = new SessionManager(this);
-        if (!session.isLoggedIn() || session.getUserId() <= 0) {
+        UserDao userDao = new UserDao(this);
+        if (!session.isLoggedIn() || session.getUserId() <= 0 || userDao.getById(session.getUserId()) == null) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();

@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         session = new SessionManager(this);
 
         if (session.isLoggedIn()) {
-            if (session.getUserId() > 0) {
+            if (session.getUserId() > 0 && userDao.getById(session.getUserId()) != null) {
                 openHomeByRole(session.getRole());
                 return;
             }
