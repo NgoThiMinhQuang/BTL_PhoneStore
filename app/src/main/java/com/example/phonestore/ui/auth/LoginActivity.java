@@ -49,8 +49,11 @@ public class LoginActivity extends AppCompatActivity {
         session = new SessionManager(this);
 
         if (session.isLoggedIn()) {
-            openHomeByRole(session.getRole());
-            return;
+            if (session.getUserId() > 0) {
+                openHomeByRole(session.getRole());
+                return;
+            }
+            session.clear();
         }
 
         btnLogin.setOnClickListener(v -> doLogin());

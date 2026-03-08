@@ -43,7 +43,8 @@ public class CartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cart);
 
         session = new SessionManager(this);
-        if (!session.isLoggedIn()) {
+        if (!session.isLoggedIn() || session.getUserId() <= 0) {
+            session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
             return;

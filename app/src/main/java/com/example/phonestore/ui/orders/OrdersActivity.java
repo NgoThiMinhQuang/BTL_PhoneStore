@@ -33,7 +33,8 @@ public class OrdersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_orders);
 
         session = new SessionManager(this);
-        if (!session.isLoggedIn()) {
+        if (!session.isLoggedIn() || session.getUserId() <= 0) {
+            session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
             return;
@@ -83,6 +84,12 @@ public class OrdersActivity extends AppCompatActivity {
                 : orderDao.getOrdersByUser(session.getUserId());
 
         adapter.setData(list, adminMode);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadOrders();
     }
 
     @Override

@@ -44,7 +44,8 @@ public class CheckoutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_checkout);
 
         session = new SessionManager(this);
-        if (!session.isLoggedIn()) {
+        if (!session.isLoggedIn() || session.getUserId() <= 0) {
+            session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
             return;
@@ -139,15 +140,22 @@ public class CheckoutActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.checkout_success, Toast.LENGTH_SHORT).show();
 
         Intent ordersIntent = new Intent(this, OrdersActivity.class);
-        ordersIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        ordersIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(ordersIntent);
 
         finish();
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
+    public void onBackPressed() {
+        Intent ordersIntent = new Intent(this, OrdersActivity.class);
+        startActivity(ordersIntent);
         finish();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
         return true;
     }
 }
