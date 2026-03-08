@@ -66,13 +66,13 @@ public class LoginActivity extends AppCompatActivity {
         String password = edtPassword.getText().toString().trim();
 
         if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ tài khoản và mật khẩu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.login_required_fields, Toast.LENGTH_SHORT).show();
             return;
         }
 
         User user = userDao.login(username, password);
         if (user == null) {
-            Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.login_invalid_credentials, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -89,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
             intent = new Intent(this, CustomerHomeActivity.class);
         } else {
             session.clear();
-            Toast.makeText(this, "Vai trò không hợp lệ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalid_role, Toast.LENGTH_SHORT).show();
             return;
         }
 

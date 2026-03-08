@@ -99,4 +99,12 @@
     <string name="order_detail_title">Chi tiết đơn hàng</string>
     <string name="order_not_found">Không tìm thấy đơn hàng</string>
     <string name="order_header">Đơn #%1$d | %2$d sản phẩm | Tổng: %3$s</string>
+    <string name="orders_title_admin">Đơn hàng</string>
+    <string name="orders_title_customer">Đơn hàng của tôi</string>
+    <string name="order_status_update_failed">Cập nhật trạng thái thất bại</string>
+    <string name="order_status_updated">Đã cập nhật trạng thái đơn hàng</string>
+    <string name="checkout_success_with_order_id">Đặt hàng thành công. Mã đơn #%1$d</string>
+    <string name="login_required_fields">Vui lòng nhập đầy đủ tài khoản và mật khẩu</string>
+    <string name="login_invalid_credentials">Sai tài khoản hoặc mật khẩu</string>
+    <string name="invalid_role">Vai trò không hợp lệ</string>
 </resources>

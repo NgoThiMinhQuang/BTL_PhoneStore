@@ -71,11 +71,11 @@ public class OrdersActivity extends AppCompatActivity {
 
                 boolean ok = orderDao.updateStatus(order.id, newStatus);
                 if (!ok) {
-                    Toast.makeText(OrdersActivity.this, "Cập nhật trạng thái thất bại", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OrdersActivity.this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                Toast.makeText(OrdersActivity.this, "Đã cập nhật trạng thái đơn hàng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OrdersActivity.this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
                 loadOrders();
             }
         });
@@ -95,7 +95,7 @@ public class OrdersActivity extends AppCompatActivity {
 
     private void updateToolbarTitle() {
         if (toolbar != null) {
-            toolbar.setTitle(adminMode ? "Đơn hàng" : "Đơn hàng của tôi");
+            toolbar.setTitle(getString(adminMode ? R.string.orders_title_admin : R.string.orders_title_customer));
         }
     }
 
@@ -116,7 +116,7 @@ public class OrdersActivity extends AppCompatActivity {
         if (!showSuccess) return;
 
         String message = orderId > 0
-                ? "Đặt hàng thành công. Mã đơn #" + orderId
+                ? getString(R.string.checkout_success_with_order_id, orderId)
                 : getString(R.string.checkout_success);
 
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
