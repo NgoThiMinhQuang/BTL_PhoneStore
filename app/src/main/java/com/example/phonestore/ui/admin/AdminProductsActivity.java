@@ -1,6 +1,7 @@
 package com.example.phonestore.ui.admin;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -8,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +25,6 @@ import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
-import android.content.Intent;
-
 import java.util.ArrayList;
 
 public class AdminProductsActivity extends AppCompatActivity {
@@ -32,7 +32,14 @@ public class AdminProductsActivity extends AppCompatActivity {
     private SessionManager session;
     private ProductDao productDao;
     private AdminProductAdapter adapter;
+
     private EditText edtSearch;
+    private RecyclerView rvProducts;
+    private View layoutEmpty;
+    private TextView tvTotalProducts;
+    private TextView tvInStockProducts;
+    private TextView tvLowStockProducts;
+    private TextView tvResultCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +57,22 @@ public class AdminProductsActivity extends AppCompatActivity {
         productDao = new ProductDao(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.admin_products_title);
+        toolbar.setTitle("Quản lý sản phẩm");
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         edtSearch = findViewById(R.id.edtSearch);
+        rvProducts = findViewById(R.id.rvProducts);
+        layoutEmpty = findViewById(R.id.layoutEmpty);
+        tvTotalProducts = findViewById(R.id.tvTotalProducts);
+        tvInStockProducts = findViewById(R.id.tvInStockProducts);
+        tvLowStockProducts = findViewById(R.id.tvLowStockProducts);
+        tvResultCount = findViewById(R.id.tvResultCount);
 
-        RecyclerView rv = findViewById(R.id.rvProducts);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        rvProducts.setLayoutManager(new LinearLayoutManager(this));
+        rvProducts.setHasFixedSize(true);
 
         adapter = new AdminProductAdapter(new AdminProductAdapter.Listener() {
             @Override
@@ -70,7 +85,7 @@ public class AdminProductsActivity extends AppCompatActivity {
                 confirmDelete(product);
             }
         });
-        rv.setAdapter(adapter);
+        rvProducts.setAdapter(adapter);
 
         MaterialButton btnAdd = findViewById(R.id.btnAddProduct);
         btnAdd.setOnClickListener(v -> showProductFormDialog(null));
@@ -78,7 +93,9 @@ public class AdminProductsActivity extends AppCompatActivity {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) {
+
+            @Override
+            public void afterTextChanged(Editable s) {
                 loadData();
             }
         });
@@ -87,9 +104,40 @@ public class AdminProductsActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+        ArrayList<Product> allProducts = productDao.layTatCa();
         String key = edtSearch.getText().toString().trim();
-        ArrayList<Product> list = key.isEmpty() ? productDao.layTatCa() : productDao.timKiem(key);
-        adapter.setData(list);
+        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : productDao.timKiem(key);
+
+        adapter.setData(filteredProducts);
+        updateDashboard(allProducts, filteredProducts);
+        updateEmptyState(filteredProducts);
+    }
+
+    private void updateDashboard(ArrayList<Product> allProducts, ArrayList<Product> filteredProducts) {
+        int total = allProducts == null ? 0 : allProducts.size();
+        int inStock = 0;
+        int lowStock = 0;
+
+        if (allProducts != null) {
+            for (Product p : allProducts) {
+                if (p == null) continue;
+                if (p.tonKho > 0) inStock++;
+                if (p.tonKho > 0 && p.tonKho <= 5) lowStock++;
+            }
+        }
+
+        tvTotalProducts.setText(String.valueOf(total));
+        tvInStockProducts.setText(String.valueOf(inStock));
+        tvLowStockProducts.setText(String.valueOf(lowStock));
+
+        int resultCount = filteredProducts == null ? 0 : filteredProducts.size();
+        tvResultCount.setText("Hiển thị " + resultCount + " sản phẩm");
+    }
+
+    private void updateEmptyState(ArrayList<Product> list) {
+        boolean isEmpty = list == null || list.isEmpty();
+        layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        rvProducts.setVisibility(isEmpty ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void showProductFormDialog(Product oldProduct) {
@@ -115,15 +163,18 @@ public class AdminProductsActivity extends AppCompatActivity {
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(editing ? R.string.edit_product : R.string.add_product)
+                .setTitle(editing ? "Cập nhật sản phẩm" : "Thêm sản phẩm mới")
                 .setView(view)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.save, null)
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Lưu", null)
                 .create();
 
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             Product p = editing ? oldProduct : new Product();
-            String error = fillAndValidateProductFromForm(p, edtName, edtBrand, edtPrice, edtStock, edtDiscount, edtDesc, edtImage);
+            String error = fillAndValidateProductFromForm(
+                    p, edtName, edtBrand, edtPrice, edtStock, edtDiscount, edtDesc, edtImage
+            );
+
             if (error != null) {
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
                 return;
@@ -137,11 +188,11 @@ public class AdminProductsActivity extends AppCompatActivity {
             }
 
             if (!ok) {
-                Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Thao tác thất bại", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            Toast.makeText(this, editing ? R.string.product_updated : R.string.product_added, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, editing ? "Cập nhật sản phẩm thành công" : "Thêm sản phẩm thành công", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
             loadData();
         }));
@@ -157,15 +208,16 @@ public class AdminProductsActivity extends AppCompatActivity {
                                                   EditText edtDiscount,
                                                   EditText edtDesc,
                                                   EditText edtImage) {
+
         String name = edtName.getText().toString().trim();
         String brand = edtBrand.getText().toString().trim();
         String priceStr = edtPrice.getText().toString().trim();
         String stockStr = edtStock.getText().toString().trim();
         String discountStr = edtDiscount.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
-        if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
-        if (TextUtils.isEmpty(stockStr)) return getString(R.string.err_stock_required);
+        if (TextUtils.isEmpty(name)) return "Vui lòng nhập tên sản phẩm";
+        if (TextUtils.isEmpty(priceStr)) return "Vui lòng nhập giá";
+        if (TextUtils.isEmpty(stockStr)) return "Vui lòng nhập tồn kho";
 
         int price;
         int stock;
@@ -176,12 +228,12 @@ public class AdminProductsActivity extends AppCompatActivity {
             stock = Integer.parseInt(stockStr);
             discount = TextUtils.isEmpty(discountStr) ? 0 : Integer.parseInt(discountStr);
         } catch (NumberFormatException e) {
-            return getString(R.string.err_number_format);
+            return "Dữ liệu số không hợp lệ";
         }
 
-        if (price <= 0) return getString(R.string.err_price_invalid);
-        if (stock < 0) return getString(R.string.err_stock_invalid);
-        if (discount < 0 || discount > 100) return getString(R.string.err_discount_invalid);
+        if (price <= 0) return "Giá phải lớn hơn 0";
+        if (stock < 0) return "Tồn kho không được âm";
+        if (discount < 0 || discount > 100) return "Giảm giá chỉ từ 0 đến 100";
 
         p.tenSanPham = name;
         p.hang = brand;
@@ -190,21 +242,22 @@ public class AdminProductsActivity extends AppCompatActivity {
         p.giamGia = discount;
         p.moTa = edtDesc.getText().toString().trim();
         p.tenAnh = edtImage.getText().toString().trim();
+
         return null;
     }
 
     private void confirmDelete(Product product) {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.delete_product)
-                .setMessage(getString(R.string.delete_product_confirm, product.tenSanPham))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.delete, (d, w) -> {
+                .setTitle("Xóa sản phẩm")
+                .setMessage("Bạn có chắc muốn xóa \"" + product.tenSanPham + "\" không?")
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Xóa", (d, w) -> {
                     boolean ok = productDao.delete(product.maSanPham);
                     if (ok) {
-                        Toast.makeText(this, R.string.product_deleted, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
                         loadData();
                     } else {
-                        Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Thao tác thất bại", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .show();

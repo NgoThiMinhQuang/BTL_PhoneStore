@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
@@ -32,7 +33,9 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
 
     public void setData(ArrayList<Product> list) {
         data.clear();
-        data.addAll(list);
+        if (list != null) {
+            data.addAll(list);
+        }
         notifyDataSetChanged();
     }
 
@@ -47,15 +50,42 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
     public void onBindViewHolder(@NonNull VH h, int position) {
         Product p = data.get(position);
 
-        h.tvName.setText(p.tenSanPham == null ? "" : p.tenSanPham);
-        String brand = p.hang == null || p.hang.trim().isEmpty() ? "-" : p.hang;
-        h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_brand_value, brand));
+        h.tvName.setText(p.tenSanPham == null || p.tenSanPham.trim().isEmpty()
+                ? "Sản phẩm chưa đặt tên"
+                : p.tenSanPham);
+
+        String brand = (p.hang == null || p.hang.trim().isEmpty()) ? "Chưa rõ hãng" : p.hang.trim();
+        h.tvBrand.setText("Thương hiệu: " + brand);
+
+        h.tvId.setText("#SP" + p.maSanPham);
+
+        String desc = (p.moTa == null || p.moTa.trim().isEmpty())
+                ? "Chưa có mô tả cho sản phẩm này."
+                : p.moTa.trim();
+        h.tvDesc.setText(desc);
 
         String gia = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
         h.tvPrice.setText(gia);
 
-        h.tvStock.setText(h.itemView.getContext().getString(R.string.product_stock_value, p.tonKho));
-        h.tvDiscount.setText(h.itemView.getContext().getString(R.string.product_discount_value, p.giamGia));
+        h.tvStock.setText("Tồn kho: " + p.tonKho);
+        h.tvDiscount.setText("Giảm giá: " + p.giamGia + "%");
+
+        if (p.tonKho <= 0) {
+            h.tvStock.setText("Hết hàng");
+            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_dark));
+        } else if (p.tonKho <= 5) {
+            h.tvStock.setText("Sắp hết: " + p.tonKho);
+            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
+        } else {
+            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_primary));
+        }
+
+        if (p.giamGia > 0) {
+            h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
+        } else {
+            h.tvDiscount.setText("Không giảm giá");
+            h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_sub));
+        }
 
         h.btnEdit.setOnClickListener(v -> listener.onEdit(p));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(p));
@@ -67,13 +97,15 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvName, tvBrand, tvPrice, tvStock, tvDiscount;
+        TextView tvName, tvBrand, tvId, tvDesc, tvPrice, tvStock, tvDiscount;
         MaterialButton btnEdit, btnDelete;
 
         VH(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvName);
             tvBrand = itemView.findViewById(R.id.tvBrand);
+            tvId = itemView.findViewById(R.id.tvId);
+            tvDesc = itemView.findViewById(R.id.tvDesc);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvStock = itemView.findViewById(R.id.tvStock);
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
