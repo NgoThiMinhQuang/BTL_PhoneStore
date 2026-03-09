@@ -12,6 +12,8 @@
     <string name="admin_reports_title">Báo cáo</string>
 
     <string name="search_products_hint">Tìm theo tên máy / hãng...</string>
+    <string name="admin_products_search_title">Tìm kiếm sản phẩm</string>
+    <string name="admin_products_search_subtitle">Tra cứu nhanh theo tên máy hoặc thương hiệu.</string>
     <string name="search_customers_hint">Tìm theo họ tên / tài khoản...</string>
 
     <string name="add_product">Thêm sản phẩm</string>
@@ -29,6 +31,9 @@
     <string name="product_discount">Giảm giá (%)</string>
     <string name="product_desc">Mô tả</string>
     <string name="product_image">Tên ảnh (mipmap)</string>
+    <string name="product_brand_value">Thương hiệu: %1$s</string>
+    <string name="product_stock_value">Tồn kho: %1$d</string>
+    <string name="product_discount_value">Giảm giá: %1$d%%</string>
 
     <string name="save">Lưu</string>
     <string name="cancel">Hủy</string>

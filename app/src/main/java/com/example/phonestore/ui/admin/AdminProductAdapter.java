@@ -48,13 +48,14 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         Product p = data.get(position);
 
         h.tvName.setText(p.tenSanPham == null ? "" : p.tenSanPham);
-        h.tvBrand.setText(p.hang == null ? "-" : p.hang);
+        String brand = p.hang == null || p.hang.trim().isEmpty() ? "-" : p.hang;
+        h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_brand_value, brand));
 
         String gia = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
         h.tvPrice.setText(gia);
 
-        h.tvStock.setText("Tồn kho: " + p.tonKho);
-        h.tvDiscount.setText("Giảm giá: " + p.giamGia + "%");
+        h.tvStock.setText(h.itemView.getContext().getString(R.string.product_stock_value, p.tonKho));
+        h.tvDiscount.setText(h.itemView.getContext().getString(R.string.product_discount_value, p.giamGia));
 
         h.btnEdit.setOnClickListener(v -> listener.onEdit(p));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(p));
