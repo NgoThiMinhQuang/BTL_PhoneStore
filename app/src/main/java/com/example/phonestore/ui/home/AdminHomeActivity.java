@@ -92,6 +92,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
         bindKpis(orders, products, revenueByMonth);
         bindRevenueChart(revenueByMonth);
         bindQuickActions();
+        bindInventoryShortcut();
         bindRecentOrders(orders);
     }
 
@@ -207,6 +208,13 @@ public class AdminHomeActivity extends BaseHomeActivity {
         btnQuickInventory.setOnClickListener(v -> openBottomTab(new Intent(this, AdminInventoryActivity.class)));
         btnQuickOrders.setOnClickListener(v -> openBottomTab(new Intent(this, AdminOrdersActivity.class)));
         btnQuickReports.setOnClickListener(v -> startActivity(new Intent(this, AdminReportsActivity.class)));
+    }
+
+    private void bindInventoryShortcut() {
+        View btnOpenInventorySummary = findViewById(R.id.btnOpenInventorySummary);
+        if (btnOpenInventorySummary != null) {
+            btnOpenInventorySummary.setOnClickListener(v -> openBottomTab(new Intent(this, AdminInventoryActivity.class)));
+        }
     }
 
     private void bindRecentOrders(ArrayList<Order> orders) {

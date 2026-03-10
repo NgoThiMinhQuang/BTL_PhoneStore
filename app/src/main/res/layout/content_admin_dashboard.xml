@@ -49,10 +49,24 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:drawableStart="@drawable/ic_search_small"
+            android:drawablePadding="8dp"
+            android:hint="Tìm đơn hàng, sản phẩm, cảnh báo kho..."
+            android:paddingStart="10dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -207,11 +221,56 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_panel_admin"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kho hôm nay"
+                    android:textColor="@color/admin_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLowStockSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/admin_no_low_stock"
+                    android:textColor="@color/admin_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenInventorySummary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Mở kho"
+                android:textAllCaps="false"
+                android:textColor="@color/admin_primary"
+                app:cornerRadius="18dp"
+                app:strokeColor="@color/admin_stroke" />
+        </LinearLayout>
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/admin_warning_soft"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/admin_surface"
             app:cardCornerRadius="22dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/admin_stroke"
@@ -231,15 +290,6 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvLowStockSummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/admin_no_low_stock"
-                    android:textColor="@color/admin_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
