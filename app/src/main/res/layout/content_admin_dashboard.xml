@@ -21,12 +21,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_panel_admin"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Xin chào, chào mừng bạn đến PhoneStore"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:text="@string/admin_dashboard_greeting"
                 android:textColor="@color/admin_text_primary"
                 android:textSize="24sp"
@@ -36,7 +43,7 @@
                 android:id="@+id/tvDashboardSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/admin_dashboard_subtitle"
                 android:textColor="@color/admin_text_secondary"
                 android:textSize="13sp" />

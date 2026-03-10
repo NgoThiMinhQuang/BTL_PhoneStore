@@ -73,12 +73,12 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     @Override
     protected String screenTitle() {
-        return getString(R.string.admin_dashboard);
+        return "Trang chủ";
     }
 
     @Override
     protected boolean shouldShowToolbarActions() {
-        return false;
+        return true;
     }
 
     @Override
