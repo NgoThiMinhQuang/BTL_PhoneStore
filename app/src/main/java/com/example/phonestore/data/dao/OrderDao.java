@@ -19,11 +19,13 @@ public class OrderDao {
 
     private final DBHelper dbHelper;
     private final CartDao cartDao;
+    private final InventoryHistoryDao historyDao;
     private String lastCheckoutError;
 
     public OrderDao(Context ctx) {
         dbHelper = new DBHelper(ctx);
         cartDao = new CartDao(ctx);
+        historyDao = new InventoryHistoryDao(ctx);
     }
 
     public String getLastCheckoutError() {
@@ -132,6 +134,16 @@ public class OrderDao {
                 }
 
                 it.tonKho = it.tonKho - it.soLuong;
+                historyDao.insert(
+                        db,
+                        it.productId,
+                        it.tenSanPham,
+                        InventoryHistoryDao.ACTION_EXPORT,
+                        it.soLuong,
+                        "ORDER",
+                        orderId,
+                        status
+                );
             }
 
             if (selectedOnly) {

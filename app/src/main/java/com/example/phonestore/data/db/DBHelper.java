@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 7; // tăng version để upgrade DB
+    public static final int DB_VERSION = 8; // tăng version để upgrade DB
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -59,6 +59,38 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_OI_DISCOUNT = "giam_gia";
     public static final String COL_OI_QTY = "so_luong";
     public static final String COL_OI_AMOUNT = "thanh_tien";
+
+    // ===== SUPPLIERS / RECEIPTS / INVENTORY HISTORY =====
+    public static final String TBL_SUPPLIERS = "nha_cung_cap";
+    public static final String COL_S_NAME = "ten_nha_cung_cap";
+    public static final String COL_S_BRAND = "hang";
+    public static final String COL_S_PHONE = "so_dien_thoai";
+    public static final String COL_S_ADDRESS = "dia_chi";
+
+    public static final String TBL_RECEIPTS = "phieu_nhap";
+    public static final String COL_R_SUPPLIER_ID = "nha_cung_cap_id";
+    public static final String COL_R_TOTAL_QTY = "tong_so_luong";
+    public static final String COL_R_TOTAL_AMOUNT = "tong_tien";
+    public static final String COL_R_CREATED = "ngay_tao";
+    public static final String COL_R_NOTE = "ghi_chu";
+
+    public static final String TBL_RECEIPT_ITEMS = "phieu_nhap_ct";
+    public static final String COL_RI_RECEIPT_ID = "phieu_nhap_id";
+    public static final String COL_RI_PRODUCT_ID = "san_pham_id";
+    public static final String COL_RI_PRODUCT_NAME = "ten_san_pham";
+    public static final String COL_RI_QTY = "so_luong";
+    public static final String COL_RI_UNIT_COST = "don_gia_nhap";
+    public static final String COL_RI_AMOUNT = "thanh_tien";
+
+    public static final String TBL_INVENTORY_HISTORY = "lich_su_kho";
+    public static final String COL_H_PRODUCT_ID = "san_pham_id";
+    public static final String COL_H_PRODUCT_NAME = "ten_san_pham";
+    public static final String COL_H_ACTION = "loai_bien_dong";
+    public static final String COL_H_QTY = "so_luong";
+    public static final String COL_H_REF_TYPE = "loai_tham_chieu";
+    public static final String COL_H_REF_ID = "tham_chieu_id";
+    public static final String COL_H_NOTE = "ghi_chu";
+    public static final String COL_H_CREATED = "ngay_tao";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -153,6 +185,58 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_OI_AMOUNT + " INTEGER NOT NULL, " +
                 "FOREIGN KEY(" + COL_OI_ORDER_ID + ") REFERENCES " + TBL_ORDERS + "(" + COL_ID + ") ON DELETE CASCADE" +
                 ");");
+
+        // 6) nhà cung cấp
+        db.execSQL("CREATE TABLE " + TBL_SUPPLIERS + " (" +
+                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_S_NAME + " TEXT NOT NULL, " +
+                COL_S_BRAND + " TEXT, " +
+                COL_S_PHONE + " TEXT, " +
+                COL_S_ADDRESS + " TEXT" +
+                ");");
+
+        // seed nhà cung cấp mẫu
+        seedSupplier(db, "Apple Vietnam Supply", "Apple", "0900000001", "TP.HCM");
+        seedSupplier(db, "Samsung Partner VN", "Samsung", "0900000002", "Hà Nội");
+        seedSupplier(db, "Xiaomi Distribution", "Xiaomi", "0900000003", "Đà Nẵng");
+
+        // 7) phiếu nhập
+        db.execSQL("CREATE TABLE " + TBL_RECEIPTS + " (" +
+                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_R_SUPPLIER_ID + " INTEGER NOT NULL, " +
+                COL_R_TOTAL_QTY + " INTEGER NOT NULL, " +
+                COL_R_TOTAL_AMOUNT + " INTEGER NOT NULL, " +
+                COL_R_CREATED + " INTEGER NOT NULL, " +
+                COL_R_NOTE + " TEXT, " +
+                "FOREIGN KEY(" + COL_R_SUPPLIER_ID + ") REFERENCES " + TBL_SUPPLIERS + "(" + COL_ID + ")" +
+                ");");
+
+        // 8) chi tiết phiếu nhập
+        db.execSQL("CREATE TABLE " + TBL_RECEIPT_ITEMS + " (" +
+                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_RI_RECEIPT_ID + " INTEGER NOT NULL, " +
+                COL_RI_PRODUCT_ID + " INTEGER NOT NULL, " +
+                COL_RI_PRODUCT_NAME + " TEXT NOT NULL, " +
+                COL_RI_QTY + " INTEGER NOT NULL, " +
+                COL_RI_UNIT_COST + " INTEGER NOT NULL, " +
+                COL_RI_AMOUNT + " INTEGER NOT NULL, " +
+                "FOREIGN KEY(" + COL_RI_RECEIPT_ID + ") REFERENCES " + TBL_RECEIPTS + "(" + COL_ID + ") ON DELETE CASCADE, " +
+                "FOREIGN KEY(" + COL_RI_PRODUCT_ID + ") REFERENCES " + TBL_PRODUCTS + "(" + COL_ID + ")" +
+                ");");
+
+        // 9) lịch sử kho
+        db.execSQL("CREATE TABLE " + TBL_INVENTORY_HISTORY + " (" +
+                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_H_PRODUCT_ID + " INTEGER NOT NULL, " +
+                COL_H_PRODUCT_NAME + " TEXT NOT NULL, " +
+                COL_H_ACTION + " TEXT NOT NULL, " +
+                COL_H_QTY + " INTEGER NOT NULL, " +
+                COL_H_REF_TYPE + " TEXT, " +
+                COL_H_REF_ID + " INTEGER, " +
+                COL_H_NOTE + " TEXT, " +
+                COL_H_CREATED + " INTEGER NOT NULL, " +
+                "FOREIGN KEY(" + COL_H_PRODUCT_ID + ") REFERENCES " + TBL_PRODUCTS + "(" + COL_ID + ")" +
+                ");");
     }
 
     private void seedProduct(SQLiteDatabase db,
@@ -169,8 +253,21 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(TBL_PRODUCTS, null, v);
     }
 
+    private void seedSupplier(SQLiteDatabase db, String name, String brand, String phone, String address) {
+        ContentValues v = new ContentValues();
+        v.put(COL_S_NAME, name);
+        v.put(COL_S_BRAND, brand);
+        v.put(COL_S_PHONE, phone);
+        v.put(COL_S_ADDRESS, address);
+        db.insert(TBL_SUPPLIERS, null, v);
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TBL_INVENTORY_HISTORY);
+        db.execSQL("DROP TABLE IF EXISTS " + TBL_RECEIPT_ITEMS);
+        db.execSQL("DROP TABLE IF EXISTS " + TBL_RECEIPTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TBL_SUPPLIERS);
         db.execSQL("DROP TABLE IF EXISTS " + TBL_ORDER_ITEMS);
         db.execSQL("DROP TABLE IF EXISTS " + TBL_ORDERS);
         db.execSQL("DROP TABLE IF EXISTS " + TBL_CART);

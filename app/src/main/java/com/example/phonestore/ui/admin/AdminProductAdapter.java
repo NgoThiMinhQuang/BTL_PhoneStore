@@ -51,30 +51,35 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         Product p = data.get(position);
 
         h.tvName.setText(p.tenSanPham == null || p.tenSanPham.trim().isEmpty()
-                ? "Sản phẩm chưa đặt tên"
+                ? h.itemView.getContext().getString(R.string.admin_product_unknown_name)
                 : p.tenSanPham);
 
-        String brand = (p.hang == null || p.hang.trim().isEmpty()) ? "Chưa rõ hãng" : p.hang.trim();
-        h.tvBrand.setText("Thương hiệu: " + brand);
+        String brand = (p.hang == null || p.hang.trim().isEmpty())
+                ? h.itemView.getContext().getString(R.string.admin_product_unknown_brand)
+                : p.hang.trim();
+        h.tvBrand.setText(h.itemView.getContext().getString(R.string.admin_product_brand_label, brand));
 
-        h.tvId.setText("#SP" + p.maSanPham);
+        h.tvId.setText(h.itemView.getContext().getString(R.string.admin_product_id, p.maSanPham));
 
         String desc = (p.moTa == null || p.moTa.trim().isEmpty())
-                ? "Chưa có mô tả cho sản phẩm này."
+                ? h.itemView.getContext().getString(R.string.admin_product_empty_desc)
                 : p.moTa.trim();
         h.tvDesc.setText(desc);
 
-        String gia = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
+        String gia = h.itemView.getContext().getString(
+                R.string.admin_price_currency,
+                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia)
+        );
         h.tvPrice.setText(gia);
 
-        h.tvStock.setText("Tồn kho: " + p.tonKho);
-        h.tvDiscount.setText("Giảm giá: " + p.giamGia + "%");
+        h.tvStock.setText(h.itemView.getContext().getString(R.string.admin_stock_label, p.tonKho));
+        h.tvDiscount.setText(h.itemView.getContext().getString(R.string.admin_discount_label, p.giamGia));
 
         if (p.tonKho <= 0) {
-            h.tvStock.setText("Hết hàng");
+            h.tvStock.setText(R.string.admin_stock_empty);
             h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_dark));
         } else if (p.tonKho <= 5) {
-            h.tvStock.setText("Sắp hết: " + p.tonKho);
+            h.tvStock.setText(h.itemView.getContext().getString(R.string.admin_stock_low, p.tonKho));
             h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
         } else {
             h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_primary));
@@ -83,7 +88,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         if (p.giamGia > 0) {
             h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
         } else {
-            h.tvDiscount.setText("Không giảm giá");
+            h.tvDiscount.setText(R.string.admin_discount_none);
             h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_sub));
         }
 

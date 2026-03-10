@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Thông tin cơ bản"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/admin_text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -23,33 +23,33 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Tên sản phẩm"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtBrand"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Thương hiệu"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:text="Giá và tồn kho"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/admin_text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -58,49 +58,49 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Giá bán"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtStock"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Số lượng tồn kho"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtDiscount"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Phần trăm giảm giá"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:text="Mô tả và hình ảnh"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/admin_text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="110dp"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:gravity="top|start"
             android:hint="Mô tả ngắn về sản phẩm, cấu hình hoặc ưu điểm nổi bật"
             android:inputType="textMultiLine"
@@ -118,28 +118,20 @@
             android:paddingTop="12dp"
             android:paddingEnd="14dp"
             android:paddingBottom="12dp"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtImage"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="Tên file ảnh hoặc đường dẫn ảnh"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Gợi ý: nên nhập tên rõ ràng, giá đúng định dạng số và mô tả ngắn gọn để dễ quản lý hơn."
-            android:textColor="@color/text_sub"
-            android:textSize="12sp" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
     </LinearLayout>
 </ScrollView>

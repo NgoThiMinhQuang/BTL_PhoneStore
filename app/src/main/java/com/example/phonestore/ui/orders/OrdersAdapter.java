@@ -61,12 +61,17 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int position) {
         Order o = data.get(position);
 
-        String total = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(o.tongTien) + "đ";
+        String total = h.itemView.getContext().getString(
+                R.string.admin_price_currency,
+                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(o.tongTien)
+        );
         String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("vi", "VN"))
                 .format(new Date(o.ngayTao));
 
-        h.tvTitle.setText("Đơn #" + o.id + (adminMode && o.username != null ? " - " + o.username : ""));
-        h.tvSub.setText(date + "  |  " + dinhDangTrangThai(o.trangThai));
+        h.tvTitle.setText(adminMode && o.username != null
+                ? h.itemView.getContext().getString(R.string.admin_order_code_with_user, o.id, o.username)
+                : h.itemView.getContext().getString(R.string.admin_order_code, o.id));
+        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_date_status, date, dinhDangTrangThai(o.trangThai)));
         h.tvTotal.setText(total);
 
         h.itemView.setOnClickListener(v -> listener.onClick(o));

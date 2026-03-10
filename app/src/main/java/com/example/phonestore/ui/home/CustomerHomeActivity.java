@@ -21,4 +21,9 @@ public class CustomerHomeActivity extends BaseHomeActivity {
     protected String screenTitle() {
         return "Trang chủ";
     }
+
+    @Override
+    protected boolean shouldSetupHomeInteractions() {
+        return true;
+    }
 }

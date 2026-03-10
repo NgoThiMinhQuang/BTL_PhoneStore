@@ -46,7 +46,7 @@ public class AdminCustomersAdapter extends RecyclerView.Adapter<AdminCustomersAd
         User u = data.get(position);
 
         h.tvName.setText((u.fullname == null || u.fullname.trim().isEmpty()) ? "-" : u.fullname);
-        h.tvUsername.setText("@" + (u.username == null ? "" : u.username));
+        h.tvUsername.setText(h.itemView.getContext().getString(R.string.admin_customer_username, u.username == null ? "" : u.username));
         h.tvRole.setText(u.role == null ? "" : u.role);
 
         h.btnEdit.setOnClickListener(v -> listener.onEdit(u));

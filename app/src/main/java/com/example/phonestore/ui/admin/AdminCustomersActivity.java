@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,8 @@ public class AdminCustomersActivity extends AppCompatActivity {
     private UserDao userDao;
     private AdminCustomersAdapter adapter;
     private EditText edtSearch;
+    private TextView tvCustomersCount;
+    private TextView tvCustomersFiltered;
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
@@ -57,6 +60,12 @@ public class AdminCustomersActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         edtSearch = findViewById(R.id.edtSearch);
+        View cardCustomersCount = findViewById(R.id.cardCustomersCount);
+        View cardCustomersFiltered = findViewById(R.id.cardCustomersFiltered);
+        ((TextView) cardCustomersCount.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_customers_count);
+        ((TextView) cardCustomersFiltered.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_customers_search_results);
+        tvCustomersCount = cardCustomersCount.findViewById(R.id.tvKpiValue);
+        tvCustomersFiltered = cardCustomersFiltered.findViewById(R.id.tvKpiValue);
 
         RecyclerView rv = findViewById(R.id.rvCustomers);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -92,7 +101,11 @@ public class AdminCustomersActivity extends AppCompatActivity {
 
     private void loadData() {
         String key = edtSearch.getText().toString().trim();
-        adapter.setData(userDao.getCustomers(key));
+        int totalCustomers = userDao.getSoKhachHang();
+        java.util.ArrayList<User> filteredList = userDao.getCustomers(key);
+        adapter.setData(filteredList);
+        tvCustomersCount.setText(String.valueOf(totalCustomers));
+        tvCustomersFiltered.setText(String.valueOf(filteredList.size()));
     }
 
     private void showCustomerDialog(User oldUser) {

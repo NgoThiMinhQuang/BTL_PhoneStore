@@ -3,22 +3,27 @@ package com.example.phonestore.ui.home;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.InputDevice;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.MenuRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.phonestore.R;
+import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.admin.AdminCustomersActivity;
 import com.example.phonestore.ui.admin.AdminProductsActivity;
 import com.example.phonestore.ui.admin.AdminReportsActivity;
@@ -26,116 +31,90 @@ import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
 import com.example.phonestore.ui.orders.OrdersActivity;
-import com.example.phonestore.data.dao.ProductDao;
-import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.products.ProductDetailActivity;
 import com.example.phonestore.ui.products.ProductsActivity;
 import com.example.phonestore.ui.profile.ProfileActivity;
 import com.example.phonestore.utils.SessionManager;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public abstract class BaseHomeActivity extends AppCompatActivity {
 
     protected SessionManager session;
     private ScrollView homeScroll;
 
+    @LayoutRes
+    protected int shellLayoutRes() {
+        return R.layout.activity_home_bottom;
+    }
+
+    @LayoutRes
+    protected int contentLayoutRes() {
+        return R.layout.content_home;
+    }
+
     @MenuRes
     protected abstract int bottomMenuRes();
 
     protected abstract String screenTitle();
 
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_home;
+    }
+
+    protected boolean shouldSetupHomeInteractions() {
+        return false;
+    }
+
+    protected boolean shouldShowToolbarActions() {
+        return true;
+    }
+
+    protected void onShellReady() {
+        // subclasses may override
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_bottom);
+        setContentView(shellLayoutRes());
 
         session = new SessionManager(this);
+        inflateContentLayoutIfNeeded();
 
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(screenTitle());
         setSupportActionBar(toolbar);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        bottomNav.getMenu().clear();
-        bottomNav.inflateMenu(bottomMenuRes());
+        if (bottomNav != null) {
+            bottomNav.getMenu().clear();
+            bottomNav.inflateMenu(bottomMenuRes());
+            bottomNav.setOnItemSelectedListener(item -> handleBottomNavigation(item.getItemId()));
+            bottomNav.setOnItemReselectedListener(item -> {
+                // no-op
+            });
+            bottomNav.setSelectedItemId(selectedBottomNavItemId());
+        }
 
-        bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
+        if (shouldSetupHomeInteractions()) {
+            setupHomeBrandClicks();
+            setupHomeFeaturedProductClicks();
+            setupHomeScrollSupport();
+        }
+    }
 
-            if (id == R.id.nav_home) {
-                return true;
-            }
-
-            if (id == R.id.nav_products) {
-                if (DBHelper.ROLE_ADMIN.equals(session.getRole())) {
-                    Intent i = new Intent(this, AdminProductsActivity.class);
-                    openBottomTab(i);
-                } else {
-                    Intent i = new Intent(this, ProductsActivity.class);
-                    openBottomTab(i);
-                }
-                return true;
-            }
-
-            if (id == R.id.nav_cart) {
-                if (!session.isLoggedIn()) {
-                    redirectToWelcome();
-                    return true;
-                }
-                Intent i = new Intent(this, CartActivity.class);
-                openBottomTab(i);
-                return true;
-            }
-
-            if (id == R.id.nav_orders) {
-                Intent i = new Intent(this, OrdersActivity.class);
-                openBottomTab(i);
-                return true;
-            }
-
-            if (id == R.id.nav_orders_admin) {
-                Intent i = new Intent(this, OrdersActivity.class);
-                i.putExtra(OrdersActivity.EXTRA_ADMIN_MODE, true);
-                openBottomTab(i);
-                return true;
-            }
-
-            if (id == R.id.nav_profile) {
-                Intent i = new Intent(this, ProfileActivity.class);
-                openBottomTab(i);
-                return true;
-            }
-
-            if (id == R.id.nav_admin_customers) {
-                Intent i = new Intent(this, AdminCustomersActivity.class);
-                openBottomTab(i);
-                return true;
-            }
-
-            if (id == R.id.nav_admin_reports) {
-                Intent i = new Intent(this, AdminReportsActivity.class);
-                openBottomTab(i);
-                return true;
-            }
-
-            return false;
-        });
-
-        bottomNav.setOnItemReselectedListener(item -> {
-            // no-op
-        });
-        bottomNav.setSelectedItemId(R.id.nav_home);
-
-        setupHomeBrandClicks();
-        setupHomeFeaturedProductClicks();
-        setupHomeScrollSupport();
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        onShellReady();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        if (!shouldShowToolbarActions()) return true;
         getMenuInflater().inflate(R.menu.menu_home_actions, menu);
         return true;
     }
@@ -163,12 +142,12 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         return super.dispatchGenericMotionEvent(event);
     }
 
-    private void openBottomTab(Intent intent) {
+    protected void openBottomTab(Intent intent) {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 
-    private void showLogoutConfirmDialog() {
+    protected void showLogoutConfirmDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.logout)
                 .setMessage(R.string.logout_confirm_message)
@@ -179,6 +158,82 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
                     finish();
                 })
                 .show();
+    }
+
+    protected boolean isAdminSession() {
+        return DBHelper.ROLE_ADMIN.equals(session.getRole());
+    }
+
+    private void inflateContentLayoutIfNeeded() {
+        int contentLayout = contentLayoutRes();
+        if (contentLayout == 0) return;
+
+        ViewGroup container = findViewById(R.id.homeContentContainer);
+        if (container == null) return;
+
+        container.removeAllViews();
+        LayoutInflater.from(this).inflate(contentLayout, container, true);
+    }
+
+    private boolean handleBottomNavigation(int id) {
+        if (id == selectedBottomNavItemId()) {
+            return true;
+        }
+
+        if (id == R.id.nav_home) {
+            openHomeTab();
+            return true;
+        }
+
+        if (id == R.id.nav_products) {
+            if (isAdminSession()) {
+                openBottomTab(new Intent(this, AdminProductsActivity.class));
+            } else {
+                openBottomTab(new Intent(this, ProductsActivity.class));
+            }
+            return true;
+        }
+
+        if (id == R.id.nav_cart) {
+            if (!session.isLoggedIn()) {
+                redirectToWelcome();
+                return true;
+            }
+            openBottomTab(new Intent(this, CartActivity.class));
+            return true;
+        }
+
+        if (id == R.id.nav_orders) {
+            openBottomTab(new Intent(this, OrdersActivity.class));
+            return true;
+        }
+
+        if (id == R.id.nav_orders_admin) {
+            openBottomTab(new Intent(this, AdminOrdersActivity.class));
+            return true;
+        }
+
+        if (id == R.id.nav_profile) {
+            openBottomTab(new Intent(this, ProfileActivity.class));
+            return true;
+        }
+
+        if (id == R.id.nav_admin_inventory) {
+            openBottomTab(new Intent(this, AdminInventoryActivity.class));
+            return true;
+        }
+
+        if (id == R.id.nav_admin_more) {
+            openBottomTab(new Intent(this, AdminMoreActivity.class));
+            return true;
+        }
+
+        return false;
+    }
+
+    private void openHomeTab() {
+        Intent intent = new Intent(this, isAdminSession() ? AdminHomeActivity.class : CustomerHomeActivity.class);
+        openBottomTab(intent);
     }
 
     private void setupHomeBrandClicks() {
@@ -305,8 +360,11 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         int delta = (int) (vScroll * ViewConfiguration.get(this).getScaledVerticalScrollFactor());
         if (delta == 0) delta = vScroll > 0f ? 1 : -1;
 
+        View child = homeScroll.getChildAt(0);
+        if (child == null) return false;
+
         int targetY = homeScroll.getScrollY() - delta;
-        int maxY = Math.max(0, homeScroll.getChildAt(0).getHeight() - homeScroll.getHeight());
+        int maxY = Math.max(0, child.getHeight() - homeScroll.getHeight());
         targetY = Math.max(0, Math.min(targetY, maxY));
 
         if (targetY == homeScroll.getScrollY()) return false;

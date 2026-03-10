@@ -12,43 +12,54 @@
         <EditText
             android:id="@+id/edtFullName"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_edittext"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="@string/receiver_name"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtUsername"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="@string/username"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="@string/password_edit_hint"
             android:inputType="textPassword"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColorHint="@color/text_hint" />
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtConfirm"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
+            android:background="@drawable/bg_edittext_admin"
             android:hint="@string/confirm_password"
             android:inputType="textPassword"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:singleLine="true"
-            android:textColorHint="@color/text_hint" />
-
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
     </LinearLayout>
 </ScrollView>

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
+import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderItem;
 
 import java.text.NumberFormat;
@@ -23,6 +24,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private OrderDao orderDao;
     private TextView tvHeader;
+    private TextView tvShipInfo;
     private OrderItemsAdapter adapter;
 
     @Override
@@ -44,6 +46,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         orderDao = new OrderDao(this);
         tvHeader = findViewById(R.id.tvHeader);
+        tvShipInfo = findViewById(R.id.tvShipInfo);
 
         RecyclerView rv = findViewById(R.id.rvOrderItems);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -54,14 +57,37 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     private void loadOrder(long orderId) {
+        Order order = orderDao.getOrderById(orderId);
         ArrayList<OrderItem> items = orderDao.getOrderItems(orderId);
         adapter.setData(items);
 
         int total = 0;
         for (OrderItem it : items) total += it.thanhTien;
-        String totalText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(total) + "đ";
+        String totalText = getString(
+                R.string.admin_price_currency,
+                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(total)
+        );
 
         tvHeader.setText(getString(R.string.order_header, orderId, items.size(), totalText));
+
+        if (order == null) {
+            tvShipInfo.setText("");
+            return;
+        }
+
+        StringBuilder info = new StringBuilder();
+        info.append(getString(R.string.admin_shipping_receiver, valueOrDash(order.nguoiNhan)));
+        info.append("\n").append(getString(R.string.admin_shipping_phone, valueOrDash(order.sdtNhan)));
+        info.append("\n").append(getString(R.string.admin_shipping_address, valueOrDash(order.diaChiNhan)));
+        info.append("\n").append(getString(R.string.admin_shipping_payment, valueOrDash(order.phuongThucThanhToan)));
+        if (order.ghiChu != null && !order.ghiChu.trim().isEmpty()) {
+            info.append("\n").append(getString(R.string.admin_shipping_note, order.ghiChu.trim()));
+        }
+        tvShipInfo.setText(info.toString());
+    }
+
+    private String valueOrDash(String value) {
+        return value == null || value.trim().isEmpty() ? "-" : value.trim();
     }
 
     @Override

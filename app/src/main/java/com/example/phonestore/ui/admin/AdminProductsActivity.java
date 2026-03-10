@@ -12,8 +12,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,12 +20,13 @@ import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
-public class AdminProductsActivity extends AppCompatActivity {
+public class AdminProductsActivity extends BaseHomeActivity {
 
     private SessionManager session;
     private ProductDao productDao;
@@ -42,9 +41,38 @@ public class AdminProductsActivity extends AppCompatActivity {
     private TextView tvResultCount;
 
     @Override
+    protected int shellLayoutRes() {
+        return R.layout.activity_home_bottom_admin;
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_admin_products;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_admin;
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_products;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.admin_products_title);
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_products);
 
         session = new SessionManager(this);
         if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
@@ -55,13 +83,6 @@ public class AdminProductsActivity extends AppCompatActivity {
         }
 
         productDao = new ProductDao(this);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Quản lý sản phẩm");
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         edtSearch = findViewById(R.id.edtSearch);
         rvProducts = findViewById(R.id.rvProducts);
@@ -131,7 +152,7 @@ public class AdminProductsActivity extends AppCompatActivity {
         tvLowStockProducts.setText(String.valueOf(lowStock));
 
         int resultCount = filteredProducts == null ? 0 : filteredProducts.size();
-        tvResultCount.setText("Hiển thị " + resultCount + " sản phẩm");
+        tvResultCount.setText(getString(R.string.admin_product_results, resultCount));
     }
 
     private void updateEmptyState(ArrayList<Product> list) {
@@ -163,10 +184,10 @@ public class AdminProductsActivity extends AppCompatActivity {
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(editing ? "Cập nhật sản phẩm" : "Thêm sản phẩm mới")
+                .setTitle(editing ? R.string.admin_product_dialog_edit : R.string.admin_product_dialog_add)
                 .setView(view)
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Lưu", null)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.save, null)
                 .create();
 
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -188,11 +209,11 @@ public class AdminProductsActivity extends AppCompatActivity {
             }
 
             if (!ok) {
-                Toast.makeText(this, "Thao tác thất bại", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            Toast.makeText(this, editing ? "Cập nhật sản phẩm thành công" : "Thêm sản phẩm thành công", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, editing ? R.string.admin_product_updated_success : R.string.admin_product_added_success, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
             loadData();
         }));
@@ -215,9 +236,9 @@ public class AdminProductsActivity extends AppCompatActivity {
         String stockStr = edtStock.getText().toString().trim();
         String discountStr = edtDiscount.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name)) return "Vui lòng nhập tên sản phẩm";
-        if (TextUtils.isEmpty(priceStr)) return "Vui lòng nhập giá";
-        if (TextUtils.isEmpty(stockStr)) return "Vui lòng nhập tồn kho";
+        if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
+        if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
+        if (TextUtils.isEmpty(stockStr)) return getString(R.string.err_stock_required);
 
         int price;
         int stock;
@@ -228,12 +249,12 @@ public class AdminProductsActivity extends AppCompatActivity {
             stock = Integer.parseInt(stockStr);
             discount = TextUtils.isEmpty(discountStr) ? 0 : Integer.parseInt(discountStr);
         } catch (NumberFormatException e) {
-            return "Dữ liệu số không hợp lệ";
+            return getString(R.string.err_number_format);
         }
 
-        if (price <= 0) return "Giá phải lớn hơn 0";
-        if (stock < 0) return "Tồn kho không được âm";
-        if (discount < 0 || discount > 100) return "Giảm giá chỉ từ 0 đến 100";
+        if (price <= 0) return getString(R.string.err_price_invalid);
+        if (stock < 0) return getString(R.string.err_stock_invalid);
+        if (discount < 0 || discount > 100) return getString(R.string.err_discount_invalid);
 
         p.tenSanPham = name;
         p.hang = brand;
@@ -248,24 +269,31 @@ public class AdminProductsActivity extends AppCompatActivity {
 
     private void confirmDelete(Product product) {
         new AlertDialog.Builder(this)
-                .setTitle("Xóa sản phẩm")
-                .setMessage("Bạn có chắc muốn xóa \"" + product.tenSanPham + "\" không?")
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Xóa", (d, w) -> {
+                .setTitle(R.string.admin_delete_product_title)
+                .setMessage(getString(R.string.admin_delete_product_message, product.tenSanPham))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.delete, (d, w) -> {
                     boolean ok = productDao.delete(product.maSanPham);
                     if (ok) {
-                        Toast.makeText(this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.product_deleted, Toast.LENGTH_SHORT).show();
                         loadData();
                     } else {
-                        Toast.makeText(this, "Thao tác thất bại", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .show();
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (productDao != null && adapter != null) {
+            loadData();
+        }
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+        return false;
     }
 }

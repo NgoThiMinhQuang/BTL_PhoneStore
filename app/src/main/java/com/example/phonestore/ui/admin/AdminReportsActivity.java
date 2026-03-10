@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import android.view.View;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
@@ -66,6 +68,9 @@ public class AdminReportsActivity extends AppCompatActivity {
         TextView tvRevenue = findViewById(R.id.tvRevenue);
         TextView tvOrders = findViewById(R.id.tvOrders);
         TextView tvCustomers = findViewById(R.id.tvCustomers);
+        View cardRevenue = findViewById(R.id.cardRevenue);
+        View cardOrders = findViewById(R.id.cardOrders);
+        View cardCustomers = findViewById(R.id.cardCustomers);
 
         String revenue = NumberFormat.getNumberInstance(new Locale("vi", "VN"))
                 .format(orderDao.getTongDoanhThu()) + "đ";
@@ -73,6 +78,13 @@ public class AdminReportsActivity extends AppCompatActivity {
         tvRevenue.setText(getString(R.string.kpi_revenue_value, revenue));
         tvOrders.setText(getString(R.string.kpi_orders_value, orderDao.getSoDonHang()));
         tvCustomers.setText(getString(R.string.kpi_customers_value, userDao.getSoKhachHang()));
+
+        ((TextView) cardRevenue.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_revenue_month);
+        ((TextView) cardRevenue.findViewById(R.id.tvKpiValue)).setText(revenue);
+        ((TextView) cardOrders.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_total_orders);
+        ((TextView) cardOrders.findViewById(R.id.tvKpiValue)).setText(String.valueOf(orderDao.getSoDonHang()));
+        ((TextView) cardCustomers.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_total_customers);
+        ((TextView) cardCustomers.findViewById(R.id.tvKpiValue)).setText(String.valueOf(userDao.getSoKhachHang()));
 
         // Charts
         LineChart chartRevenue = findViewById(R.id.chartRevenue);
@@ -108,11 +120,13 @@ public class AdminReportsActivity extends AppCompatActivity {
         }
 
         LineDataSet set = new LineDataSet(entries, "Doanh thu " + year);
-        set.setLineWidth(2f);
-        set.setCircleRadius(3f);
+        set.setLineWidth(2.5f);
+        set.setCircleRadius(3.5f);
         set.setValueTextSize(10f);
-        set.setColor(ColorTemplate.MATERIAL_COLORS[0]);
-        set.setCircleColor(ColorTemplate.MATERIAL_COLORS[0]);
+        set.setColor(ContextCompat.getColor(this, R.color.admin_primary));
+        set.setCircleColor(ContextCompat.getColor(this, R.color.admin_primary));
+        set.setDrawFilled(true);
+        set.setFillColor(ContextCompat.getColor(this, R.color.admin_surface_soft));
 
         LineData data = new LineData(set);
         chart.setData(data);
@@ -157,7 +171,7 @@ public class AdminReportsActivity extends AppCompatActivity {
         }
 
         BarDataSet set = new BarDataSet(entries, "Số lượng bán");
-        set.setColors(ColorTemplate.MATERIAL_COLORS);
+        set.setColor(ContextCompat.getColor(this, R.color.admin_primary));
         set.setValueTextSize(10f);
 
         BarData data = new BarData(set);
@@ -186,7 +200,12 @@ public class AdminReportsActivity extends AppCompatActivity {
         }
 
         PieDataSet set = new PieDataSet(entries, "Trạng thái");
-        set.setColors(ColorTemplate.MATERIAL_COLORS);
+        set.setColors(
+                ContextCompat.getColor(this, R.color.admin_primary),
+                ContextCompat.getColor(this, R.color.admin_warning),
+                ContextCompat.getColor(this, R.color.admin_success),
+                ContextCompat.getColor(this, R.color.admin_danger)
+        );
         set.setValueTextSize(11f);
 
         PieData data = new PieData(set);

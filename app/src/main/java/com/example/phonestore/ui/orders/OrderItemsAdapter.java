@@ -36,11 +36,17 @@ public class OrderItemsAdapter extends RecyclerView.Adapter<OrderItemsAdapter.VH
     public void onBindViewHolder(@NonNull VH h, int position) {
         OrderItem it = data.get(position);
 
-        String gia = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.donGia) + "đ";
-        String tt = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.thanhTien) + "đ";
+        String gia = h.itemView.getContext().getString(
+                R.string.admin_price_currency,
+                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.donGia)
+        );
+        String tt = h.itemView.getContext().getString(
+                R.string.admin_price_currency,
+                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.thanhTien)
+        );
 
         h.tvName.setText(it.tenSanPham);
-        h.tvSub.setText("Giá: " + gia + " | SL: " + it.soLuong + " | Giảm: " + it.giamGia + "%");
+        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_item_sub, gia, it.soLuong, it.giamGia));
         h.tvAmount.setText(tt);
     }
 

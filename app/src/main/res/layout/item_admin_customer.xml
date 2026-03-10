@@ -4,18 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
-    app:cardBackgroundColor="@color/panel_light"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="1dp"
-    app:strokeColor="@color/panel_stroke"
+    app:cardBackgroundColor="@color/admin_surface"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/admin_stroke"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:padding="14dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -27,7 +27,7 @@
                 android:id="@+id/tvName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/admin_text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -36,15 +36,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/text_sub" />
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/tvRole"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/text_sub"
-                android:textSize="12sp" />
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_edittext_admin"
+                android:paddingStart="12dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp"
+                android:textColor="@color/admin_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
@@ -58,9 +65,9 @@
                 android:layout_height="40dp"
                 android:text="@string/edit"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:backgroundTint="@color/red_primary"
-                app:cornerRadius="20dp" />
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/admin_primary"
+                app:cornerRadius="18dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
@@ -69,10 +76,9 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/delete"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:backgroundTint="@color/red_dark"
-                app:cornerRadius="20dp" />
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/admin_danger"
+                app:cornerRadius="18dp" />
         </LinearLayout>
-
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

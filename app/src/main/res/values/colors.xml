@@ -27,4 +27,23 @@
     <color name="text_primary">#111827</color>
     <color name="text_sub">#6B7280</color>
     <color name="text_hint">#9CA3AF</color>
+
+    <!-- Admin redesign -->
+    <color name="admin_primary">#E11D48</color>
+    <color name="admin_primary_dark">#9F1239</color>
+    <color name="admin_background">#FFF5F7</color>
+    <color name="admin_surface">#FFFFFF</color>
+    <color name="admin_surface_soft">#FFF1F2</color>
+    <color name="admin_stroke">#FFE4E6</color>
+    <color name="admin_text_primary">#111827</color>
+    <color name="admin_text_secondary">#6B7280</color>
+    <color name="admin_warning">#D97706</color>
+    <color name="admin_warning_soft">#FFF7ED</color>
+    <color name="admin_success">#059669</color>
+    <color name="admin_success_soft">#ECFDF5</color>
+    <color name="admin_danger">#9F1239</color>
+    <color name="admin_danger_soft">#FFF1F2</color>
+    <color name="admin_bottom_nav_active">#E11D48</color>
+    <color name="admin_bottom_nav_inactive">#9CA3AF</color>
+    <color name="admin_bottom_nav_indicator">#22E11D48</color>
 </resources>

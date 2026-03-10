@@ -1,0 +1,180 @@
+package com.example.phonestore.ui.home;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.phonestore.R;
+import com.example.phonestore.data.dao.OrderDao;
+import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.Order;
+import com.example.phonestore.data.model.OrderStatus;
+import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.ui.orders.OrderDetailActivity;
+import com.example.phonestore.ui.orders.OrdersAdapter;
+
+import java.util.ArrayList;
+
+public class AdminOrdersActivity extends BaseHomeActivity {
+
+    private OrderDao orderDao;
+    private OrdersAdapter adapter;
+    private String currentFilter;
+    private TextView tvOrdersCount;
+    private TextView tvOrdersPending;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
+            session.clear();
+            startActivity(new Intent(this, WelcomeActivity.class));
+            finish();
+            return;
+        }
+
+        orderDao = new OrderDao(this);
+    }
+
+    @Override
+    protected int shellLayoutRes() {
+        return R.layout.activity_home_bottom_admin;
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_admin_orders;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_admin;
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_orders_admin;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.admin_orders);
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
+    }
+
+    @Override
+    protected void onShellReady() {
+        View cardOrdersCount = findViewById(R.id.cardOrdersCount);
+        View cardOrdersPending = findViewById(R.id.cardOrdersPending);
+        ((TextView) cardOrdersCount.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_orders_count);
+        ((TextView) cardOrdersPending.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_orders_pending);
+        tvOrdersCount = cardOrdersCount.findViewById(R.id.tvKpiValue);
+        tvOrdersPending = cardOrdersPending.findViewById(R.id.tvKpiValue);
+
+        RecyclerView rvOrders = findViewById(R.id.rvOrders);
+        if (rvOrders.getAdapter() == null) {
+            rvOrders.setLayoutManager(new LinearLayoutManager(this));
+            adapter = new OrdersAdapter(new OrdersAdapter.Listener() {
+                @Override
+                public void onClick(Order order) {
+                    Intent intent = new Intent(AdminOrdersActivity.this, OrderDetailActivity.class);
+                    intent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.id);
+                    startActivity(intent);
+                }
+
+                @Override
+                public void onUpdateStatus(Order order, String newStatus) {
+                    boolean ok = orderDao.updateStatus(order.id, newStatus);
+                    if (!ok) {
+                        Toast.makeText(AdminOrdersActivity.this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(AdminOrdersActivity.this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
+                    loadOrders();
+                }
+            });
+            rvOrders.setAdapter(adapter);
+        }
+
+        if (currentFilter == null) {
+            currentFilter = OrderStatus.STATUS_CHO_XAC_NHAN;
+        }
+
+        bindChip(findViewById(R.id.chipAllOrders), null);
+        bindChip(findViewById(R.id.chipPendingOrders), OrderStatus.STATUS_CHO_XAC_NHAN);
+        bindChip(findViewById(R.id.chipProcessingOrders), "PROCESSING");
+        bindChip(findViewById(R.id.chipCompletedOrders), OrderStatus.STATUS_DA_GIAO);
+        bindChip(findViewById(R.id.chipCancelledOrders), OrderStatus.STATUS_DA_HUY);
+
+        updateChipStates();
+        loadOrders();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (orderDao != null) loadOrders();
+    }
+
+    private void bindChip(TextView chip, String filter) {
+        chip.setOnClickListener(v -> {
+            currentFilter = filter;
+            updateChipStates();
+            loadOrders();
+        });
+    }
+
+    private void updateChipStates() {
+        updateChip(findViewById(R.id.chipAllOrders), currentFilter == null);
+        updateChip(findViewById(R.id.chipPendingOrders), OrderStatus.STATUS_CHO_XAC_NHAN.equals(currentFilter));
+        updateChip(findViewById(R.id.chipProcessingOrders), "PROCESSING".equals(currentFilter));
+        updateChip(findViewById(R.id.chipCompletedOrders), OrderStatus.STATUS_DA_GIAO.equals(currentFilter));
+        updateChip(findViewById(R.id.chipCancelledOrders), OrderStatus.STATUS_DA_HUY.equals(currentFilter));
+    }
+
+    private void updateChip(TextView chip, boolean selected) {
+        chip.setSelected(selected);
+        chip.setTextColor(ContextCompat.getColor(this, selected ? android.R.color.white : R.color.admin_text_secondary));
+    }
+
+    private void loadOrders() {
+        if (adapter == null || orderDao == null) return;
+
+        ArrayList<Order> allOrders = orderDao.getAllOrders();
+        ArrayList<Order> filteredOrders = new ArrayList<>();
+        int pendingCount = 0;
+
+        for (Order order : allOrders) {
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai)) {
+                pendingCount++;
+            }
+            if (matchesFilter(order)) {
+                filteredOrders.add(order);
+            }
+        }
+
+        tvOrdersCount.setText(String.valueOf(filteredOrders.size()));
+        tvOrdersPending.setText(String.valueOf(pendingCount));
+        adapter.setData(filteredOrders, true);
+    }
+
+    private boolean matchesFilter(Order order) {
+        if (currentFilter == null) return true;
+        if ("PROCESSING".equals(currentFilter)) {
+            return OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThai)
+                    || OrderStatus.STATUS_DA_THANH_TOAN.equals(order.trangThai);
+        }
+        return currentFilter.equals(order.trangThai);
+    }
+}

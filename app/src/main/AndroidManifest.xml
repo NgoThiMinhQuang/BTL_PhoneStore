@@ -53,6 +53,36 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ui.home.AdminReceiptDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminReceiptEditorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminInventoryOverviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminInventoryHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminInventoryAlertsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminSuppliersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminReceiptsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminMoreActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminInventoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.AdminOrdersActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.home.AdminHomeActivity"
             android:exported="false" />
 
