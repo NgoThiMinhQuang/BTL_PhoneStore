@@ -126,6 +126,12 @@
     <string name="admin_more_title">Tiện ích quản trị</string>
     <string name="admin_dashboard_greeting">Tổng quan hoạt động cửa hàng</string>
     <string name="admin_dashboard_subtitle">Theo dõi nhanh số liệu chính, tồn kho và thao tác cần ưu tiên trong ngày.</string>
+    <string name="admin_dashboard_search_hint">Tìm đơn hàng, sản phẩm, cảnh báo kho...</string>
+    <string name="admin_dashboard_inventory_today">Kho hôm nay</string>
+    <string name="admin_dashboard_inventory_today_desc">Theo dõi cảnh báo tồn kho và mở nhanh khu vực nhập hàng trong ngày.</string>
+    <string name="admin_dashboard_low_stock_desc">Sản phẩm cần ưu tiên nhập thêm</string>
+    <string name="admin_dashboard_chart_caption">Cập nhật doanh thu của 6 tháng gần nhất</string>
+    <string name="admin_dashboard_quick_actions_desc">Mở nhanh các khu vực quản trị thường dùng.</string>
     <string name="admin_revenue_month">Doanh thu tháng</string>
     <string name="admin_total_orders">Tổng đơn hàng</string>
     <string name="admin_total_customers">Khách hàng</string>
@@ -217,6 +223,12 @@
     <string name="admin_stock_empty">Hết hàng</string>
     <string name="admin_stock_low">Sắp hết: %1$d</string>
     <string name="admin_discount_none">Không giảm giá</string>
+    <string name="admin_product_stock_short">Kho: %1$d</string>
+    <string name="admin_product_status_in_stock">Còn hàng</string>
+    <string name="admin_product_status_low_stock">Sắp hết</string>
+    <string name="admin_product_status_out_of_stock">Hết hàng</string>
+    <string name="admin_product_discount_short">-%1$d%%</string>
+    <string name="admin_product_image">Ảnh sản phẩm</string>
     <string name="admin_order_item_sub">Giá: %1$s | SL: %2$d | Giảm: %3$d%%</string>
     <string name="admin_order_code_with_user">Đơn #%1$d - %2$s</string>
     <string name="admin_order_code">Đơn #%1$d</string>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardEntry"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
@@ -18,6 +19,7 @@
         android:padding="14dp">
 
         <View
+            android:id="@+id/viewAccent"
             android:layout_width="10dp"
             android:layout_height="42dp"
             android:background="@color/admin_primary" />

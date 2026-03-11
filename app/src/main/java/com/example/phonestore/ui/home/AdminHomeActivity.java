@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 
 import com.example.phonestore.R;
+import com.google.android.material.card.MaterialCardView;
 import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.dao.UserDao;
@@ -20,11 +21,11 @@ import com.example.phonestore.ui.admin.AdminProductsActivity;
 import com.example.phonestore.ui.admin.AdminReportsActivity;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.orders.OrderDetailActivity;
-import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.text.NumberFormat;
@@ -101,6 +102,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
         TextView tvOrdersCount = findViewById(R.id.tvOrdersCount);
         TextView tvCustomersCount = findViewById(R.id.tvCustomersCount);
         TextView tvProductsCount = findViewById(R.id.tvProductsCount);
+        TextView tvLowStockCount = findViewById(R.id.tvLowStockCount);
         TextView tvLowStockSummary = findViewById(R.id.tvLowStockSummary);
 
         int currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
@@ -127,6 +129,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
         tvOrdersCount.setText(String.valueOf(orders.size()));
         tvCustomersCount.setText(String.valueOf(userDao.getSoKhachHang()));
         tvProductsCount.setText(String.valueOf(products.size()));
+        tvLowStockCount.setText(String.valueOf(lowStockCount));
 
         if (lowStockCount == 0) {
             tvLowStockSummary.setText(R.string.admin_no_low_stock);
@@ -140,13 +143,21 @@ public class AdminHomeActivity extends BaseHomeActivity {
     }
 
     private void bindRevenueChart(ArrayList<OrderDao.MonthRevenue> revenueByMonth) {
-        LineChart chart = findViewById(R.id.chartRevenueMini);
+        BarChart chart = findViewById(R.id.chartRevenueMini);
         chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
         chart.getLegend().setEnabled(false);
         chart.setNoDataText("Chưa có dữ liệu doanh thu");
         chart.setExtraLeftOffset(4f);
         chart.setExtraRightOffset(4f);
+        chart.setExtraTopOffset(8f);
+        chart.setExtraBottomOffset(8f);
+        chart.setDrawGridBackground(false);
+        chart.setDrawBarShadow(false);
+        chart.setFitBars(true);
+        chart.setPinchZoom(false);
+        chart.setScaleEnabled(false);
+        chart.setDoubleTapToZoomEnabled(false);
 
         int[] revenue = new int[13];
         for (OrderDao.MonthRevenue item : revenueByMonth) {
@@ -157,25 +168,25 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
         int currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
         int startMonth = Math.max(1, currentMonth - 5);
-        ArrayList<Entry> entries = new ArrayList<>();
-        ArrayList<Integer> labels = new ArrayList<>();
+        ArrayList<BarEntry> entries = new ArrayList<>();
         for (int month = startMonth; month <= currentMonth; month++) {
-            entries.add(new Entry(month, revenue[month]));
-            labels.add(month);
+            entries.add(new BarEntry(month, revenue[month]));
         }
 
-        LineDataSet dataSet = new LineDataSet(entries, getString(R.string.admin_revenue_chart_title));
-        dataSet.setColor(ContextCompat.getColor(this, R.color.admin_primary));
-        dataSet.setCircleColor(ContextCompat.getColor(this, R.color.admin_primary));
-        dataSet.setCircleHoleColor(ContextCompat.getColor(this, R.color.admin_surface));
-        dataSet.setLineWidth(2.5f);
-        dataSet.setCircleRadius(4f);
+        BarDataSet dataSet = new BarDataSet(entries, getString(R.string.admin_revenue_chart_title));
+        dataSet.setColor(ContextCompat.getColor(this, R.color.admin_dashboard_blue));
+        dataSet.setValueTextColor(ContextCompat.getColor(this, R.color.admin_text_secondary));
         dataSet.setValueTextSize(10f);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        dataSet.setDrawFilled(true);
-        dataSet.setFillColor(ContextCompat.getColor(this, R.color.admin_surface_soft));
+        dataSet.setHighLightAlpha(0);
 
-        chart.setData(new LineData(dataSet));
+        BarData data = new BarData(dataSet);
+        data.setBarWidth(0.55f);
+        chart.setData(data);
+
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisLeft().setTextColor(ContextCompat.getColor(this, R.color.admin_text_secondary));
+        chart.getAxisLeft().setGridColor(ContextCompat.getColor(this, R.color.admin_dashboard_grid));
+        chart.getAxisLeft().setAxisLineColor(ContextCompat.getColor(this, R.color.admin_dashboard_stroke));
         chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -186,7 +197,10 @@ public class AdminHomeActivity extends BaseHomeActivity {
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
+        xAxis.setTextColor(ContextCompat.getColor(this, R.color.admin_text_secondary));
+        xAxis.setAxisLineColor(ContextCompat.getColor(this, R.color.admin_dashboard_stroke));
         xAxis.setDrawGridLines(false);
+        xAxis.setCenterAxisLabels(false);
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -195,6 +209,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
             }
         });
 
+        chart.animateY(700);
         chart.invalidate();
     }
 
@@ -245,12 +260,23 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     private View addDashboardEntry(LinearLayout container, String title, String sub, String meta) {
         View view = LayoutInflater.from(this).inflate(R.layout.item_admin_dashboard_entry, container, false);
+        MaterialCardView cardEntry = view.findViewById(R.id.cardEntry);
+        View accent = view.findViewById(R.id.viewAccent);
         TextView tvTitle = view.findViewById(R.id.tvTitle);
         TextView tvSub = view.findViewById(R.id.tvSub);
         TextView tvMeta = view.findViewById(R.id.tvMeta);
+
+        if (cardEntry != null) {
+            cardEntry.setCardBackgroundColor(ContextCompat.getColor(this, R.color.admin_dashboard_surface_alt));
+            cardEntry.setStrokeColor(ContextCompat.getColor(this, R.color.admin_dashboard_stroke));
+        }
+        if (accent != null) {
+            accent.setBackgroundColor(ContextCompat.getColor(this, R.color.admin_dashboard_blue));
+        }
         tvTitle.setText(title);
         tvSub.setText(sub);
         tvMeta.setText(meta);
+        tvMeta.setTextColor(ContextCompat.getColor(this, R.color.admin_dashboard_blue));
         container.addView(view);
         return view;
     }

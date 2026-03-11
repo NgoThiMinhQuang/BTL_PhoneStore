@@ -1,8 +1,11 @@
 package com.example.phonestore.ui.admin;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,6 +29,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
 
     private final ArrayList<Product> data = new ArrayList<>();
     private final Listener listener;
+    private final NumberFormat currencyFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
 
     public AdminProductAdapter(Listener listener) {
         this.listener = listener;
@@ -49,48 +53,34 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         Product p = data.get(position);
+        Context context = h.itemView.getContext();
 
-        h.tvName.setText(p.tenSanPham == null || p.tenSanPham.trim().isEmpty()
-                ? h.itemView.getContext().getString(R.string.admin_product_unknown_name)
-                : p.tenSanPham);
-
-        String brand = (p.hang == null || p.hang.trim().isEmpty())
-                ? h.itemView.getContext().getString(R.string.admin_product_unknown_brand)
+        String name = p.tenSanPham == null || p.tenSanPham.trim().isEmpty()
+                ? context.getString(R.string.admin_product_unknown_name)
+                : p.tenSanPham.trim();
+        String brand = p.hang == null || p.hang.trim().isEmpty()
+                ? context.getString(R.string.admin_product_unknown_brand)
                 : p.hang.trim();
-        h.tvBrand.setText(h.itemView.getContext().getString(R.string.admin_product_brand_label, brand));
-
-        h.tvId.setText(h.itemView.getContext().getString(R.string.admin_product_id, p.maSanPham));
-
-        String desc = (p.moTa == null || p.moTa.trim().isEmpty())
-                ? h.itemView.getContext().getString(R.string.admin_product_empty_desc)
+        String desc = p.moTa == null || p.moTa.trim().isEmpty()
+                ? context.getString(R.string.admin_product_empty_desc)
                 : p.moTa.trim();
+
+        h.tvName.setText(name);
+        h.tvBrand.setText(context.getString(R.string.admin_product_brand_label, brand));
+        h.tvId.setText(context.getString(R.string.admin_product_id, p.maSanPham));
         h.tvDesc.setText(desc);
-
-        String gia = h.itemView.getContext().getString(
-                R.string.admin_price_currency,
-                NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia)
-        );
-        h.tvPrice.setText(gia);
-
-        h.tvStock.setText(h.itemView.getContext().getString(R.string.admin_stock_label, p.tonKho));
-        h.tvDiscount.setText(h.itemView.getContext().getString(R.string.admin_discount_label, p.giamGia));
-
-        if (p.tonKho <= 0) {
-            h.tvStock.setText(R.string.admin_stock_empty);
-            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_dark));
-        } else if (p.tonKho <= 5) {
-            h.tvStock.setText(h.itemView.getContext().getString(R.string.admin_stock_low, p.tonKho));
-            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
-        } else {
-            h.tvStock.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_primary));
-        }
+        h.tvPrice.setText(context.getString(R.string.admin_price_currency, currencyFormat.format(p.gia)));
+        h.tvStock.setText(context.getString(R.string.admin_product_stock_short, Math.max(0, p.tonKho)));
+        h.ivThumb.setImageResource(resolveProductImage(context, p));
 
         if (p.giamGia > 0) {
-            h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.red_primary));
+            h.tvDiscount.setVisibility(View.VISIBLE);
+            h.tvDiscount.setText(context.getString(R.string.admin_product_discount_short, p.giamGia));
         } else {
-            h.tvDiscount.setText(R.string.admin_discount_none);
-            h.tvDiscount.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.text_sub));
+            h.tvDiscount.setVisibility(View.GONE);
         }
+
+        bindStatus(context, h, p.tonKho);
 
         h.btnEdit.setOnClickListener(v -> listener.onEdit(p));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(p));
@@ -101,12 +91,65 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         return data.size();
     }
 
+    private void bindStatus(Context context, VH h, int stock) {
+        int textRes;
+        int textColorRes;
+        int bgColorRes;
+
+        if (stock <= 0) {
+            textRes = R.string.admin_product_status_out_of_stock;
+            textColorRes = R.color.admin_product_status_empty;
+            bgColorRes = R.color.admin_product_status_empty_bg;
+            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_product_status_empty));
+        } else if (stock <= 5) {
+            textRes = R.string.admin_product_status_low_stock;
+            textColorRes = R.color.admin_product_status_low;
+            bgColorRes = R.color.admin_product_status_low_bg;
+            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_product_status_low));
+        } else {
+            textRes = R.string.admin_product_status_in_stock;
+            textColorRes = R.color.admin_product_status_ok;
+            bgColorRes = R.color.admin_product_status_ok_bg;
+            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_text_primary));
+        }
+
+        h.tvStatus.setText(textRes);
+        h.tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
+        h.tvStatus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, bgColorRes)));
+    }
+
+    private int resolveProductImage(Context context, Product p) {
+        int imageRes = findImageRes(context, p.tenAnh);
+        if (imageRes != 0) return imageRes;
+
+        String name = p.tenSanPham == null ? "" : p.tenSanPham.toLowerCase(Locale.ROOT);
+        String brand = p.hang == null ? "" : p.hang.toLowerCase(Locale.ROOT);
+
+        if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
+        if (name.contains("s24") || brand.contains("samsung")) return R.drawable.ss_s24_utra;
+        if (brand.contains("xiaomi")) return R.drawable.ic_iphone15;
+
+        return android.R.drawable.ic_menu_gallery;
+    }
+
+    private int findImageRes(Context context, String imageName) {
+        if (imageName == null || imageName.trim().isEmpty()) return 0;
+
+        String imageKey = imageName.trim();
+        int resId = context.getResources().getIdentifier(imageKey, "drawable", context.getPackageName());
+        if (resId != 0) return resId;
+
+        return context.getResources().getIdentifier(imageKey, "mipmap", context.getPackageName());
+    }
+
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvName, tvBrand, tvId, tvDesc, tvPrice, tvStock, tvDiscount;
+        ImageView ivThumb;
+        TextView tvName, tvBrand, tvId, tvDesc, tvPrice, tvStock, tvDiscount, tvStatus;
         MaterialButton btnEdit, btnDelete;
 
         VH(@NonNull View itemView) {
             super(itemView);
+            ivThumb = itemView.findViewById(R.id.ivThumb);
             tvName = itemView.findViewById(R.id.tvName);
             tvBrand = itemView.findViewById(R.id.tvBrand);
             tvId = itemView.findViewById(R.id.tvId);
@@ -114,6 +157,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvStock = itemView.findViewById(R.id.tvStock);
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }

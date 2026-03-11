@@ -43,7 +43,32 @@
     <color name="admin_success_soft">#ECFDF5</color>
     <color name="admin_danger">#9F1239</color>
     <color name="admin_danger_soft">#FFF1F2</color>
+    <color name="admin_product_thumb_bg">#F8FAFC</color>
+    <color name="admin_product_action_bg">#F8FAFC</color>
+    <color name="admin_product_status_ok">#15803D</color>
+    <color name="admin_product_status_ok_bg">#DCFCE7</color>
+    <color name="admin_product_status_low">#C2410C</color>
+    <color name="admin_product_status_low_bg">#FFEDD5</color>
+    <color name="admin_product_status_empty">#B91C1C</color>
+    <color name="admin_product_status_empty_bg">#FEE2E2</color>
     <color name="admin_bottom_nav_active">#E11D48</color>
     <color name="admin_bottom_nav_inactive">#9CA3AF</color>
     <color name="admin_bottom_nav_indicator">#22E11D48</color>
+
+    <!-- Dashboard-specific palette -->
+    <color name="admin_dashboard_background">#F3F7FC</color>
+    <color name="admin_dashboard_surface">#FFFFFF</color>
+    <color name="admin_dashboard_surface_alt">#F8FBFF</color>
+    <color name="admin_dashboard_stroke">#DCE6F2</color>
+    <color name="admin_dashboard_grid">#D7E3F1</color>
+    <color name="admin_dashboard_blue">#3B82F6</color>
+    <color name="admin_dashboard_blue_soft">#E8F1FF</color>
+    <color name="admin_dashboard_green">#16A34A</color>
+    <color name="admin_dashboard_green_soft">#EAF8EF</color>
+    <color name="admin_dashboard_orange">#F59E0B</color>
+    <color name="admin_dashboard_orange_soft">#FFF4DD</color>
+    <color name="admin_dashboard_purple">#8B5CF6</color>
+    <color name="admin_dashboard_purple_soft">#F1E9FF</color>
+    <color name="admin_dashboard_red">#EF4444</color>
+    <color name="admin_dashboard_red_soft">#FEECEC</color>
 </resources>
