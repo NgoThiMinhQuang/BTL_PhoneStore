@@ -229,6 +229,7 @@
     <string name="admin_product_status_out_of_stock">Hết hàng</string>
     <string name="admin_product_discount_short">-%1$d%%</string>
     <string name="admin_product_image">Ảnh sản phẩm</string>
+    <string name="admin_add_short">Thêm</string>
     <string name="admin_order_item_sub">Giá: %1$s | SL: %2$d | Giảm: %3$d%%</string>
     <string name="admin_order_code_with_user">Đơn #%1$d - %2$s</string>
     <string name="admin_order_code">Đơn #%1$d</string>

@@ -118,20 +118,45 @@
             </LinearLayout>
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/edtSearch"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:background="@drawable/bg_edittext_admin"
-            android:drawableStart="@drawable/ic_search_small"
-            android:drawablePadding="10dp"
-            android:hint="@string/search_products_hint"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:singleLine="true"
-            android:textColor="@color/admin_text_primary"
-            android:textColorHint="@color/admin_text_secondary" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edtSearch"
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edittext_admin"
+                android:drawableStart="@drawable/ic_search_small"
+                android:drawablePadding="10dp"
+                android:hint="@string/search_products_hint"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:singleLine="true"
+                android:textColor="@color/admin_text_primary"
+                android:textColorHint="@color/admin_text_secondary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="54dp"
+                android:layout_marginStart="10dp"
+                android:minWidth="0dp"
+                android:text="@string/admin_add_short"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@color/admin_primary"
+                app:cornerRadius="20dp"
+                app:icon="@drawable/ic_plus"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconTint="@android:color/white" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView
@@ -155,7 +180,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingBottom="72dp" />
+            android:paddingBottom="20dp" />
 
         <LinearLayout
             android:id="@+id/layoutEmpty"
@@ -185,19 +210,7 @@
         </LinearLayout>
     </FrameLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddProduct"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="54dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/add_product"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        app:backgroundTint="@color/admin_primary"
-        app:cornerRadius="24dp"
-        app:icon="@drawable/ic_plus"
-        app:iconGravity="textStart"
-        app:iconPadding="10dp"
-        app:iconTint="@android:color/white" />
+        android:layout_height="16dp" />
 </LinearLayout>

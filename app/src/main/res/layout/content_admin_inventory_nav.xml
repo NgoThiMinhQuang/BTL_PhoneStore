@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/admin_dashboard_background"
     android:fillViewport="true"
     android:paddingBottom="20dp">
 
@@ -15,92 +16,157 @@
         android:paddingEnd="16dp"
         android:paddingBottom="24dp">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_panel_admin"
-            android:orientation="vertical">
+            app:cardBackgroundColor="@color/admin_primary"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_primary_dark"
+            app:strokeWidth="1dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/admin_inventory_title"
-                android:textColor="@color/admin_text_primary"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/admin_inventory_nav_summary"
-                android:textColor="@color/admin_text_secondary"
-                android:textSize="13sp" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/admin_inventory_title"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
 
-        <com.google.android.material.button.MaterialButton
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/admin_inventory_nav_summary"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnOpenInventoryOverview"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/admin_inventory_overview"
-            android:textAllCaps="false"
-            android:textColor="@color/admin_text_primary"
-            app:backgroundTint="@color/admin_surface"
-            app:cornerRadius="20dp"
-            app:strokeColor="@color/admin_stroke"
-            app:strokeWidth="1dp" />
+            android:layout_height="72dp"
+            android:layout_marginTop="18dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/admin_dashboard_blue_soft"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_dashboard_blue"
+            app:strokeWidth="1dp">
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_inventory_overview"
+                android:textColor="@color/admin_dashboard_blue"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnOpenReceipts"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:layout_marginTop="12dp"
-            android:text="@string/admin_inventory_receipts"
-            android:textAllCaps="false"
-            android:textColor="@color/admin_text_primary"
-            app:backgroundTint="@color/admin_surface"
-            app:cornerRadius="20dp"
-            app:strokeColor="@color/admin_stroke"
-            app:strokeWidth="1dp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/admin_dashboard_purple_soft"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_dashboard_purple"
+            app:strokeWidth="1dp">
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_inventory_receipts"
+                android:textColor="@color/admin_dashboard_purple"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnOpenSuppliers"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:layout_marginTop="12dp"
-            android:text="@string/admin_inventory_suppliers"
-            android:textAllCaps="false"
-            android:textColor="@color/admin_text_primary"
-            app:backgroundTint="@color/admin_surface"
-            app:cornerRadius="20dp"
-            app:strokeColor="@color/admin_stroke"
-            app:strokeWidth="1dp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/admin_dashboard_green_soft"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_dashboard_green"
+            app:strokeWidth="1dp">
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_inventory_suppliers"
+                android:textColor="@color/admin_dashboard_green"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnOpenAlerts"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:layout_marginTop="12dp"
-            android:text="@string/admin_inventory_alerts"
-            android:textAllCaps="false"
-            android:textColor="@color/admin_text_primary"
-            app:backgroundTint="@color/admin_surface"
-            app:cornerRadius="20dp"
-            app:strokeColor="@color/admin_stroke"
-            app:strokeWidth="1dp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/admin_dashboard_orange_soft"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_dashboard_orange"
+            app:strokeWidth="1dp">
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_inventory_alerts"
+                android:textColor="@color/admin_dashboard_orange"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnOpenHistory"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="72dp"
             android:layout_marginTop="12dp"
-            android:text="@string/admin_inventory_history"
-            android:textAllCaps="false"
-            android:textColor="@color/admin_text_primary"
-            app:backgroundTint="@color/admin_surface"
-            app:cornerRadius="20dp"
-            app:strokeColor="@color/admin_stroke"
-            app:strokeWidth="1dp" />
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/admin_dashboard_red_soft"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_dashboard_red"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/admin_inventory_history"
+                android:textColor="@color/admin_dashboard_red"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

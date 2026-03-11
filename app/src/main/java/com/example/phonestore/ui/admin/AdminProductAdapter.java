@@ -66,7 +66,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
                 : p.moTa.trim();
 
         h.tvName.setText(name);
-        h.tvBrand.setText(context.getString(R.string.admin_product_brand_label, brand));
+        h.tvBrand.setText(brand);
         h.tvId.setText(context.getString(R.string.admin_product_id, p.maSanPham));
         h.tvDesc.setText(desc);
         h.tvPrice.setText(context.getString(R.string.admin_price_currency, currencyFormat.format(p.gia)));
