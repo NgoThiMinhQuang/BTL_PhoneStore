@@ -14,14 +14,16 @@ import com.example.phonestore.R;
 import com.example.phonestore.data.dao.ReceiptDao;
 import com.example.phonestore.data.model.Receipt;
 import com.example.phonestore.data.model.ReceiptItem;
+import com.google.android.material.button.MaterialButton;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class AdminReceiptDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_RECEIPT_ID = "extra_receipt_id";
+
+    private ReceiptDao receiptDao;
+    private long receiptId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,56 +33,97 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.receipt_detail_title);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        long receiptId = getIntent().getLongExtra(EXTRA_RECEIPT_ID, -1);
-        ReceiptDao receiptDao = new ReceiptDao(this);
-        ArrayList<Receipt> receipts = receiptDao.getRecentReceipts();
-        Receipt target = null;
-        for (Receipt receipt : receipts) if (receipt.id == receiptId) target = receipt;
-        ArrayList<ReceiptItem> items = receiptDao.getReceiptItems(receiptId);
-
-        TextView tvReceiptHeader = findViewById(R.id.tvReceiptHeader);
-        TextView tvReceiptSummary = findViewById(R.id.tvReceiptSummary);
-        long finalReceiptId = receiptId;
-        if (target != null) {
-            tvReceiptHeader.setText(getString(
-                    R.string.receipt_header,
-                    target.id,
-                    target.supplierName,
-                    getString(R.string.admin_price_currency, NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(target.totalAmount))
-            ));
-            StringBuilder summary = new StringBuilder();
-            summary.append(getString(R.string.receipt_summary_qty, target.totalQuantity));
-            if (target.note != null && !target.note.trim().isEmpty()) {
-                summary.append("\n").append(getString(R.string.receipt_summary_note, target.note.trim()));
-            }
-            tvReceiptSummary.setText(summary.toString());
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        tvReceiptHeader.setOnLongClickListener(v -> {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.delete)
-                    .setMessage(R.string.receipt_delete_confirm)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.delete, (dialog, which) -> {
-                        boolean ok = receiptDao.deleteReceipt(finalReceiptId);
-                        if (!ok) {
-                            Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        Toast.makeText(this, R.string.receipt_deleted, Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .show();
-            return true;
-        });
+        receiptId = getIntent().getLongExtra(EXTRA_RECEIPT_ID, -1);
+        receiptDao = new ReceiptDao(this);
 
-        RecyclerView rv = findViewById(R.id.rvReceiptItems);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        ReceiptLineAdapter adapter = new ReceiptLineAdapter();
+        if (receiptId == -1) {
+            Toast.makeText(this, R.string.receipt_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        findViewById(R.id.btnPrintReceipt).setOnClickListener(v ->
+                Toast.makeText(this, R.string.receipt_print_placeholder, Toast.LENGTH_SHORT).show()
+        );
+        ((MaterialButton) findViewById(R.id.btnDeleteReceipt)).setOnClickListener(v -> confirmDelete());
+
+        loadReceipt();
+    }
+
+    private void loadReceipt() {
+        Receipt receipt = receiptDao.getReceiptById(receiptId);
+        if (receipt == null) {
+            Toast.makeText(this, R.string.receipt_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        ArrayList<ReceiptItem> items = receiptDao.getReceiptItems(receiptId);
+        bindHeader(receipt);
+        bindItems(items);
+        bindSummary(receipt, items);
+    }
+
+    private void bindHeader(Receipt receipt) {
+        ((TextView) findViewById(R.id.tvReceiptCode)).setText(receipt.getDisplayCode());
+        ((TextView) findViewById(R.id.tvReceiptDate)).setText(ReceiptUiFormatter.formatDate(receipt.createdAt));
+        ((TextView) findViewById(R.id.tvReceiptSupplier)).setText(valueOrDash(receipt.supplierName));
+        ((TextView) findViewById(R.id.tvReceiptCreator)).setText(valueOrDash(receipt.creatorName));
+        ((TextView) findViewById(R.id.tvReceiptNote)).setText(getString(
+                R.string.receipt_note_value,
+                receipt.note == null || receipt.note.trim().isEmpty()
+                        ? getString(R.string.receipt_note_empty)
+                        : receipt.note.trim()
+        ));
+        ReceiptUiFormatter.applyStatusBadge((TextView) findViewById(R.id.tvReceiptStatus), receipt.status);
+    }
+
+    private void bindItems(ArrayList<ReceiptItem> items) {
+        RecyclerView rvReceiptItems = findViewById(R.id.rvReceiptItems);
+        rvReceiptItems.setLayoutManager(new LinearLayoutManager(this));
+        ReceiptLineAdapter adapter = new ReceiptLineAdapter(false, null);
         adapter.setData(items);
-        rv.setAdapter(adapter);
+        rvReceiptItems.setAdapter(adapter);
+        ((TextView) findViewById(R.id.tvItemsSummary)).setText(getString(R.string.receipt_items_count, items.size()));
+    }
+
+    private void bindSummary(Receipt receipt, ArrayList<ReceiptItem> items) {
+        int totalQuantity = 0;
+        int totalAmount = 0;
+        for (ReceiptItem item : items) {
+            totalQuantity += item.quantity;
+            totalAmount += item.amount;
+        }
+
+        ((TextView) findViewById(R.id.tvTotalQuantity)).setText(getString(R.string.receipt_quantity_value, totalQuantity));
+        ((TextView) findViewById(R.id.tvTotalAmount)).setText(ReceiptUiFormatter.formatCurrency(this, totalAmount > 0 ? totalAmount : receipt.totalAmount));
+    }
+
+    private void confirmDelete() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete)
+                .setMessage(R.string.receipt_delete_confirm)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.delete, (dialog, which) -> deleteReceipt())
+                .show();
+    }
+
+    private void deleteReceipt() {
+        boolean ok = receiptDao.deleteReceipt(receiptId);
+        if (!ok) {
+            Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, R.string.receipt_deleted, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private String valueOrDash(String value) {
+        return value == null || value.trim().isEmpty() ? "-" : value.trim();
     }
 
     @Override

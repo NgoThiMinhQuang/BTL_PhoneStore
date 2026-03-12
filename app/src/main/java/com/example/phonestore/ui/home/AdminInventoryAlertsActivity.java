@@ -14,18 +14,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
+import com.example.phonestore.data.dao.InventoryHistoryDao;
 import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.InventoryHistoryEntry;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
+    private static final String FILTER_ALL = "ALL";
+    private static final String FILTER_OUT = InventoryManagementItem.STATUS_OUT_OF_STOCK;
+    private static final String FILTER_LOW = InventoryManagementItem.STATUS_LOW_STOCK;
+    private static final int MINIMUM_STOCK = 5;
+
     private ProductDao productDao;
-    private ReceiptAdapter adapter;
-    private String currentFilter = "ALL";
+    private InventoryHistoryDao historyDao;
+    private InventoryManagementAdapter adapter;
+    private String currentFilter = FILTER_ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +46,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
             return;
         }
         productDao = new ProductDao(this);
+        historyDao = new InventoryHistoryDao(this);
     }
 
     @Override
@@ -80,7 +90,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
         RecyclerView rv = findViewById(R.id.rvInventoryList);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ReceiptAdapter(receipt -> {});
+        adapter = new InventoryManagementAdapter();
         rv.setAdapter(adapter);
 
         findViewById(R.id.btnPrimaryAction).setVisibility(View.GONE);
@@ -95,58 +105,84 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
     }
 
     private void loadData(String keyword) {
-        ArrayList<Product> products = productDao.layTatCa();
-        ArrayList<com.example.phonestore.data.model.Receipt> alertRows = new ArrayList<>();
+        ArrayList<Product> products = keyword == null || keyword.isEmpty() ? productDao.layTatCa() : productDao.timKiem(keyword);
+        HashMap<Long, int[]> totalsByProduct = buildHistoryTotals();
+        ArrayList<InventoryManagementItem> items = new ArrayList<>();
         int out = 0;
         int low = 0;
         for (Product product : products) {
-            if (product.tonKho == 0) out++;
-            if (product.tonKho > 0 && product.tonKho <= 5) low++;
-
-            String name = product.tenSanPham == null ? "" : product.tenSanPham.toLowerCase();
-            String brand = product.hang == null ? "" : product.hang.toLowerCase();
-            if (keyword != null && !keyword.isEmpty() && !name.contains(keyword.toLowerCase()) && !brand.contains(keyword.toLowerCase())) {
-                continue;
-            }
-            if (!"ALL".equals(currentFilter) && !"OUT".equals(currentFilter) && product.tonKho == 0) {
-                continue;
-            }
-            if (!"ALL".equals(currentFilter) && !"LOW".equals(currentFilter) && product.tonKho > 0 && product.tonKho <= 5) {
-                continue;
-            }
             if (product.tonKho == 0) {
-                com.example.phonestore.data.model.Receipt fake = new com.example.phonestore.data.model.Receipt();
-                fake.id = product.maSanPham;
-                fake.supplierName = product.tenSanPham;
-                fake.totalQuantity = product.tonKho;
-                fake.note = "Hết hàng • " + (product.hang == null ? "" : product.hang);
-                fake.totalAmount = 0;
-                alertRows.add(fake);
+                out++;
+            }
+            if (product.tonKho > 0 && product.tonKho <= MINIMUM_STOCK) {
+                low++;
+            }
+
+            String status = resolveStatus(product.tonKho);
+            if (!matchesFilter(status)) {
                 continue;
             }
-            if (product.tonKho <= 5) {
-                com.example.phonestore.data.model.Receipt fake = new com.example.phonestore.data.model.Receipt();
-                fake.id = product.maSanPham;
-                fake.supplierName = product.tenSanPham;
-                fake.totalQuantity = product.tonKho;
-                fake.note = "Sắp hết • " + (product.hang == null ? "" : product.hang);
-                fake.totalAmount = 0;
-                alertRows.add(fake);
+            if (InventoryManagementItem.STATUS_IN_STOCK.equals(status)) {
+                continue;
             }
+
+            int[] totals = totalsByProduct.get(product.maSanPham);
+            items.add(new InventoryManagementItem(
+                    product.maSanPham,
+                    normalizeName(product.tenSanPham),
+                    normalizeBrand(product.hang),
+                    Math.max(0, product.tonKho),
+                    MINIMUM_STOCK,
+                    totals == null ? 0 : totals[0],
+                    totals == null ? 0 : totals[1],
+                    status
+            ));
         }
-        adapter.setData(alertRows);
+        adapter.setData(items);
         View cardPrimary = findViewById(R.id.cardPrimaryKpi);
         View cardSecondary = findViewById(R.id.cardSecondaryKpi);
         ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(out));
         ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(low));
     }
 
+    private HashMap<Long, int[]> buildHistoryTotals() {
+        ArrayList<InventoryHistoryEntry> histories = historyDao.getAll();
+        HashMap<Long, int[]> totalsByProduct = new HashMap<>();
+        for (InventoryHistoryEntry entry : histories) {
+            int[] totals = totalsByProduct.get(entry.productId);
+            if (totals == null) {
+                totals = new int[]{0, 0};
+                totalsByProduct.put(entry.productId, totals);
+            }
+            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)) {
+                totals[0] += Math.max(0, entry.quantity);
+            } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
+                totals[1] += Math.max(0, entry.quantity);
+            }
+        }
+        return totalsByProduct;
+    }
+
+    private String resolveStatus(int stock) {
+        if (stock <= 0) {
+            return FILTER_OUT;
+        }
+        if (stock <= MINIMUM_STOCK) {
+            return FILTER_LOW;
+        }
+        return InventoryManagementItem.STATUS_IN_STOCK;
+    }
+
+    private boolean matchesFilter(String status) {
+        return FILTER_ALL.equals(currentFilter) || currentFilter.equals(status);
+    }
+
     private void setupFilters() {
         LinearLayout container = findViewById(R.id.layoutWarehouseFilters);
         container.removeAllViews();
-        addFilterChip(container, getString(R.string.filter_all), "ALL");
-        addFilterChip(container, getString(R.string.filter_out_of_stock), "OUT");
-        addFilterChip(container, getString(R.string.filter_low_stock), "LOW");
+        addFilterChip(container, getString(R.string.filter_all), FILTER_ALL);
+        addFilterChip(container, getString(R.string.filter_out_of_stock), FILTER_OUT);
+        addFilterChip(container, getString(R.string.filter_low_stock), FILTER_LOW);
     }
 
     private void addFilterChip(LinearLayout container, String label, String filter) {
@@ -161,5 +197,13 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
             loadData(edtSearch.getText().toString().trim());
         });
         container.addView(chip);
+    }
+
+    private String normalizeName(String name) {
+        return name == null || name.trim().isEmpty() ? getString(R.string.admin_product_unknown_name) : name.trim();
+    }
+
+    private String normalizeBrand(String brand) {
+        return brand == null || brand.trim().isEmpty() ? getString(R.string.admin_product_unknown_brand) : brand.trim();
     }
 }

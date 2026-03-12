@@ -1,42 +1,35 @@
 package com.example.phonestore.ui.home;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
-import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.dao.ReceiptDao;
-import com.example.phonestore.data.dao.SupplierDao;
 import com.example.phonestore.data.db.DBHelper;
-import com.example.phonestore.data.model.Product;
 import com.example.phonestore.data.model.Receipt;
-import com.example.phonestore.data.model.ReceiptItem;
-import com.example.phonestore.data.model.Supplier;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class AdminReceiptsActivity extends BaseHomeActivity {
 
+    private static final String FILTER_ALL = "ALL";
+    private static final String FILTER_DRAFT = Receipt.STATUS_DRAFT;
+    private static final String FILTER_COMPLETED = Receipt.STATUS_COMPLETED;
+
     private ReceiptDao receiptDao;
-    private SupplierDao supplierDao;
-    private ProductDao productDao;
     private ReceiptAdapter adapter;
-    private String currentFilter = "ALL";
+    private String currentFilter = FILTER_ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +41,11 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
             return;
         }
         receiptDao = new ReceiptDao(this);
-        supplierDao = new SupplierDao(this);
-        productDao = new ProductDao(this);
     }
 
     @Override
     protected int shellLayoutRes() {
-        return R.layout.activity_admin_inventory_list;
+        return R.layout.activity_admin_receipts;
     }
 
     @Override
@@ -84,90 +75,103 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
-        ((TextView) findViewById(R.id.tvScreenTitle)).setText(R.string.admin_receipts_title);
-        ((TextView) findViewById(R.id.tvScreenSummary)).setText(R.string.admin_receipts_summary);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_need_import);
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_suggested_qty);
-
-        RecyclerView rv = findViewById(R.id.rvInventoryList);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView rvReceipts = findViewById(R.id.rvReceipts);
+        rvReceipts.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ReceiptAdapter(receipt -> {
             Intent intent = new Intent(this, AdminReceiptDetailActivity.class);
             intent.putExtra(AdminReceiptDetailActivity.EXTRA_RECEIPT_ID, receipt.id);
             startActivity(intent);
         });
-        rv.setAdapter(adapter);
+        rvReceipts.setAdapter(adapter);
 
-        ((com.google.android.material.button.MaterialButton) findViewById(R.id.btnPrimaryAction)).setText(R.string.receipt_create);
-        findViewById(R.id.btnPrimaryAction).setOnClickListener(v -> startActivity(new Intent(this, AdminReceiptEditorActivity.class)));
+        findViewById(R.id.btnAddReceipt).setOnClickListener(v -> startActivity(new Intent(this, AdminReceiptEditorActivity.class)));
         setupFilters();
 
-        EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
+        EditText edtSearch = findViewById(R.id.edtReceiptSearch);
         edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { loadData(s.toString().trim()); }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                loadData(s.toString().trim());
+            }
         });
 
         loadData("");
     }
 
-    private void loadData(String keyword) {
-        ArrayList<Receipt> receipts = receiptDao.getRecentReceipts();
-        if (keyword != null && !keyword.isEmpty()) {
-            ArrayList<Receipt> filtered = new ArrayList<>();
-            String lower = keyword.toLowerCase();
-            for (Receipt receipt : receipts) {
-                String supplier = receipt.supplierName == null ? "" : receipt.supplierName.toLowerCase();
-                String note = receipt.note == null ? "" : receipt.note.toLowerCase();
-                if (supplier.contains(lower) || note.contains(lower) || String.valueOf(receipt.id).contains(lower)) {
-                    filtered.add(receipt);
-                }
-            }
-            receipts = filtered;
-        }
-        if (!"ALL".equals(currentFilter)) {
-            ArrayList<Receipt> filtered = new ArrayList<>();
-            for (int i = 0; i < receipts.size(); i++) {
-                Receipt receipt = receipts.get(i);
-                boolean hasNote = receipt.note != null && !receipt.note.trim().isEmpty();
-                if ("RECENT".equals(currentFilter) && i < 5) filtered.add(receipt);
-                if ("HAS_NOTE".equals(currentFilter) && hasNote) filtered.add(receipt);
-                if ("NO_NOTE".equals(currentFilter) && !hasNote) filtered.add(receipt);
-            }
-            receipts = filtered;
-        }
-        ArrayList<Product> products = productDao.layTatCa();
-        int lowStock = 0;
-        int suggested = 0;
-        for (Product product : products) {
-            if (product.tonKho <= 5) {
-                lowStock++;
-                suggested += product.tonKho == 0 ? 12 : 8;
-            }
-        }
-        adapter.setData(receipts);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(lowStock));
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(suggested));
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        if (receiptDao != null) loadData("");
+        if (receiptDao != null) {
+            EditText edtSearch = findViewById(R.id.edtReceiptSearch);
+            loadData(edtSearch == null ? "" : edtSearch.getText().toString().trim());
+        }
+    }
+
+    private void loadData(String keyword) {
+        ArrayList<Receipt> receipts = receiptDao.getRecentReceipts();
+        ArrayList<Receipt> filtered = new ArrayList<>();
+        String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase(Locale.ROOT);
+        int draftCount = 0;
+        int completedCount = 0;
+
+        for (Receipt receipt : receipts) {
+            if (receipt.isDraft()) {
+                draftCount++;
+            } else if (receipt.isCompleted()) {
+                completedCount++;
+            }
+
+            if (!matchesFilter(receipt)) {
+                continue;
+            }
+            if (!matchesKeyword(receipt, normalizedKeyword)) {
+                continue;
+            }
+            filtered.add(receipt);
+        }
+
+        adapter.setData(filtered);
+        ((TextView) findViewById(R.id.tvDraftCount)).setText(String.valueOf(draftCount));
+        ((TextView) findViewById(R.id.tvCompletedCount)).setText(String.valueOf(completedCount));
+        ((TextView) findViewById(R.id.tvReceiptListMeta)).setText(getString(R.string.receipt_results_count, filtered.size()));
+    }
+
+    private boolean matchesFilter(Receipt receipt) {
+        if (FILTER_ALL.equals(currentFilter)) {
+            return true;
+        }
+        return currentFilter.equals(receipt.status);
+    }
+
+    private boolean matchesKeyword(Receipt receipt, String keyword) {
+        if (keyword.isEmpty()) {
+            return true;
+        }
+
+        String code = receipt.getDisplayCode().toLowerCase(Locale.ROOT);
+        String supplier = safeLower(receipt.supplierName);
+        String note = safeLower(receipt.note);
+        return code.contains(keyword) || supplier.contains(keyword) || note.contains(keyword);
+    }
+
+    private String safeLower(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT);
     }
 
     private void setupFilters() {
-        LinearLayout container = findViewById(R.id.layoutWarehouseFilters);
+        LinearLayout container = findViewById(R.id.layoutReceiptFilters);
         container.removeAllViews();
-        addFilterChip(container, getString(R.string.filter_all), "ALL");
-        addFilterChip(container, getString(R.string.filter_recent_receipts), "RECENT");
-        addFilterChip(container, getString(R.string.filter_has_note), "HAS_NOTE");
-        addFilterChip(container, getString(R.string.filter_no_note), "NO_NOTE");
+        addFilterChip(container, getString(R.string.filter_all), FILTER_ALL);
+        addFilterChip(container, getString(R.string.receipt_status_draft), FILTER_DRAFT);
+        addFilterChip(container, getString(R.string.receipt_status_completed), FILTER_COMPLETED);
     }
 
     private void addFilterChip(LinearLayout container, String label, String filter) {
@@ -178,7 +182,7 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
         chip.setOnClickListener(v -> {
             currentFilter = filter;
             setupFilters();
-            EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
+            EditText edtSearch = findViewById(R.id.edtReceiptSearch);
             loadData(edtSearch.getText().toString().trim());
         });
         container.addView(chip);

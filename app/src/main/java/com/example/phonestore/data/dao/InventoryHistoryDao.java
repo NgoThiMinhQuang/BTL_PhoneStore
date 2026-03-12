@@ -45,6 +45,10 @@ public class InventoryHistoryDao {
         return getRecent(limit, null);
     }
 
+    public ArrayList<InventoryHistoryEntry> getAll() {
+        return getRecent(Integer.MAX_VALUE, null);
+    }
+
     public ArrayList<InventoryHistoryEntry> getRecent(int limit, String keyword) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<InventoryHistoryEntry> list = new ArrayList<>();

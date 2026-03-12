@@ -11,9 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Receipt;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
 
@@ -42,11 +40,20 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
-        Receipt r = data.get(position);
-        h.tvTitle.setText("Phiếu nhập #" + r.id + " • " + r.supplierName);
-        h.tvSub.setText("SL " + r.totalQuantity + (r.note == null || r.note.isEmpty() ? "" : " • " + r.note));
-        h.tvMeta.setText(NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(r.totalAmount) + "đ");
-        h.itemView.setOnClickListener(v -> listener.onClick(r));
+        Receipt receipt = data.get(position);
+        h.tvReceiptCode.setText(receipt.getDisplayCode());
+        h.tvReceiptDate.setText(ReceiptUiFormatter.formatDate(receipt.createdAt));
+        h.tvReceiptSupplier.setText(h.itemView.getContext().getString(R.string.receipt_supplier_name_value, valueOrDash(receipt.supplierName)));
+        h.tvReceiptCreator.setText(h.itemView.getContext().getString(R.string.receipt_creator_name_value, valueOrDash(receipt.creatorName)));
+        if (receipt.note == null || receipt.note.trim().isEmpty()) {
+            h.tvReceiptNote.setText(h.itemView.getContext().getString(R.string.receipt_note_value, h.itemView.getContext().getString(R.string.receipt_note_empty)));
+        } else {
+            h.tvReceiptNote.setText(h.itemView.getContext().getString(R.string.receipt_note_value, receipt.note.trim()));
+        }
+        h.tvReceiptQuantity.setText(h.itemView.getContext().getString(R.string.receipt_quantity_value, receipt.totalQuantity));
+        h.tvReceiptAmount.setText(ReceiptUiFormatter.formatCurrency(h.itemView.getContext(), receipt.totalAmount));
+        ReceiptUiFormatter.applyStatusBadge(h.tvReceiptStatus, receipt.status);
+        h.itemView.setOnClickListener(v -> listener.onClick(receipt));
     }
 
     @Override
@@ -54,13 +61,30 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
         return data.size();
     }
 
+    private String valueOrDash(String value) {
+        return value == null || value.trim().isEmpty() ? "-" : value.trim();
+    }
+
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvSub, tvMeta;
+        final TextView tvReceiptCode;
+        final TextView tvReceiptDate;
+        final TextView tvReceiptStatus;
+        final TextView tvReceiptSupplier;
+        final TextView tvReceiptCreator;
+        final TextView tvReceiptNote;
+        final TextView tvReceiptQuantity;
+        final TextView tvReceiptAmount;
+
         VH(@NonNull View itemView) {
             super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvSub = itemView.findViewById(R.id.tvSub);
-            tvMeta = itemView.findViewById(R.id.tvMeta);
+            tvReceiptCode = itemView.findViewById(R.id.tvReceiptCode);
+            tvReceiptDate = itemView.findViewById(R.id.tvReceiptDate);
+            tvReceiptStatus = itemView.findViewById(R.id.tvReceiptStatus);
+            tvReceiptSupplier = itemView.findViewById(R.id.tvReceiptSupplier);
+            tvReceiptCreator = itemView.findViewById(R.id.tvReceiptCreator);
+            tvReceiptNote = itemView.findViewById(R.id.tvReceiptNote);
+            tvReceiptQuantity = itemView.findViewById(R.id.tvReceiptQuantity);
+            tvReceiptAmount = itemView.findViewById(R.id.tvReceiptAmount);
         }
     }
 }
