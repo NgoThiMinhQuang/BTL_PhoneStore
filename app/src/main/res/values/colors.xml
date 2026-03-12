@@ -35,6 +35,11 @@
     <color name="admin_surface">#FFFFFF</color>
     <color name="admin_surface_soft">#FFF1F2</color>
     <color name="admin_stroke">#FFE4E6</color>
+    <color name="supplier_primary">#E11D48</color>
+    <color name="supplier_primary_dark">#BE123C</color>
+    <color name="supplier_background">#FFF6F8</color>
+    <color name="supplier_surface_soft">#FFF1F4</color>
+    <color name="supplier_stroke">#F5CCD7</color>
     <color name="admin_text_primary">#111827</color>
     <color name="admin_text_secondary">#6B7280</color>
     <color name="admin_warning">#D97706</color>

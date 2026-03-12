@@ -1,32 +1,38 @@
 package com.example.phonestore.ui.home;
 
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
+import com.example.phonestore.data.dao.ReceiptDao;
 import com.example.phonestore.data.dao.SupplierDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Supplier;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.util.ArrayList;
 
 public class AdminSuppliersActivity extends BaseHomeActivity {
 
     private SupplierDao supplierDao;
-    private com.example.phonestore.data.dao.ReceiptDao receiptDao;
+    private ReceiptDao receiptDao;
     private SupplierAdapter adapter;
-    private String currentBrandFilter = "ALL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +44,12 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
             return;
         }
         supplierDao = new SupplierDao(this);
-        receiptDao = new com.example.phonestore.data.dao.ReceiptDao(this);
+        receiptDao = new ReceiptDao(this);
     }
 
     @Override
     protected int shellLayoutRes() {
-        return R.layout.activity_admin_inventory_list;
+        return R.layout.activity_admin_suppliers;
     }
 
     @Override
@@ -73,59 +79,61 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
-        ((TextView) findViewById(R.id.tvScreenTitle)).setText(R.string.admin_suppliers_title);
-        ((TextView) findViewById(R.id.tvScreenSummary)).setText(R.string.admin_suppliers_summary);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_brand_count);
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_priority_import);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
+        if (toolbar.getNavigationIcon() != null) {
+            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rvInventoryList);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new SupplierAdapter(
-                this::showSupplierDialog,
-                this::confirmDeleteSupplier
-        );
-        rv.setAdapter(adapter);
+        RecyclerView rvSuppliers = findViewById(R.id.rvSuppliers);
+        rvSuppliers.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new SupplierAdapter(this::showSupplierDialog, this::confirmDeleteSupplier);
+        rvSuppliers.setAdapter(adapter);
 
-        findViewById(R.id.btnPrimaryAction).setOnClickListener(v -> showSupplierDialog(null));
-        ((com.google.android.material.button.MaterialButton) findViewById(R.id.btnPrimaryAction)).setText(R.string.add_supplier);
-        setupBrandFilters(null);
+        findViewById(R.id.btnAddSupplier).setOnClickListener(v -> showSupplierDialog(null));
 
-        EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
+        EditText edtSearch = findViewById(R.id.edtSupplierSearch);
         edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { loadData(s.toString().trim()); }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                loadData(s.toString().trim());
+            }
         });
 
         loadData("");
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (supplierDao != null) {
+            loadData(currentKeyword());
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
     private void loadData(String keyword) {
-        java.util.ArrayList<Supplier> suppliers = supplierDao.getAll(keyword);
-        if (!"ALL".equals(currentBrandFilter)) {
-            java.util.ArrayList<Supplier> filtered = new java.util.ArrayList<>();
-            for (Supplier supplier : suppliers) {
-                String brand = supplier.brand == null ? "" : supplier.brand.trim();
-                if (currentBrandFilter.equalsIgnoreCase(brand)) filtered.add(supplier);
-            }
-            suppliers = filtered;
-        }
-        int lowStockBrands = 0;
-        java.util.HashSet<String> brands = new java.util.HashSet<>();
-        for (Supplier supplier : suppliers) {
-            if (supplier.brand != null && !supplier.brand.trim().isEmpty()) {
-                brands.add(supplier.brand.trim());
-            }
-        }
-        lowStockBrands = brands.size();
+        ArrayList<Supplier> suppliers = supplierDao.getAll(keyword);
         adapter.setData(suppliers);
-        setupBrandFilters(suppliers);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(suppliers.size()));
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(lowStockBrands));
+    }
+
+    private String currentKeyword() {
+        EditText edtSearch = findViewById(R.id.edtSupplierSearch);
+        return edtSearch == null ? "" : edtSearch.getText().toString().trim();
     }
 
     private void confirmDeleteSupplier(Supplier supplier) {
@@ -144,47 +152,26 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
                         return;
                     }
                     Toast.makeText(this, R.string.supplier_deleted, Toast.LENGTH_SHORT).show();
-                    loadData("");
+                    loadData(currentKeyword());
                 })
                 .show();
     }
 
-    private void setupBrandFilters(java.util.ArrayList<Supplier> suppliers) {
-        LinearLayout container = findViewById(R.id.layoutWarehouseFilters);
-        container.removeAllViews();
-        addBrandChip(container, getString(R.string.filter_brand_all), "ALL");
-        java.util.LinkedHashSet<String> brands = new java.util.LinkedHashSet<>();
-        java.util.ArrayList<Supplier> source = suppliers == null ? supplierDao.getAll(null) : suppliers;
-        for (Supplier supplier : source) {
-            if (supplier.brand != null && !supplier.brand.trim().isEmpty()) brands.add(supplier.brand.trim());
-        }
-        for (String brand : brands) {
-            addBrandChip(container, brand, brand);
-        }
-    }
-
-    private void addBrandChip(LinearLayout container, String label, String value) {
-        TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, container, false);
-        chip.setText(label);
-        chip.setSelected(value.equals(currentBrandFilter));
-        chip.setTextColor(getColor(value.equals(currentBrandFilter) ? android.R.color.white : R.color.admin_text_secondary));
-        chip.setOnClickListener(v -> {
-            currentBrandFilter = value;
-            setupBrandFilters(null);
-            EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
-            loadData(edtSearch.getText().toString().trim());
-        });
-        container.addView(chip);
-    }
-
     private void showSupplierDialog(Supplier oldSupplier) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_supplier_form, null, false);
+        TextView tvTitle = view.findViewById(R.id.tvSupplierDialogTitle);
+        TextView tvSubtitle = view.findViewById(R.id.tvSupplierDialogSubtitle);
         EditText edtName = view.findViewById(R.id.edtSupplierName);
         EditText edtBrand = view.findViewById(R.id.edtSupplierBrand);
         EditText edtPhone = view.findViewById(R.id.edtSupplierPhone);
         EditText edtAddress = view.findViewById(R.id.edtSupplierAddress);
+        View btnCancel = view.findViewById(R.id.btnCancelSupplier);
+        View btnSave = view.findViewById(R.id.btnSaveSupplier);
 
         boolean editing = oldSupplier != null;
+        tvTitle.setText(editing ? R.string.supplier_form_edit_title : R.string.supplier_form_add_title);
+        tvSubtitle.setText(editing ? R.string.supplier_form_edit_subtitle : R.string.supplier_form_add_subtitle);
+
         if (editing) {
             edtName.setText(oldSupplier.name);
             edtBrand.setText(oldSupplier.brand);
@@ -192,19 +179,27 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
             edtAddress.setText(oldSupplier.address);
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(editing ? R.string.edit_supplier : R.string.add_supplier)
-                .setView(view)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.save, null)
-                .create();
-
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String name = edtName.getText().toString().trim();
-            if (name.isEmpty()) {
-                Toast.makeText(this, R.string.err_fullname_required, Toast.LENGTH_SHORT).show();
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setContentView(view);
+        dialog.setOnShowListener(d -> {
+            FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (bottomSheet == null) {
                 return;
             }
+            bottomSheet.setBackgroundColor(Color.TRANSPARENT);
+            BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+            behavior.setSkipCollapsed(true);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            String name = edtName.getText().toString().trim();
+            if (name.isEmpty()) {
+                Toast.makeText(this, R.string.err_supplier_name_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Supplier supplier = editing ? oldSupplier : new Supplier();
             supplier.name = name;
             supplier.brand = edtBrand.getText().toString().trim();
@@ -216,10 +211,11 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
                 Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
                 return;
             }
+
             Toast.makeText(this, editing ? R.string.supplier_updated : R.string.supplier_added, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
-            loadData("");
-        }));
+            loadData(currentKeyword());
+        });
         dialog.show();
     }
 }

@@ -2,14 +2,9 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +21,6 @@ import java.util.HashMap;
 
 public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
-    private static final String FILTER_ALL = "ALL";
     private static final String FILTER_OUT = InventoryManagementItem.STATUS_OUT_OF_STOCK;
     private static final String FILTER_LOW = InventoryManagementItem.STATUS_LOW_STOCK;
     private static final int MINIMUM_STOCK = 5;
@@ -34,7 +28,6 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
     private ProductDao productDao;
     private InventoryHistoryDao historyDao;
     private InventoryManagementAdapter adapter;
-    private String currentFilter = FILTER_ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +44,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     @Override
     protected int shellLayoutRes() {
-        return R.layout.activity_admin_inventory_list;
+        return R.layout.activity_admin_inventory_alerts;
     }
 
     @Override
@@ -81,49 +74,38 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
-        ((TextView) findViewById(R.id.tvScreenTitle)).setText(R.string.admin_alerts_title);
-        ((TextView) findViewById(R.id.tvScreenSummary)).setText(R.string.admin_alerts_summary);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_out_of_stock);
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_low_stock);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
+        if (toolbar.getNavigationIcon() != null) {
+            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rvInventoryList);
+        RecyclerView rv = findViewById(R.id.rvInventoryAlerts);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new InventoryManagementAdapter();
+        adapter = new InventoryManagementAdapter(item -> startActivity(new Intent(this, AdminReceiptEditorActivity.class)));
         rv.setAdapter(adapter);
 
-        findViewById(R.id.btnPrimaryAction).setVisibility(View.GONE);
-        setupFilters();
-        EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { loadData(s.toString().trim()); }
-        });
-        loadData("");
+        loadData();
     }
 
-    private void loadData(String keyword) {
-        ArrayList<Product> products = keyword == null || keyword.isEmpty() ? productDao.layTatCa() : productDao.timKiem(keyword);
+    private void loadData() {
+        ArrayList<Product> products = productDao.layTatCa();
         HashMap<Long, int[]> totalsByProduct = buildHistoryTotals();
         ArrayList<InventoryManagementItem> items = new ArrayList<>();
         int out = 0;
         int low = 0;
-        for (Product product : products) {
-            if (product.tonKho == 0) {
-                out++;
-            }
-            if (product.tonKho > 0 && product.tonKho <= MINIMUM_STOCK) {
-                low++;
-            }
 
+        for (Product product : products) {
             String status = resolveStatus(product.tonKho);
-            if (!matchesFilter(status)) {
-                continue;
-            }
             if (InventoryManagementItem.STATUS_IN_STOCK.equals(status)) {
                 continue;
+            }
+
+            if (FILTER_OUT.equals(status)) {
+                out++;
+            } else if (FILTER_LOW.equals(status)) {
+                low++;
             }
 
             int[] totals = totalsByProduct.get(product.maSanPham);
@@ -131,6 +113,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
                     product.maSanPham,
                     normalizeName(product.tenSanPham),
                     normalizeBrand(product.hang),
+                    product.tenAnh,
                     Math.max(0, product.tonKho),
                     MINIMUM_STOCK,
                     totals == null ? 0 : totals[0],
@@ -138,11 +121,14 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
                     status
             ));
         }
+
         adapter.setData(items);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(out));
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(low));
+        bindSummary(items.size(), out, low);
+    }
+
+    private void bindSummary(int totalAlerts, int outOfStockCount, int lowStockCount) {
+        TextView tvSummaryCount = findViewById(R.id.tvAlertSummaryCount);
+        tvSummaryCount.setText(getString(R.string.admin_alerts_summary_count, totalAlerts, outOfStockCount, lowStockCount));
     }
 
     private HashMap<Long, int[]> buildHistoryTotals() {
@@ -171,32 +157,6 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
             return FILTER_LOW;
         }
         return InventoryManagementItem.STATUS_IN_STOCK;
-    }
-
-    private boolean matchesFilter(String status) {
-        return FILTER_ALL.equals(currentFilter) || currentFilter.equals(status);
-    }
-
-    private void setupFilters() {
-        LinearLayout container = findViewById(R.id.layoutWarehouseFilters);
-        container.removeAllViews();
-        addFilterChip(container, getString(R.string.filter_all), FILTER_ALL);
-        addFilterChip(container, getString(R.string.filter_out_of_stock), FILTER_OUT);
-        addFilterChip(container, getString(R.string.filter_low_stock), FILTER_LOW);
-    }
-
-    private void addFilterChip(LinearLayout container, String label, String filter) {
-        TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, container, false);
-        chip.setText(label);
-        chip.setSelected(filter.equals(currentFilter));
-        chip.setTextColor(getColor(filter.equals(currentFilter) ? android.R.color.white : R.color.admin_text_secondary));
-        chip.setOnClickListener(v -> {
-            currentFilter = filter;
-            setupFilters();
-            EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
-            loadData(edtSearch.getText().toString().trim());
-        });
-        container.addView(chip);
     }
 
     private String normalizeName(String name) {

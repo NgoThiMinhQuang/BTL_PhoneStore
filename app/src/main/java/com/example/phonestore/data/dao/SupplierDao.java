@@ -26,9 +26,12 @@ public class SupplierDao {
             String k = "%" + keyword.trim() + "%";
             c = db.rawQuery(
                     "SELECT * FROM " + DBHelper.TBL_SUPPLIERS +
-                            " WHERE " + DBHelper.COL_S_NAME + " LIKE ? OR " + DBHelper.COL_S_BRAND + " LIKE ?" +
+                            " WHERE " + DBHelper.COL_S_NAME + " LIKE ?" +
+                            " OR " + DBHelper.COL_S_BRAND + " LIKE ?" +
+                            " OR " + DBHelper.COL_S_PHONE + " LIKE ?" +
+                            " OR " + DBHelper.COL_S_ADDRESS + " LIKE ?" +
                             " ORDER BY " + DBHelper.COL_ID + " DESC",
-                    new String[]{k, k}
+                    new String[]{k, k, k, k}
             );
         } else {
             c = db.rawQuery(

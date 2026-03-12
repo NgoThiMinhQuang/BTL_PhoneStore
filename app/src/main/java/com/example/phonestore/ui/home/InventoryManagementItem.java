@@ -9,6 +9,7 @@ public class InventoryManagementItem {
     final long productId;
     final String productName;
     final String brand;
+    final String imageName;
     final int currentStock;
     final int minimumStock;
     final int totalImport;
@@ -18,6 +19,7 @@ public class InventoryManagementItem {
     InventoryManagementItem(long productId,
                             String productName,
                             String brand,
+                            String imageName,
                             int currentStock,
                             int minimumStock,
                             int totalImport,
@@ -26,10 +28,22 @@ public class InventoryManagementItem {
         this.productId = productId;
         this.productName = productName;
         this.brand = brand;
+        this.imageName = imageName;
         this.currentStock = currentStock;
         this.minimumStock = minimumStock;
         this.totalImport = totalImport;
         this.totalExport = totalExport;
         this.status = status;
+    }
+
+    InventoryManagementItem(long productId,
+                            String productName,
+                            String brand,
+                            int currentStock,
+                            int minimumStock,
+                            int totalImport,
+                            int totalExport,
+                            String status) {
+        this(productId, productName, brand, null, currentStock, minimumStock, totalImport, totalExport, status);
     }
 }
