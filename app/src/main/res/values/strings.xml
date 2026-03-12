@@ -316,4 +316,15 @@
     <string name="filter_brand_all">Tất cả hãng</string>
     <string name="inventory_overview_receipts">Phiếu nhập gần đây: %1$d</string>
     <string name="inventory_overview_history">Biến động kho: %1$d dòng</string>
+    <string name="order_products_summary">%1$d sản phẩm</string>
+    <string name="order_status_current">Trạng thái hiện tại: %1$s</string>
+    <string name="order_status_update_summary">Chọn trạng thái mới và cập nhật trực tiếp trên màn hình chi tiết đơn hàng.</string>
+    <string name="order_status_timeline_title">Lộ trình trạng thái</string>
+    <string name="order_status_timeline_summary">Sau khi tải hoặc cập nhật, màn hình sẽ tự cuộn đến đúng mục trạng thái tương ứng để dễ theo dõi hơn.</string>
+    <string name="order_status_processing">Đang xử lý</string>
+    <string name="order_status_pending_desc">Đơn hàng vừa được tạo và đang chờ quản trị viên xác nhận.</string>
+    <string name="order_status_paid_desc">Đơn hàng đã được ghi nhận thanh toán và sẵn sàng chuyển sang bước xử lý.</string>
+    <string name="order_status_processing_desc">Đơn hàng đang được chuẩn bị, kiểm tra hoặc đóng gói trước khi giao.</string>
+    <string name="order_status_delivered_desc">Đơn hàng đã được giao thành công cho khách hàng.</string>
+    <string name="order_status_cancelled_desc">Đơn hàng đã bị hủy và không tiếp tục xử lý.</string>
 </resources>

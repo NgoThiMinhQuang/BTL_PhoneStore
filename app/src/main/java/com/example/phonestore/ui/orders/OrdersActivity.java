@@ -57,27 +57,10 @@ public class OrdersActivity extends AppCompatActivity {
         RecyclerView rv = findViewById(R.id.rvOrders);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new OrdersAdapter(new OrdersAdapter.Listener() {
-            @Override
-            public void onClick(Order order) {
-                Intent i = new Intent(OrdersActivity.this, OrderDetailActivity.class);
-                i.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.id);
-                startActivity(i);
-            }
-
-            @Override
-            public void onUpdateStatus(Order order, String newStatus) {
-                if (!adminMode) return;
-
-                boolean ok = orderDao.updateStatus(order.id, newStatus);
-                if (!ok) {
-                    Toast.makeText(OrdersActivity.this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Toast.makeText(OrdersActivity.this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
-                loadOrders();
-            }
+        adapter = new OrdersAdapter(order -> {
+            Intent i = new Intent(OrdersActivity.this, OrderDetailActivity.class);
+            i.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.id);
+            startActivity(i);
         });
 
         rv.setAdapter(adapter);

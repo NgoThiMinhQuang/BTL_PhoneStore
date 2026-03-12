@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -85,24 +84,10 @@ public class AdminOrdersActivity extends BaseHomeActivity {
         RecyclerView rvOrders = findViewById(R.id.rvOrders);
         if (rvOrders.getAdapter() == null) {
             rvOrders.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new OrdersAdapter(new OrdersAdapter.Listener() {
-                @Override
-                public void onClick(Order order) {
-                    Intent intent = new Intent(AdminOrdersActivity.this, OrderDetailActivity.class);
-                    intent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.id);
-                    startActivity(intent);
-                }
-
-                @Override
-                public void onUpdateStatus(Order order, String newStatus) {
-                    boolean ok = orderDao.updateStatus(order.id, newStatus);
-                    if (!ok) {
-                        Toast.makeText(AdminOrdersActivity.this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(AdminOrdersActivity.this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
-                    loadOrders();
-                }
+            adapter = new OrdersAdapter(order -> {
+                Intent intent = new Intent(AdminOrdersActivity.this, OrderDetailActivity.class);
+                intent.putExtra(OrderDetailActivity.EXTRA_ORDER_ID, order.id);
+                startActivity(intent);
             });
             rvOrders.setAdapter(adapter);
         }

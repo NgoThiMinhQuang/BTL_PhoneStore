@@ -1,6 +1,5 @@
 package com.example.phonestore.ui.orders;
 
-import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Order;
-import com.example.phonestore.data.model.OrderStatus;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -22,17 +20,8 @@ import java.util.Locale;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
 
-    private static final String[] ADMIN_STATUSES = new String[]{
-            OrderStatus.STATUS_CHO_XAC_NHAN,
-            OrderStatus.STATUS_DA_THANH_TOAN,
-            OrderStatus.STATUS_DANG_XU_LY,
-            OrderStatus.STATUS_DA_GIAO,
-            OrderStatus.STATUS_DA_HUY
-    };
-
     public interface Listener {
         void onClick(Order order);
-        void onUpdateStatus(Order order, String newStatus);
     }
 
     private final ArrayList<Order> data = new ArrayList<>();
@@ -76,33 +65,13 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
 
         h.itemView.setOnClickListener(v -> listener.onClick(o));
 
-        h.btnUpdateStatus.setVisibility(adminMode ? View.VISIBLE : View.GONE);
-        h.btnUpdateStatus.setOnClickListener(v -> hienThiHopThoaiCapNhatTrangThai(v.getContext(), o));
+        h.btnUpdateStatus.setVisibility(View.GONE);
+        h.btnUpdateStatus.setOnClickListener(null);
     }
 
     @Override
     public int getItemCount() {
         return data.size();
-    }
-
-    private void hienThiHopThoaiCapNhatTrangThai(android.content.Context context, Order order) {
-        int checked = 0;
-        for (int i = 0; i < ADMIN_STATUSES.length; i++) {
-            if (ADMIN_STATUSES[i].equals(order.trangThai)) {
-                checked = i;
-                break;
-            }
-        }
-
-        new AlertDialog.Builder(context)
-                .setTitle(R.string.update_status)
-                .setSingleChoiceItems(ADMIN_STATUSES, checked, (dialog, which) -> {
-                    String selected = ADMIN_STATUSES[which];
-                    dialog.dismiss();
-                    listener.onUpdateStatus(order, selected);
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
     }
 
     private String dinhDangTrangThai(String status) {
