@@ -30,9 +30,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
@@ -45,8 +43,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             OrderStatus.STATUS_DA_GIAO,
             OrderStatus.STATUS_DA_HUY
     };
-
-    private final Map<String, MaterialCardView> statusSectionMap = new LinkedHashMap<>();
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
@@ -68,7 +64,6 @@ public class OrderDetailActivity extends AppCompatActivity {
     private Spinner spinnerStatus;
     private MaterialButton btnUpdateStatus;
     private View cardStatusUpdate;
-    private Runnable clearHighlightRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +90,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         bindViews();
         setupRecyclerView();
         setupStatusSpinner();
-        bindStatusSections();
 
         if (!adminMode) {
             cardStatusUpdate.setVisibility(View.GONE);
@@ -146,15 +140,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         spinnerStatus.setAdapter(spinnerAdapter);
     }
 
-    private void bindStatusSections() {
-        statusSectionMap.put(OrderStatus.STATUS_CHO_XAC_NHAN, findViewById(R.id.cardStatusPending));
-        statusSectionMap.put(OrderStatus.STATUS_DA_THANH_TOAN, findViewById(R.id.cardStatusPaid));
-        statusSectionMap.put(OrderStatus.STATUS_DANG_XU_LY, findViewById(R.id.cardStatusProcessing));
-        statusSectionMap.put(OrderStatus.STATUS_DA_GIAO, findViewById(R.id.cardStatusDelivered));
-        statusSectionMap.put(OrderStatus.STATUS_DA_HUY, findViewById(R.id.cardStatusCancelled));
-        clearStatusHighlights();
-    }
-
     private void loadOrder(boolean shouldScrollToStatus) {
         Order order = orderDao.getOrderById(orderId);
         if (order == null) {
@@ -168,7 +153,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         bindOrder(order, items);
 
         if (shouldScrollToStatus) {
-            scrollToStatusSection(order.trangThai);
+            scrollToStatusSection();
         }
     }
 
@@ -224,53 +209,8 @@ public class OrderDetailActivity extends AppCompatActivity {
         spinnerStatus.setSelection(0, false);
     }
 
-    private void scrollToStatusSection(String status) {
-        MaterialCardView targetCard = statusSectionMap.get(status);
-        if (targetCard == null) {
-            clearStatusHighlights();
-            return;
-        }
-
-        scrollViewOrderDetail.post(() -> {
-            highlightStatusSection(status);
-            int targetY = Math.max(0, targetCard.getTop() - dp(12));
-            scrollViewOrderDetail.smoothScrollTo(0, targetY);
-        });
-    }
-
-    private void highlightStatusSection(String status) {
-        clearStatusHighlights();
-
-        MaterialCardView highlightedCard = statusSectionMap.get(status);
-        if (highlightedCard == null) {
-            return;
-        }
-
-        applyStatusCardStyle(highlightedCard, status, true);
-
-        if (clearHighlightRunnable != null) {
-            scrollViewOrderDetail.removeCallbacks(clearHighlightRunnable);
-        }
-
-        clearHighlightRunnable = this::clearStatusHighlights;
-        scrollViewOrderDetail.postDelayed(clearHighlightRunnable, 1600L);
-    }
-
-    private void clearStatusHighlights() {
-        if (clearHighlightRunnable != null) {
-            scrollViewOrderDetail.removeCallbacks(clearHighlightRunnable);
-            clearHighlightRunnable = null;
-        }
-
-        for (Map.Entry<String, MaterialCardView> entry : statusSectionMap.entrySet()) {
-            applyStatusCardStyle(entry.getValue(), entry.getKey(), false);
-        }
-    }
-
-    private void applyStatusCardStyle(MaterialCardView card, String status, boolean highlighted) {
-        card.setCardBackgroundColor(ContextCompat.getColor(this, getStatusBackgroundColor(status)));
-        card.setStrokeColor(ContextCompat.getColor(this, highlighted ? getStatusAccentColor(status) : R.color.admin_stroke));
-        card.setStrokeWidth(dp(highlighted ? 2 : 1));
+    private void scrollToStatusSection() {
+        scrollViewOrderDetail.post(() -> scrollViewOrderDetail.smoothScrollTo(0, cardStatusUpdate.getTop()));
     }
 
     private void updateStatusBadge(String status) {
