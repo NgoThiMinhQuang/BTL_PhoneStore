@@ -71,4 +71,12 @@
     <color name="admin_dashboard_purple_soft">#F1E9FF</color>
     <color name="admin_dashboard_red">#EF4444</color>
     <color name="admin_dashboard_red_soft">#FEECEC</color>
+    <color name="order_detail_background">#F4F4F8</color>
+    <color name="order_detail_toolbar">#2F66E8</color>
+    <color name="order_detail_toolbar_dark">#2557CF</color>
+    <color name="order_detail_border">#E4E4EA</color>
+    <color name="order_detail_status_bg">#8B5CF6</color>
+    <color name="order_detail_status_text">#FFFFFF</color>
+    <color name="order_detail_total">#2F66E8</color>
+    <color name="order_detail_hint">#7A7D85</color>
 </resources>
