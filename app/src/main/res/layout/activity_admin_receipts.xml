@@ -191,16 +191,5 @@
             android:paddingBottom="16dp" />
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/admin_surface"
-        android:elevation="8dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        app:itemBackground="@drawable/bottom_nav_item_background_admin"
-        app:itemIconTint="@drawable/bottom_nav_item_admin"
-        app:itemTextColor="@drawable/bottom_nav_item_admin"
-        app:labelVisibilityMode="labeled" />
+    <include layout="@layout/view_admin_bottom_bar" />
 </LinearLayout>

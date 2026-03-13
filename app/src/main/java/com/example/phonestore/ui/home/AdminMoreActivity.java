@@ -63,6 +63,5 @@ public class AdminMoreActivity extends BaseHomeActivity {
 
         findViewById(R.id.btnOpenCustomers).setOnClickListener(v -> startActivity(new Intent(this, AdminCustomersActivity.class)));
         findViewById(R.id.btnOpenReports).setOnClickListener(v -> startActivity(new Intent(this, AdminReportsActivity.class)));
-        findViewById(R.id.btnAdminLogout).setOnClickListener(v -> showLogoutConfirmDialog());
     }
 }

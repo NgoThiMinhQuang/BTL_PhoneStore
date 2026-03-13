@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/admin_dashboard_background"
+    android:background="@color/admin_inventory_screen_bg"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -22,52 +22,60 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="-18dp"
         android:orientation="vertical"
         android:paddingStart="16dp"
+        android:paddingTop="18dp"
         android:paddingEnd="16dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/admin_dashboard_orange_soft"
+            app:cardBackgroundColor="@color/admin_inventory_alert_card"
             app:cardCornerRadius="30dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/admin_dashboard_orange"
-            app:strokeWidth="1dp">
+            app:cardElevation="0dp"
+            app:strokeColor="@color/admin_inventory_alert_card"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="22dp">
 
                 <TextView
-                    android:id="@+id/tvAlertSummaryTitle"
-                    android:layout_width="match_parent"
+                    android:id="@+id/tvAlertIcon"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/admin_alerts_summary_title"
-                    android:textColor="@color/admin_text_primary"
-                    android:textSize="21sp"
+                    android:text="⚠"
+                    android:textColor="@android:color/white"
+                    android:textSize="28sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvAlertSummaryMessage"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/admin_alerts_summary"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textSize="13sp" />
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvAlertSummaryCount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:textColor="@color/admin_dashboard_orange"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvAlertSummaryTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/admin_alerts_summary_title"
+                        android:textColor="@android:color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAlertSummaryCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -75,22 +83,11 @@
             android:id="@+id/rvInventoryAlerts"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="16dp"
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingBottom="16dp" />
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/admin_surface"
-        android:elevation="8dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        app:itemBackground="@drawable/bottom_nav_item_background_admin"
-        app:itemIconTint="@drawable/bottom_nav_item_admin"
-        app:itemTextColor="@drawable/bottom_nav_item_admin"
-        app:labelVisibilityMode="labeled" />
+    <include layout="@layout/view_admin_bottom_bar" />
 </LinearLayout>

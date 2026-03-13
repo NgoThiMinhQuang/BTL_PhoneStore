@@ -10,4 +10,6 @@ public class InventoryHistoryEntry {
     public long referenceId;
     public String note;
     public long createdAt;
+    public int stockAfter;
+    public String actorName;
 }

@@ -76,6 +76,10 @@
     <color name="admin_dashboard_purple_soft">#F1E9FF</color>
     <color name="admin_dashboard_red">#EF4444</color>
     <color name="admin_dashboard_red_soft">#FEECEC</color>
+    <color name="admin_inventory_alert_card">#FF7A0D</color>
+    <color name="admin_inventory_alert_border">#EB9907</color>
+    <color name="admin_inventory_panel_bg">#F3E9BE</color>
+    <color name="admin_inventory_screen_bg">#EFF0F1</color>
     <color name="order_detail_background">#F4F4F8</color>
     <color name="order_detail_toolbar">#2F66E8</color>
     <color name="order_detail_toolbar_dark">#2557CF</color>

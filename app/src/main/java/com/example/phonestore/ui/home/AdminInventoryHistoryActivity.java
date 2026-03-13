@@ -2,30 +2,34 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.InventoryHistoryDao;
+import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.InventoryHistoryEntry;
+import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AdminInventoryHistoryActivity extends BaseHomeActivity {
 
+    private static final String FILTER_ALL = "ALL";
+
     private InventoryHistoryDao historyDao;
+    private ProductDao productDao;
     private InventoryHistoryAdapter adapter;
-    private String currentFilter = "ALL";
+    private Spinner spProduct;
+    private Spinner spType;
+    private ArrayList<Product> products = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +41,12 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
             return;
         }
         historyDao = new InventoryHistoryDao(this);
+        productDao = new ProductDao(this);
     }
 
     @Override
     protected int shellLayoutRes() {
-        return R.layout.activity_admin_inventory_list;
+        return R.layout.activity_admin_inventory_history;
     }
 
     @Override
@@ -71,66 +76,98 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
-        ((TextView) findViewById(R.id.tvScreenTitle)).setText(R.string.admin_history_title);
-        ((TextView) findViewById(R.id.tvScreenSummary)).setText(R.string.admin_history_summary);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_best_seller);
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_kpi_tracked_lines);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
+        if (toolbar.getNavigationIcon() != null) {
+            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
+        }
+        toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rvInventoryList);
+        spProduct = findViewById(R.id.spHistoryProduct);
+        spType = findViewById(R.id.spHistoryType);
+
+        RecyclerView rv = findViewById(R.id.rvInventoryHistory);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InventoryHistoryAdapter();
         rv.setAdapter(adapter);
 
-        findViewById(R.id.btnPrimaryAction).setVisibility(View.GONE);
         setupFilters();
-        EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { loadData(s.toString().trim()); }
-        });
-        loadData("");
-    }
-
-    private void loadData(String keyword) {
-        ArrayList<InventoryHistoryEntry> list = historyDao.getRecent(20, keyword);
-        if (!"ALL".equals(currentFilter)) {
-            ArrayList<InventoryHistoryEntry> filtered = new ArrayList<>();
-            for (InventoryHistoryEntry entry : list) {
-                if (currentFilter.equals(entry.actionType)) filtered.add(entry);
-            }
-            list = filtered;
-        }
-        adapter.setData(list);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        int importCount = 0;
-        for (InventoryHistoryEntry e : list) if (InventoryHistoryDao.ACTION_IMPORT.equals(e.actionType)) importCount++;
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(importCount));
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(list.size()));
+        loadData();
     }
 
     private void setupFilters() {
-        LinearLayout container = findViewById(R.id.layoutWarehouseFilters);
-        container.removeAllViews();
-        addFilterChip(container, getString(R.string.filter_all), "ALL");
-        addFilterChip(container, getString(R.string.filter_import), InventoryHistoryDao.ACTION_IMPORT);
-        addFilterChip(container, getString(R.string.filter_export), InventoryHistoryDao.ACTION_EXPORT);
+        products = productDao.layTatCa();
+
+        ArrayList<String> productLabels = new ArrayList<>();
+        productLabels.add(getString(R.string.inventory_history_all_products));
+        for (Product product : products) {
+            productLabels.add(product.tenSanPham);
+        }
+
+        ArrayList<String> typeLabels = new ArrayList<>();
+        typeLabels.add(getString(R.string.inventory_history_all_types));
+        typeLabels.add(getString(R.string.inventory_history_import));
+        typeLabels.add(getString(R.string.inventory_history_export));
+
+        spProduct.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, productLabels));
+        spType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, typeLabels));
+
+        spProduct.setOnItemSelectedListener(new SimpleItemSelectedListener(this::loadData));
+        spType.setOnItemSelectedListener(new SimpleItemSelectedListener(this::loadData));
     }
 
-    private void addFilterChip(LinearLayout container, String label, String filter) {
-        TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, container, false);
-        chip.setText(label);
-        chip.setSelected(filter.equals(currentFilter));
-        chip.setTextColor(getColor(filter.equals(currentFilter) ? android.R.color.white : R.color.admin_text_secondary));
-        chip.setOnClickListener(v -> {
-            currentFilter = filter;
-            setupFilters();
-            EditText edtSearch = findViewById(R.id.edtWarehouseSearch);
-            loadData(edtSearch.getText().toString().trim());
-        });
-        container.addView(chip);
+    private void loadData() {
+        ArrayList<InventoryHistoryEntry> list = historyDao.getAll();
+        enrichStockAfter(list);
+
+        ArrayList<InventoryHistoryEntry> filtered = new ArrayList<>();
+        long selectedProductId = getSelectedProductId();
+        String selectedType = getSelectedType();
+
+        for (InventoryHistoryEntry entry : list) {
+            if (selectedProductId != -1 && entry.productId != selectedProductId) {
+                continue;
+            }
+            if (!FILTER_ALL.equals(selectedType) && !selectedType.equals(entry.actionType)) {
+                continue;
+            }
+            filtered.add(entry);
+        }
+
+        adapter.setData(filtered);
+    }
+
+    private void enrichStockAfter(ArrayList<InventoryHistoryEntry> list) {
+        HashMap<Long, Integer> runningStock = new HashMap<>();
+        for (int i = list.size() - 1; i >= 0; i--) {
+            InventoryHistoryEntry entry = list.get(i);
+            int current = runningStock.containsKey(entry.productId) ? runningStock.get(entry.productId) : 0;
+            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)) {
+                current += Math.max(0, entry.quantity);
+            } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
+                current = Math.max(0, current - Math.max(0, entry.quantity));
+            }
+            entry.stockAfter = current;
+            runningStock.put(entry.productId, current);
+        }
+    }
+
+    private long getSelectedProductId() {
+        int position = spProduct == null ? 0 : spProduct.getSelectedItemPosition();
+        if (position <= 0 || position > products.size()) {
+            return -1;
+        }
+        return products.get(position - 1).maSanPham;
+    }
+
+    private String getSelectedType() {
+        int position = spType == null ? 0 : spType.getSelectedItemPosition();
+        if (position == 1) {
+            return InventoryHistoryDao.ACTION_IMPORT;
+        }
+        if (position == 2) {
+            return InventoryHistoryDao.ACTION_EXPORT;
+        }
+        return FILTER_ALL;
     }
 }

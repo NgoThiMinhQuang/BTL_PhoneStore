@@ -23,7 +23,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     private static final String FILTER_OUT = InventoryManagementItem.STATUS_OUT_OF_STOCK;
     private static final String FILTER_LOW = InventoryManagementItem.STATUS_LOW_STOCK;
-    private static final int MINIMUM_STOCK = 5;
+    private static final int MINIMUM_STOCK = 20;
 
     private ProductDao productDao;
     private InventoryHistoryDao historyDao;
@@ -128,7 +128,8 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     private void bindSummary(int totalAlerts, int outOfStockCount, int lowStockCount) {
         TextView tvSummaryCount = findViewById(R.id.tvAlertSummaryCount);
-        tvSummaryCount.setText(getString(R.string.admin_alerts_summary_count, totalAlerts, outOfStockCount, lowStockCount));
+        int highlightedCount = lowStockCount > 0 ? lowStockCount : totalAlerts;
+        tvSummaryCount.setText(getString(R.string.admin_alerts_summary_count, highlightedCount));
     }
 
     private HashMap<Long, int[]> buildHistoryTotals() {

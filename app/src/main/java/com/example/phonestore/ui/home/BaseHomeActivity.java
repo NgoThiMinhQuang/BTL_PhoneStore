@@ -88,16 +88,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         toolbar.setTitle(screenTitle());
         setSupportActionBar(toolbar);
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
-        if (bottomNav != null) {
-            bottomNav.getMenu().clear();
-            bottomNav.inflateMenu(bottomMenuRes());
-            bottomNav.setOnItemSelectedListener(item -> handleBottomNavigation(item.getItemId()));
-            bottomNav.setOnItemReselectedListener(item -> {
-                // no-op
-            });
-            bottomNav.setSelectedItemId(selectedBottomNavItemId());
-        }
+        setupBottomNavigation();
 
         if (shouldSetupHomeInteractions()) {
             setupHomeBrandClicks();
@@ -175,6 +166,35 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         LayoutInflater.from(this).inflate(contentLayout, container, true);
     }
 
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        if (bottomNav != null) {
+            bottomNav.getMenu().clear();
+            bottomNav.inflateMenu(bottomMenuRes());
+            bottomNav.setOnItemSelectedListener(item -> handleBottomNavigation(item.getItemId()));
+            bottomNav.setOnItemReselectedListener(item -> {
+                // no-op
+            });
+            bottomNav.setSelectedItemId(selectedBottomNavItemId());
+            return;
+        }
+
+        int[] adminTabIds = new int[]{
+                R.id.nav_home,
+                R.id.nav_orders_admin,
+                R.id.nav_products,
+                R.id.nav_admin_inventory,
+                R.id.nav_admin_customers,
+                R.id.nav_admin_more
+        };
+        for (int tabId : adminTabIds) {
+            View tab = findViewById(tabId);
+            if (tab == null) continue;
+            tab.setSelected(tabId == selectedBottomNavItemId());
+            tab.setOnClickListener(v -> handleBottomNavigation(v.getId()));
+        }
+    }
+
     private boolean handleBottomNavigation(int id) {
         if (id == selectedBottomNavItemId()) {
             return true;
@@ -223,8 +243,13 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.nav_admin_customers) {
+            openBottomTab(new Intent(this, AdminCustomersActivity.class));
+            return true;
+        }
+
         if (id == R.id.nav_admin_more) {
-            openBottomTab(new Intent(this, AdminMoreActivity.class));
+            openBottomTab(new Intent(this, AdminReportsActivity.class));
             return true;
         }
 

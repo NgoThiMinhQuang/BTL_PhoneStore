@@ -53,24 +53,37 @@ public class InventoryHistoryDao {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<InventoryHistoryEntry> list = new ArrayList<>();
         Cursor c;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String k = "%" + keyword.trim() + "%";
-            c = db.rawQuery(
-                    "SELECT * FROM " + DBHelper.TBL_INVENTORY_HISTORY +
-                            " WHERE " + DBHelper.COL_H_PRODUCT_NAME + " LIKE ? OR IFNULL(" + DBHelper.COL_H_NOTE + ",'') LIKE ?" +
-                            " ORDER BY " + DBHelper.COL_ID + " DESC LIMIT " + limit,
-                    new String[]{k, k}
-            );
-        } else {
-            c = db.rawQuery(
-                    "SELECT * FROM " + DBHelper.TBL_INVENTORY_HISTORY +
-                            " ORDER BY " + DBHelper.COL_ID + " DESC LIMIT " + limit,
-                    null
-            );
-        }
+        String query = buildQuery(keyword, limit);
+        String[] args = buildArgs(keyword);
+        c = db.rawQuery(query, args);
         while (c.moveToNext()) list.add(read(c));
         c.close();
         return list;
+    }
+
+    private String buildQuery(String keyword, int limit) {
+        String base = "SELECT h.*, CASE" +
+                " WHEN h." + DBHelper.COL_H_REF_TYPE + "='RECEIPT' THEN IFNULL(r." + DBHelper.COL_R_CREATED_BY + ",'Admin')" +
+                " WHEN h." + DBHelper.COL_H_REF_TYPE + "='ORDER' THEN 'System'" +
+                " ELSE 'System' END AS actor_name" +
+                " FROM " + DBHelper.TBL_INVENTORY_HISTORY + " h" +
+                " LEFT JOIN " + DBHelper.TBL_RECEIPTS + " r ON h." + DBHelper.COL_H_REF_TYPE + "='RECEIPT' AND r." + DBHelper.COL_ID + " = h." + DBHelper.COL_H_REF_ID;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return base +
+                    " WHERE h." + DBHelper.COL_H_PRODUCT_NAME + " LIKE ? OR IFNULL(h." + DBHelper.COL_H_NOTE + ",'') LIKE ?" +
+                    " ORDER BY h." + DBHelper.COL_ID + " DESC LIMIT " + limit;
+        }
+
+        return base + " ORDER BY h." + DBHelper.COL_ID + " DESC LIMIT " + limit;
+    }
+
+    private String[] buildArgs(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return null;
+        }
+        String k = "%" + keyword.trim() + "%";
+        return new String[]{k, k};
     }
 
     private InventoryHistoryEntry read(Cursor c) {
@@ -84,6 +97,10 @@ public class InventoryHistoryDao {
         e.referenceId = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_H_REF_ID));
         e.note = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_H_NOTE));
         e.createdAt = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_H_CREATED));
+        int actorIndex = c.getColumnIndex("actor_name");
+        if (actorIndex >= 0) {
+            e.actorName = c.getString(actorIndex);
+        }
         return e;
     }
 }
