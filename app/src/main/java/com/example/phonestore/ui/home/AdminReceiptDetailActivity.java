@@ -31,6 +31,12 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_receipt_detail);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setContentInsetsRelative(0, 0);
+        toolbar.setContentInsetsAbsolute(0, 0);
+        toolbar.setTitleMarginStart(0);
+        toolbar.setTitleMarginEnd(0);
+        toolbar.setTitleMarginTop(0);
+        toolbar.setTitleMarginBottom(0);
         toolbar.setTitle(R.string.receipt_detail_title);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {

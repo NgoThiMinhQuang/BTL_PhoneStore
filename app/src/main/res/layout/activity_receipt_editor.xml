@@ -10,8 +10,15 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="88dp"
         android:background="@drawable/bg_toolbar_admin"
+        android:elevation="0dp"
+        android:gravity="center_vertical"
+        android:minHeight="88dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        app:contentInsetStartWithNavigation="0dp"
+        app:titleMargin="0dp"
         app:titleTextColor="@android:color/white" />
 
     <ScrollView

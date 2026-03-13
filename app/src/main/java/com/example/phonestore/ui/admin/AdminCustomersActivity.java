@@ -55,6 +55,12 @@ public class AdminCustomersActivity extends AppCompatActivity {
         userDao = new UserDao(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setContentInsetsRelative(0, 0);
+        toolbar.setContentInsetsAbsolute(0, 0);
+        toolbar.setTitleMarginStart(0);
+        toolbar.setTitleMarginEnd(0);
+        toolbar.setTitleMarginTop(0);
+        toolbar.setTitleMarginBottom(0);
         toolbar.setTitle(R.string.admin_customers_title);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
