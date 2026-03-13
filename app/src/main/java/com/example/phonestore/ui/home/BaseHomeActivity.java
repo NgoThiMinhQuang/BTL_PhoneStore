@@ -1,6 +1,7 @@
 package com.example.phonestore.ui.home;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -72,6 +73,14 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         return true;
     }
 
+    protected boolean shouldShowBackButton() {
+        return false;
+    }
+
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return false;
+    }
+
     protected void onShellReady() {
         // subclasses may override
     }
@@ -85,8 +94,19 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         inflateContentLayoutIfNeeded();
 
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setContentInsetsRelative(0, 0);
+        toolbar.setContentInsetsAbsolute(0, 0);
         toolbar.setTitle(screenTitle());
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(shouldShowBackButton());
+            if (shouldUseAdminBackButtonStyling()) {
+                Drawable upArrow = toolbar.getNavigationIcon();
+                if (upArrow != null) {
+                    upArrow.setTint(getColor(android.R.color.white));
+                }
+            }
+        }
 
         setupBottomNavigation();
 
@@ -114,6 +134,11 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+
         if (id == R.id.nav_profile) {
             startActivity(new Intent(this, ProfileActivity.class));
             return true;
@@ -125,6 +150,15 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (shouldShowBackButton()) {
+            finish();
+            return true;
+        }
+        return super.onSupportNavigateUp();
     }
 
     @Override

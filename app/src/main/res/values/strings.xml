@@ -8,7 +8,7 @@
     <string name="admin_reports">Báo cáo</string>
 
     <string name="admin_products_title">Quản lý sản phẩm</string>
-    <string name="admin_customers_title">Khách hàng</string>
+    <string name="admin_customers_title">Quản lý khách hàng</string>
     <string name="admin_reports_title">Báo cáo</string>
 
     <string name="search_products_hint">Tìm theo tên máy / hãng...</string>
@@ -137,9 +137,10 @@
     <string name="admin_dashboard">Dashboard</string>
     <string name="admin_orders">Đơn hàng</string>
     <string name="admin_products">Sản phẩm</string>
-    <string name="admin_inventory">Kho</string>
+    <string name="admin_inventory">Quản lý kho</string>
     <string name="admin_more">Báo cáo</string>
     <string name="admin_inventory_title">Quản lý kho</string>
+    <string name="admin_inventory_overview_title">Quản lý kho</string>
     <string name="admin_more_title">Tiện ích quản trị</string>
     <string name="admin_dashboard_greeting">Tổng quan hoạt động cửa hàng</string>
     <string name="admin_dashboard_subtitle">Theo dõi nhanh số liệu chính, tồn kho và thao tác cần ưu tiên trong ngày.</string>
@@ -192,19 +193,19 @@
     <string name="admin_product_updated_success">Cập nhật sản phẩm thành công</string>
     <string name="admin_stock_remaining">Còn %1$d sản phẩm</string>
     <string name="admin_inventory_overview">Quản lý kho</string>
-    <string name="admin_inventory_receipts">Phiếu nhập</string>
-    <string name="admin_inventory_suppliers">Nhà cung cấp</string>
-    <string name="admin_inventory_alerts">Cảnh báo kho</string>
-    <string name="admin_inventory_history">Lịch sử xuất nhập</string>
+    <string name="admin_inventory_receipts">Quản lý phiếu nhập</string>
+    <string name="admin_inventory_suppliers">Quản lý nhà cung cấp</string>
+    <string name="admin_inventory_alerts">Quản lý cảnh báo kho</string>
+    <string name="admin_inventory_history">Quản lý lịch sử kho</string>
     <string name="admin_inventory_nav_summary">Mở nhanh các màn quản lý kho, phiếu nhập, nhà cung cấp và lịch sử biến động để xử lý tồn kho tập trung hơn.</string>
     <string name="admin_open_receipts">Mở phiếu nhập</string>
     <string name="admin_open_suppliers">Mở nhà cung cấp</string>
     <string name="admin_open_alerts">Mở cảnh báo</string>
     <string name="admin_open_history">Mở lịch sử</string>
-    <string name="admin_receipts_title">Phiếu nhập</string>
-    <string name="admin_suppliers_title">Nhà cung cấp</string>
-    <string name="admin_alerts_title">Cảnh báo kho</string>
-    <string name="admin_history_title">Lịch sử kho</string>
+    <string name="admin_receipts_title">Quản lý phiếu nhập</string>
+    <string name="admin_suppliers_title">Quản lý nhà cung cấp</string>
+    <string name="admin_alerts_title">Quản lý cảnh báo kho</string>
+    <string name="admin_history_title">Quản lý lịch sử kho</string>
     <string name="admin_stub_message">Màn hình này đang ở giai đoạn khởi tạo giao diện và sẽ được bổ sung nghiệp vụ chi tiết tiếp theo.</string>
     <string name="admin_receipts_summary">Theo dõi các đợt nhập hàng gần đây và ưu tiên những mặt hàng đang cần bổ sung tồn kho.</string>
     <string name="admin_suppliers_summary">Theo dõi danh sách nhà cung cấp, tìm kiếm nhanh và cập nhật đối tác theo giao diện mới trực quan hơn.</string>
@@ -300,6 +301,7 @@
     <string name="inventory_history_order_code">ORD%1$03d</string>
     <string name="inventory_history_unknown_code">---</string>
     <string name="inventory_history_qty">Số lượng: %1$d</string>
+    <string name="inventory_history_results_count">Hiển thị %1$d biến động kho</string>
     <string name="receipt_create_title">Tạo phiếu nhập</string>
     <string name="receipt_detail_title">Chi tiết phiếu nhập</string>
     <string name="receipt_add_line">Thêm dòng sản phẩm</string>

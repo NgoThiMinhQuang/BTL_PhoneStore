@@ -2,9 +2,6 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
-
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -73,14 +70,17 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
     }
 
     @Override
-    protected void onShellReady() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
-        if (toolbar.getNavigationIcon() != null) {
-            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
-        }
-        toolbar.setNavigationOnClickListener(v -> finish());
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
 
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
+    protected void onShellReady() {
         RecyclerView rv = findViewById(R.id.rvInventoryAlerts);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InventoryManagementAdapter(item -> startActivity(new Intent(this, AdminReceiptEditorActivity.class)));
@@ -93,19 +93,11 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
         ArrayList<Product> products = productDao.layTatCa();
         HashMap<Long, int[]> totalsByProduct = buildHistoryTotals();
         ArrayList<InventoryManagementItem> items = new ArrayList<>();
-        int out = 0;
-        int low = 0;
 
         for (Product product : products) {
             String status = resolveStatus(product.tonKho);
             if (InventoryManagementItem.STATUS_IN_STOCK.equals(status)) {
                 continue;
-            }
-
-            if (FILTER_OUT.equals(status)) {
-                out++;
-            } else if (FILTER_LOW.equals(status)) {
-                low++;
             }
 
             int[] totals = totalsByProduct.get(product.maSanPham);
@@ -123,13 +115,6 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
         }
 
         adapter.setData(items);
-        bindSummary(items.size(), out, low);
-    }
-
-    private void bindSummary(int totalAlerts, int outOfStockCount, int lowStockCount) {
-        TextView tvSummaryCount = findViewById(R.id.tvAlertSummaryCount);
-        int highlightedCount = lowStockCount > 0 ? lowStockCount : totalAlerts;
-        tvSummaryCount.setText(getString(R.string.admin_alerts_summary_count, highlightedCount));
     }
 
     private HashMap<Long, int[]> buildHistoryTotals() {

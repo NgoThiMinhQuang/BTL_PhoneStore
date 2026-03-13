@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -78,14 +77,17 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
     }
 
     @Override
-    protected void onShellReady() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
-        if (toolbar.getNavigationIcon() != null) {
-            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
-        }
-        toolbar.setNavigationOnClickListener(v -> finish());
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
 
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
+    protected void onShellReady() {
         RecyclerView rvSuppliers = findViewById(R.id.rvSuppliers);
         rvSuppliers.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SupplierAdapter(this::showSupplierDialog, this::confirmDeleteSupplier);
@@ -118,12 +120,6 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
         if (supplierDao != null) {
             loadData(currentKeyword());
         }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
     }
 
     private void loadData(String keyword) {

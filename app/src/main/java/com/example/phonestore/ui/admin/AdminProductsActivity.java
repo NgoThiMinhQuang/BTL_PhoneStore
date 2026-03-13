@@ -71,6 +71,16 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -292,8 +302,4 @@ public class AdminProductsActivity extends BaseHomeActivity {
         }
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        return false;
-    }
 }

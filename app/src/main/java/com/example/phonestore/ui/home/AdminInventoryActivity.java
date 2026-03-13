@@ -42,12 +42,22 @@ public class AdminInventoryActivity extends BaseHomeActivity {
 
     @Override
     protected String screenTitle() {
-        return getString(R.string.admin_inventory);
+        return getString(R.string.admin_inventory_title);
     }
 
     @Override
     protected boolean shouldShowToolbarActions() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
     }
 
     @Override

@@ -74,6 +74,16 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
     protected void onShellReady() {
         RecyclerView rvReceipts = findViewById(R.id.rvReceipts);
         rvReceipts.setLayoutManager(new LinearLayoutManager(this));
@@ -119,16 +129,8 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
         ArrayList<Receipt> receipts = receiptDao.getRecentReceipts();
         ArrayList<Receipt> filtered = new ArrayList<>();
         String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase(Locale.ROOT);
-        int draftCount = 0;
-        int completedCount = 0;
 
         for (Receipt receipt : receipts) {
-            if (receipt.isDraft()) {
-                draftCount++;
-            } else if (receipt.isCompleted()) {
-                completedCount++;
-            }
-
             if (!matchesFilter(receipt)) {
                 continue;
             }
@@ -139,9 +141,6 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
         }
 
         adapter.setData(filtered);
-        ((TextView) findViewById(R.id.tvDraftCount)).setText(String.valueOf(draftCount));
-        ((TextView) findViewById(R.id.tvCompletedCount)).setText(String.valueOf(completedCount));
-        ((TextView) findViewById(R.id.tvReceiptListMeta)).setText(getString(R.string.receipt_results_count, filtered.size()));
     }
 
     private boolean matchesFilter(Receipt receipt) {

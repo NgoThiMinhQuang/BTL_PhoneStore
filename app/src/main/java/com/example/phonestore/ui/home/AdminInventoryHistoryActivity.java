@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -75,14 +73,17 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
     }
 
     @Override
-    protected void onShellReady() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material);
-        if (toolbar.getNavigationIcon() != null) {
-            toolbar.getNavigationIcon().setTint(getColor(android.R.color.white));
-        }
-        toolbar.setNavigationOnClickListener(v -> finish());
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
 
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
+    protected void onShellReady() {
         spProduct = findViewById(R.id.spHistoryProduct);
         spType = findViewById(R.id.spHistoryType);
 

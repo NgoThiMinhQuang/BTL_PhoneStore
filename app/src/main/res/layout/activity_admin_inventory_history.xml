@@ -10,7 +10,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="92dp"
+        android:layout_height="88dp"
         android:background="@drawable/bg_toolbar_admin"
         android:elevation="0dp"
         android:paddingStart="4dp"

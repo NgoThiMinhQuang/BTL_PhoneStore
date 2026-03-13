@@ -74,7 +74,7 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
 
     @Override
     protected String screenTitle() {
-        return getString(R.string.admin_inventory_title);
+        return getString(R.string.admin_inventory_overview_title);
     }
 
     @Override
@@ -83,14 +83,17 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
     }
 
     @Override
-    protected void onShellReady() {
-        ((TextView) findViewById(R.id.tvScreenTitle)).setText(R.string.admin_inventory_title);
-        ((TextView) findViewById(R.id.tvScreenSummary)).setText(R.string.admin_inventory_management_summary);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_inventory_total_products);
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_total_units);
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
 
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
+    protected void onShellReady() {
         RecyclerView rv = findViewById(R.id.rvInventoryList);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InventoryManagementAdapter();
@@ -116,7 +119,6 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
                 : productDao.timKiem(keyword);
         HashMap<Long, int[]> totalsByProduct = buildHistoryTotals();
         ArrayList<InventoryManagementItem> items = new ArrayList<>();
-        int totalUnits = 0;
 
         for (Product product : products) {
             int[] totals = totalsByProduct.get(product.maSanPham);
@@ -127,7 +129,6 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
             if (!matchesFilter(status)) {
                 continue;
             }
-            totalUnits += currentStock;
             items.add(new InventoryManagementItem(
                     product.maSanPham,
                     normalizeName(product.tenSanPham),
@@ -141,10 +142,6 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
         }
 
         adapter.setData(items);
-        View cardPrimary = findViewById(R.id.cardPrimaryKpi);
-        View cardSecondary = findViewById(R.id.cardSecondaryKpi);
-        ((TextView) cardPrimary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(items.size()));
-        ((TextView) cardSecondary.findViewById(R.id.tvKpiValue)).setText(String.valueOf(totalUnits));
     }
 
     private HashMap<Long, int[]> buildHistoryTotals() {

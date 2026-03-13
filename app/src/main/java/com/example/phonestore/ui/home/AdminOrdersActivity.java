@@ -73,6 +73,16 @@ public class AdminOrdersActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
     protected void onShellReady() {
         View cardOrdersCount = findViewById(R.id.cardOrdersCount);
         View cardOrdersPending = findViewById(R.id.cardOrdersPending);
