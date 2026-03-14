@@ -216,6 +216,7 @@ public class AdminReportsActivity extends AppCompatActivity {
 
     private String formatStatus(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
+        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
         if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);

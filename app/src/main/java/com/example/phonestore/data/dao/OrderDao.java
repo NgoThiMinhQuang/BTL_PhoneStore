@@ -97,7 +97,7 @@ public class OrderDao {
             o.put(DBHelper.COL_O_CREATED, System.currentTimeMillis());
 
             String status = CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod)
-                    ? OrderStatus.STATUS_DA_THANH_TOAN
+                    ? OrderStatus.STATUS_CHO_THANH_TOAN
                     : OrderStatus.STATUS_CHO_XAC_NHAN;
             o.put(DBHelper.COL_O_STATUS, status);
 
@@ -484,6 +484,9 @@ public class OrderDao {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(currentStatus)) {
             allowed.add(OrderStatus.STATUS_DANG_XU_LY);
             allowed.add(OrderStatus.STATUS_DA_HUY);
+        } else if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(currentStatus)) {
+            allowed.add(OrderStatus.STATUS_DA_THANH_TOAN);
+            allowed.add(OrderStatus.STATUS_DA_HUY);
         } else if (OrderStatus.STATUS_DA_THANH_TOAN.equals(currentStatus)) {
             allowed.add(OrderStatus.STATUS_DANG_XU_LY);
             allowed.add(OrderStatus.STATUS_DA_HUY);
@@ -507,6 +510,7 @@ public class OrderDao {
 
     private boolean isValidStatus(String status) {
         return OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)
+                || OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)
                 || OrderStatus.STATUS_DA_THANH_TOAN.equals(status)
                 || OrderStatus.STATUS_DANG_XU_LY.equals(status)
                 || OrderStatus.STATUS_DA_GIAO.equals(status)

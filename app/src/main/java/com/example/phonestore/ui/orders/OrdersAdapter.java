@@ -1,5 +1,6 @@
 package com.example.phonestore.ui.orders;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         h.tvTitle.setText(adminMode && o.username != null
                 ? h.itemView.getContext().getString(R.string.admin_order_code_with_user, o.id, o.username)
                 : h.itemView.getContext().getString(R.string.admin_order_code, o.id));
-        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_date_status, date, dinhDangTrangThai(o.trangThai)));
+        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_date_status, date, dinhDangTrangThai(h.itemView.getContext(), o.trangThai)));
         h.tvTotal.setText(total);
 
         h.itemView.setOnClickListener(v -> listener.onClick(o));
@@ -74,8 +75,26 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         return data.size();
     }
 
-    private String dinhDangTrangThai(String status) {
+    private String dinhDangTrangThai(Context context, String status) {
         if (status == null || status.trim().isEmpty()) return "-";
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) {
+            return context.getString(R.string.order_status_pending);
+        }
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.order_status_waiting_payment);
+        }
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.order_status_paid);
+        }
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_DANG_XU_LY.equals(status)) {
+            return context.getString(R.string.order_status_processing);
+        }
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_GIAO.equals(status)) {
+            return context.getString(R.string.order_status_delivered);
+        }
+        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_HUY.equals(status)) {
+            return context.getString(R.string.order_status_cancelled);
+        }
         return status.replace('_', ' ');
     }
 

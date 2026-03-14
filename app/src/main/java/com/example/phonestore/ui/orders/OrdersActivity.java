@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 public class OrdersActivity extends AppCompatActivity {
 
-    public static final String EXTRA_ADMIN_MODE = "extra_admin_mode";
     public static final String EXTRA_SHOW_CHECKOUT_SUCCESS = "extra_show_checkout_success";
     public static final String EXTRA_CREATED_ORDER_ID = "extra_created_order_id";
 
@@ -45,7 +44,7 @@ public class OrdersActivity extends AppCompatActivity {
         }
 
         orderDao = new OrderDao(this);
-        adminMode = resolveAdminMode(getIntent());
+        adminMode = resolveAdminMode();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,11 +68,8 @@ public class OrdersActivity extends AppCompatActivity {
         showCheckoutSuccessIfNeeded(getIntent());
     }
 
-    private boolean resolveAdminMode(Intent intent) {
-        return intent != null && intent.getBooleanExtra(
-                EXTRA_ADMIN_MODE,
-                DBHelper.ROLE_ADMIN.equals(session.getRole())
-        );
+    private boolean resolveAdminMode() {
+        return DBHelper.ROLE_ADMIN.equals(session.getRole());
     }
 
     private void updateToolbarTitle() {
@@ -114,7 +110,7 @@ public class OrdersActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
 
-        adminMode = resolveAdminMode(intent);
+        adminMode = resolveAdminMode();
         updateToolbarTitle();
         loadOrders();
         showCheckoutSuccessIfNeeded(intent);

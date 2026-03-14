@@ -128,7 +128,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     .setTitle(R.string.bank_transfer)
                     .setMessage(R.string.bank_transfer_confirm)
                     .setNegativeButton(R.string.abort, null)
-                    .setPositiveButton(R.string.success, (dialog, which) -> createOrder(info))
+                    .setPositiveButton(R.string.bank_transfer_create_order, (dialog, which) -> createOrder(info))
                     .show();
         } else {
             createOrder(info);

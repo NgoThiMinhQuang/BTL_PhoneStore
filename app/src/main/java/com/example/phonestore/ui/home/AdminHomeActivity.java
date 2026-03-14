@@ -16,6 +16,7 @@ import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Order;
+import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.admin.AdminProductsActivity;
 import com.example.phonestore.ui.admin.AdminReportsActivity;
@@ -282,6 +283,12 @@ public class AdminHomeActivity extends BaseHomeActivity {
     }
 
     private String formatStatus(String status) {
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
+        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
+        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
+        if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);
+        if (OrderStatus.STATUS_DA_HUY.equals(status)) return getString(R.string.order_status_cancelled);
         if (status == null) return "";
         return status.replace('_', ' ');
     }

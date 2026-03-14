@@ -22,6 +22,9 @@ import java.util.ArrayList;
 
 public class AdminOrdersActivity extends BaseHomeActivity {
 
+    private static final String FILTER_PENDING = "PENDING";
+    private static final String FILTER_PROCESSING = "PROCESSING";
+
     private OrderDao orderDao;
     private OrdersAdapter adapter;
     private String currentFilter;
@@ -103,12 +106,12 @@ public class AdminOrdersActivity extends BaseHomeActivity {
         }
 
         if (currentFilter == null) {
-            currentFilter = OrderStatus.STATUS_CHO_XAC_NHAN;
+            currentFilter = FILTER_PENDING;
         }
 
         bindChip(findViewById(R.id.chipAllOrders), null);
-        bindChip(findViewById(R.id.chipPendingOrders), OrderStatus.STATUS_CHO_XAC_NHAN);
-        bindChip(findViewById(R.id.chipProcessingOrders), "PROCESSING");
+        bindChip(findViewById(R.id.chipPendingOrders), FILTER_PENDING);
+        bindChip(findViewById(R.id.chipProcessingOrders), FILTER_PROCESSING);
         bindChip(findViewById(R.id.chipCompletedOrders), OrderStatus.STATUS_DA_GIAO);
         bindChip(findViewById(R.id.chipCancelledOrders), OrderStatus.STATUS_DA_HUY);
 
@@ -132,8 +135,8 @@ public class AdminOrdersActivity extends BaseHomeActivity {
 
     private void updateChipStates() {
         updateChip(findViewById(R.id.chipAllOrders), currentFilter == null);
-        updateChip(findViewById(R.id.chipPendingOrders), OrderStatus.STATUS_CHO_XAC_NHAN.equals(currentFilter));
-        updateChip(findViewById(R.id.chipProcessingOrders), "PROCESSING".equals(currentFilter));
+        updateChip(findViewById(R.id.chipPendingOrders), FILTER_PENDING.equals(currentFilter));
+        updateChip(findViewById(R.id.chipProcessingOrders), FILTER_PROCESSING.equals(currentFilter));
         updateChip(findViewById(R.id.chipCompletedOrders), OrderStatus.STATUS_DA_GIAO.equals(currentFilter));
         updateChip(findViewById(R.id.chipCancelledOrders), OrderStatus.STATUS_DA_HUY.equals(currentFilter));
     }
@@ -151,7 +154,8 @@ public class AdminOrdersActivity extends BaseHomeActivity {
         int pendingCount = 0;
 
         for (Order order : allOrders) {
-            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai)) {
+            if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThai)
+                    || OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai)) {
                 pendingCount++;
             }
             if (matchesFilter(order)) {
@@ -166,9 +170,13 @@ public class AdminOrdersActivity extends BaseHomeActivity {
 
     private boolean matchesFilter(Order order) {
         if (currentFilter == null) return true;
-        if ("PROCESSING".equals(currentFilter)) {
-            return OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThai)
-                    || OrderStatus.STATUS_DA_THANH_TOAN.equals(order.trangThai);
+        if (FILTER_PENDING.equals(currentFilter)) {
+            return OrderStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThai)
+                    || OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai);
+        }
+        if (FILTER_PROCESSING.equals(currentFilter)) {
+            return OrderStatus.STATUS_DA_THANH_TOAN.equals(order.trangThai)
+                    || OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThai);
         }
         return currentFilter.equals(order.trangThai);
     }

@@ -101,7 +101,8 @@
     <string name="checkout_required_fields">Vui lòng nhập đủ Người nhận / SĐT / Địa chỉ</string>
     <string name="invalid_phone">Số điện thoại không hợp lệ</string>
     <string name="bank_transfer">Chuyển khoản</string>
-    <string name="bank_transfer_confirm">Giả lập thanh toán chuyển khoản THÀNH CÔNG?</string>
+    <string name="bank_transfer_confirm">Tạo đơn hàng chuyển khoản và chờ xác nhận thanh toán?</string>
+    <string name="bank_transfer_create_order">Tạo đơn hàng</string>
     <string name="abort">Huỷ</string>
     <string name="success">Thành công</string>
     <string name="checkout_failed">Thanh toán thất bại (giỏ rỗng / không đủ tồn kho)</string>
@@ -135,6 +136,7 @@
     <string name="order_bank_transfer_full">Chuyển khoản ngân hàng</string>
     <string name="order_price_currency">%1$s đ</string>
     <string name="order_status_pending">Chờ xác nhận</string>
+    <string name="order_status_waiting_payment">Chờ thanh toán</string>
     <string name="order_status_paid">Đã thanh toán</string>
     <string name="order_status_shipping">Đang giao</string>
     <string name="order_status_delivered">Đã giao</string>
@@ -143,6 +145,7 @@
     <string name="orders_title_customer">Đơn hàng của tôi</string>
     <string name="order_status_update_failed">Cập nhật trạng thái thất bại</string>
     <string name="order_status_updated">Đã cập nhật trạng thái đơn hàng</string>
+    <string name="order_access_denied">Bạn không có quyền xem đơn hàng này</string>
     <string name="checkout_success_with_order_id">Đặt hàng thành công. Mã đơn #%1$d</string>
     <string name="login_required_fields">Vui lòng nhập đầy đủ tài khoản và mật khẩu</string>
     <string name="login_invalid_credentials">Sai tài khoản hoặc mật khẩu</string>
@@ -247,6 +250,7 @@
     <string name="admin_kpi_secondary_label">Chỉ số phụ</string>
     <string name="admin_orders_count">Số đơn</string>
     <string name="admin_orders_pending">Chờ xử lý</string>
+    <string name="admin_orders_pending_filter">Chờ xử lý</string>
     <string name="admin_customers_count">Tổng khách hàng</string>
     <string name="admin_customers_search_results">Kết quả lọc</string>
     <string name="admin_customer_username">@%1$s</string>
@@ -421,6 +425,7 @@
     <string name="order_status_timeline_summary">Sau khi tải hoặc cập nhật, màn hình sẽ tự cuộn đến đúng mục trạng thái tương ứng để dễ theo dõi hơn.</string>
     <string name="order_status_processing">Đang xử lý</string>
     <string name="order_status_pending_desc">Đơn hàng vừa được tạo và đang chờ quản trị viên xác nhận.</string>
+    <string name="order_status_waiting_payment_desc">Đơn hàng chuyển khoản đã được tạo và đang chờ đối soát thanh toán.</string>
     <string name="order_status_paid_desc">Đơn hàng đã được ghi nhận thanh toán và sẵn sàng chuyển sang bước xử lý.</string>
     <string name="order_status_processing_desc">Đơn hàng đang được chuẩn bị, kiểm tra hoặc đóng gói trước khi giao.</string>
     <string name="order_status_delivered_desc">Đơn hàng đã được giao thành công cho khách hàng.</string>

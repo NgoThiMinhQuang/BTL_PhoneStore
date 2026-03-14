@@ -41,6 +41,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
+    private SessionManager session;
     private long orderId;
     private boolean adminMode;
 
@@ -79,8 +80,9 @@ public class OrderDetailActivity extends AppCompatActivity {
             return;
         }
 
+        session = new SessionManager(this);
         orderDao = new OrderDao(this);
-        adminMode = DBHelper.ROLE_ADMIN.equals(new SessionManager(this).getRole());
+        adminMode = DBHelper.ROLE_ADMIN.equals(session.getRole());
 
         bindViews();
         setupRecyclerView();
@@ -132,6 +134,12 @@ public class OrderDetailActivity extends AppCompatActivity {
         Order order = orderDao.getOrderById(orderId);
         if (order == null) {
             Toast.makeText(this, R.string.order_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        if (!adminMode && order.userId != session.getUserId()) {
+            Toast.makeText(this, R.string.order_access_denied, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -234,6 +242,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private int getStatusBackgroundColor(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
+        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return R.color.admin_dashboard_blue_soft;
         if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return R.color.admin_surface_soft;
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_surface_soft;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
@@ -243,6 +252,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private int getStatusAccentColor(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
+        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return R.color.admin_dashboard_blue;
         if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return R.color.admin_primary;
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_primary;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
@@ -282,6 +292,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private String formatStatus(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
+        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
         if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);

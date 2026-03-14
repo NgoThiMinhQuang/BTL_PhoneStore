@@ -64,7 +64,7 @@
                     android:gravity="center"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:text="Chờ xác nhận"
+                    android:text="@string/admin_orders_pending_filter"
                     android:textColor="@color/admin_text_secondary"
                     android:textStyle="bold" />
 
