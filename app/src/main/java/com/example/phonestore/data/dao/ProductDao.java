@@ -19,74 +19,50 @@ public class ProductDao {
     }
 
     public ArrayList<Product> layTatCa() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        ArrayList<Product> list = new ArrayList<>();
+        return queryProducts(DBHelper.COL_IS_ACTIVE + "=1", null);
+    }
 
-        Cursor c = db.rawQuery(
-                "SELECT * FROM " + DBHelper.TBL_PRODUCTS + " ORDER BY " + DBHelper.COL_ID + " DESC",
-                null
-        );
-        while (c.moveToNext()) list.add(docSanPham(c));
-        c.close();
-        return list;
+    public ArrayList<Product> layTatCaChoAdmin() {
+        return queryProducts(null, null);
     }
 
     public ArrayList<Product> layTheoHang(String hang) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        ArrayList<Product> list = new ArrayList<>();
-        Cursor c = db.rawQuery(
-                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
-                        " WHERE " + DBHelper.COL_P_BRAND + "=? ORDER BY " + DBHelper.COL_ID + " DESC",
-                new String[]{hang}
-        );
-        while (c.moveToNext()) list.add(docSanPham(c));
-        c.close();
-        return list;
+        return queryProducts(DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_BRAND + "=?", new String[]{hang});
     }
 
     public ArrayList<Product> timKiem(String tuKhoa) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        ArrayList<Product> list = new ArrayList<>();
         String k = "%" + tuKhoa + "%";
-        Cursor c = db.rawQuery(
-                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
-                        " WHERE " + DBHelper.COL_P_NAME + " LIKE ? OR " + DBHelper.COL_P_BRAND + " LIKE ?" +
-                        " ORDER BY " + DBHelper.COL_ID + " DESC",
-                new String[]{k, k}
-        );
-        while (c.moveToNext()) list.add(docSanPham(c));
-        c.close();
-        return list;
+        return queryProducts(DBHelper.COL_IS_ACTIVE + "=1 AND (" + DBHelper.COL_P_NAME + " LIKE ? OR " + DBHelper.COL_P_BRAND + " LIKE ?)", new String[]{k, k});
+    }
+
+    public ArrayList<Product> timKiemChoAdmin(String tuKhoa) {
+        String k = "%" + tuKhoa + "%";
+        return queryProducts("(" + DBHelper.COL_P_NAME + " LIKE ? OR " + DBHelper.COL_P_BRAND + " LIKE ?)", new String[]{k, k});
     }
 
     public ArrayList<Product> timKiemTheoHang(String hang, String tuKhoa) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        ArrayList<Product> list = new ArrayList<>();
         String k = "%" + tuKhoa + "%";
-        Cursor c = db.rawQuery(
-                "SELECT * FROM " + DBHelper.TBL_PRODUCTS +
-                        " WHERE " + DBHelper.COL_P_BRAND + "=? AND " + DBHelper.COL_P_NAME + " LIKE ?" +
-                        " ORDER BY " + DBHelper.COL_ID + " DESC",
-                new String[]{hang, k}
-        );
-        while (c.moveToNext()) list.add(docSanPham(c));
-        c.close();
-        return list;
+        return queryProducts(DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_BRAND + "=? AND " + DBHelper.COL_P_NAME + " LIKE ?", new String[]{hang, k});
     }
 
     public Product getById(long id) {
+        return getById(id, false);
+    }
+
+    public Product getById(long id, boolean includeInactive) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor c = db.rawQuery(
-                "SELECT * FROM " + DBHelper.TBL_PRODUCTS + " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
-                new String[]{String.valueOf(id)}
-        );
+        String sql = "SELECT * FROM " + DBHelper.TBL_PRODUCTS + " WHERE " + DBHelper.COL_ID + "=?";
+        if (!includeInactive) {
+            sql += " AND " + DBHelper.COL_IS_ACTIVE + "=1";
+        }
+        sql += " LIMIT 1";
+        Cursor c = db.rawQuery(sql, new String[]{String.valueOf(id)});
         Product p = null;
         if (c.moveToFirst()) p = docSanPham(c);
         c.close();
         return p;
     }
 
-    // ===== CRUD cho ADMIN =====
     public long insert(Product p) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         return db.insert(DBHelper.TBL_PRODUCTS, null, toValues(p));
@@ -100,19 +76,35 @@ public class ProductDao {
 
     public boolean delete(long id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        return db.delete(DBHelper.TBL_PRODUCTS, DBHelper.COL_ID + "=?",
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_IS_ACTIVE, 0);
+        return db.update(DBHelper.TBL_PRODUCTS, v,
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(id)}) > 0;
     }
 
     public boolean giamTonKho(SQLiteDatabase db, long productId, int qty) {
-        // dùng câu lệnh an toàn: ton_kho = ton_kho - qty (không âm)
         db.execSQL(
                 "UPDATE " + DBHelper.TBL_PRODUCTS +
                         " SET " + DBHelper.COL_P_STOCK + " = " + DBHelper.COL_P_STOCK + " - ?" +
-                        " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_P_STOCK + " >= ?",
+                        " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_STOCK + " >= ?",
                 new Object[]{qty, productId, qty}
         );
         return true;
+    }
+
+    private ArrayList<Product> queryProducts(String whereClause, String[] args) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM " + DBHelper.TBL_PRODUCTS;
+        if (whereClause != null && !whereClause.trim().isEmpty()) {
+            sql += " WHERE " + whereClause;
+        }
+        sql += " ORDER BY " + DBHelper.COL_ID + " DESC";
+        Cursor c = db.rawQuery(sql, args);
+        while (c.moveToNext()) list.add(docSanPham(c));
+        c.close();
+        return list;
     }
 
     private ContentValues toValues(Product p) {
@@ -124,6 +116,7 @@ public class ProductDao {
         v.put(DBHelper.COL_P_DISCOUNT, p.giamGia);
         v.put(DBHelper.COL_P_DESC, p.moTa);
         v.put(DBHelper.COL_P_IMAGE, p.tenAnh);
+        v.put(DBHelper.COL_IS_ACTIVE, p.isActive ? 1 : 0);
         return v;
     }
 
@@ -137,6 +130,8 @@ public class ProductDao {
         p.giamGia = c.getInt(c.getColumnIndexOrThrow(DBHelper.COL_P_DISCOUNT));
         p.moTa = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_P_DESC));
         p.tenAnh = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_P_IMAGE));
+        int activeIndex = c.getColumnIndex(DBHelper.COL_IS_ACTIVE);
+        p.isActive = activeIndex < 0 || c.getInt(activeIndex) == 1;
         return p;
     }
 }

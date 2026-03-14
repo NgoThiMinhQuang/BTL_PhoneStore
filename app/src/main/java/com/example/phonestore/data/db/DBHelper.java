@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 10;
+    public static final int DB_VERSION = 11;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -19,6 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_USERNAME = "ten_dang_nhap";
     public static final String COL_PASSWORD = "mat_khau";
     public static final String COL_ROLE = "vai_tro";
+    public static final String COL_IS_ACTIVE = "is_active";
 
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_CUSTOMER = "CUSTOMER";
@@ -46,7 +47,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_O_CREATED = "ngay_tao";
     public static final String COL_O_STATUS = "trang_thai";
 
-    // (NEW) SQLite cột tiếng Việt không dấu
     public static final String COL_O_RECEIVER = "nguoi_nhan";
     public static final String COL_O_PHONE = "sdt_nhan";
     public static final String COL_O_ADDRESS = "dia_chi_nhan";
@@ -108,33 +108,31 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
-        // 1) người dùng
         db.execSQL("CREATE TABLE " + TBL_USERS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_FULLNAME + " TEXT, " +
                 COL_USERNAME + " TEXT UNIQUE NOT NULL, " +
                 COL_PASSWORD + " TEXT NOT NULL, " +
-                COL_ROLE + " TEXT NOT NULL" +
+                COL_ROLE + " TEXT NOT NULL, " +
+                COL_IS_ACTIVE + " INTEGER NOT NULL DEFAULT 1" +
                 ");");
 
-        // seed ADMIN
         ContentValues admin = new ContentValues();
         admin.put(COL_FULLNAME, "Administrator");
         admin.put(COL_USERNAME, "admin");
         admin.put(COL_PASSWORD, "admin123");
         admin.put(COL_ROLE, ROLE_ADMIN);
+        admin.put(COL_IS_ACTIVE, 1);
         db.insert(TBL_USERS, null, admin);
 
-        // seed CUSTOMER
         ContentValues customer = new ContentValues();
         customer.put(COL_FULLNAME, "Khachhang");
         customer.put(COL_USERNAME, "khachhang");
         customer.put(COL_PASSWORD, "khachhang123");
         customer.put(COL_ROLE, ROLE_CUSTOMER);
+        customer.put(COL_IS_ACTIVE, 1);
         db.insert(TBL_USERS, null, customer);
 
-        // 2) sản phẩm
         db.execSQL("CREATE TABLE " + TBL_PRODUCTS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_P_NAME + " TEXT NOT NULL, " +
@@ -143,15 +141,14 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_P_STOCK + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_P_DISCOUNT + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_P_DESC + " TEXT, " +
-                COL_P_IMAGE + " TEXT" +
+                COL_P_IMAGE + " TEXT, " +
+                COL_IS_ACTIVE + " INTEGER NOT NULL DEFAULT 1" +
                 ");");
 
-        // seed sản phẩm mẫu
         long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 10, 10, "Flagship, pin trâu, camera mạnh", "ip_15");
-        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 20, "Zoom xa, màn đẹp", "ss_s24_utra");
-        long xiaomi14Id = seedProduct(db, "Xiaomi 14", "Xiaomi", 15990000, 15, 0, "Hiệu năng/giá tốt", "ic_iphone15");
+        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 20, "Zoom xa, màn đẹp", "ss_s24_ultra");
+        long xiaomi14Id = seedProduct(db, "Xiaomi 14", "Xiaomi", 15990000, 6, 0, "Hiệu năng/giá tốt", "");
 
-        // 3) giỏ hàng
         db.execSQL("CREATE TABLE " + TBL_CART + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_C_USER_ID + " INTEGER NOT NULL, " +
@@ -162,7 +159,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_C_PRODUCT_ID + ") REFERENCES " + TBL_PRODUCTS + "(" + COL_ID + ")" +
                 ");");
 
-        // 4) hóa đơn (NEW: thêm cột nhận hàng + thanh toán)
         db.execSQL("CREATE TABLE " + TBL_ORDERS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_O_USER_ID + " INTEGER NOT NULL, " +
@@ -177,7 +173,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_O_USER_ID + ") REFERENCES " + TBL_USERS + "(" + COL_ID + ")" +
                 ");");
 
-        // 5) hóa đơn chi tiết
         db.execSQL("CREATE TABLE " + TBL_ORDER_ITEMS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_OI_ORDER_ID + " INTEGER NOT NULL, " +
@@ -190,7 +185,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_OI_ORDER_ID + ") REFERENCES " + TBL_ORDERS + "(" + COL_ID + ") ON DELETE CASCADE" +
                 ");");
 
-        // 6) nhà cung cấp
         db.execSQL("CREATE TABLE " + TBL_SUPPLIERS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_S_NAME + " TEXT NOT NULL, " +
@@ -199,12 +193,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_S_ADDRESS + " TEXT" +
                 ");");
 
-        // seed nhà cung cấp mẫu
         long appleSupplierId = seedSupplier(db, "Apple Vietnam Supply", "Apple", "0900000001", "TP.HCM");
         long samsungSupplierId = seedSupplier(db, "Samsung Partner VN", "Samsung", "0900000002", "Hà Nội");
         long xiaomiSupplierId = seedSupplier(db, "Xiaomi Distribution", "Xiaomi", "0900000003", "Đà Nẵng");
 
-        // 7) phiếu nhập
         db.execSQL("CREATE TABLE " + TBL_RECEIPTS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_R_SUPPLIER_ID + " INTEGER NOT NULL, " +
@@ -217,7 +209,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_R_SUPPLIER_ID + ") REFERENCES " + TBL_SUPPLIERS + "(" + COL_ID + ")" +
                 ");");
 
-        // 8) chi tiết phiếu nhập
         db.execSQL("CREATE TABLE " + TBL_RECEIPT_ITEMS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_RI_RECEIPT_ID + " INTEGER NOT NULL, " +
@@ -230,7 +221,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_RI_PRODUCT_ID + ") REFERENCES " + TBL_PRODUCTS + "(" + COL_ID + ")" +
                 ");");
 
-        // 9) lịch sử kho
         db.execSQL("CREATE TABLE " + TBL_INVENTORY_HISTORY + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_H_PRODUCT_ID + " INTEGER NOT NULL, " +
@@ -246,7 +236,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         seedInitialReceipt(db, appleSupplierId, iphone15Id, "iPhone 15 Pro Max", 10, 24000000, "Nhập lô đầu tiên", Receipt.STATUS_COMPLETED, "Admin");
         seedInitialReceipt(db, samsungSupplierId, samsungS24Id, "Samsung S24 Ultra", 8, 20000000, "Bổ sung kho quý I", Receipt.STATUS_COMPLETED, "Admin");
-        seedInitialReceipt(db, xiaomiSupplierId, xiaomi14Id, "Xiaomi 14", 15, 12000000, "Chờ xác nhận nhập kho", Receipt.STATUS_DRAFT, "Admin");
+        seedInitialReceipt(db, xiaomiSupplierId, xiaomi14Id, "Xiaomi 14", 8, 12000000, "Chờ xác nhận bổ sung kho", Receipt.STATUS_DRAFT, "Admin");
     }
 
     private long seedProduct(SQLiteDatabase db,
@@ -260,6 +250,7 @@ public class DBHelper extends SQLiteOpenHelper {
         v.put(COL_P_DISCOUNT, giamGia);
         v.put(COL_P_DESC, moTa);
         v.put(COL_P_IMAGE, tenAnh);
+        v.put(COL_IS_ACTIVE, 1);
         return db.insert(TBL_PRODUCTS, null, v);
     }
 

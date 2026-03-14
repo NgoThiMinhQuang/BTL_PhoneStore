@@ -97,7 +97,7 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
     }
 
     private void setupFilters() {
-        products = productDao.layTatCa();
+        products = productDao.layTatCaChoAdmin();
 
         ArrayList<String> productLabels = new ArrayList<>();
         productLabels.add(getString(R.string.inventory_history_all_products));
@@ -109,6 +109,7 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
         typeLabels.add(getString(R.string.inventory_history_all_types));
         typeLabels.add(getString(R.string.inventory_history_import));
         typeLabels.add(getString(R.string.inventory_history_export));
+        typeLabels.add(getString(R.string.inventory_history_cancel_return));
 
         spProduct.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, productLabels));
         spType.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, typeLabels));
@@ -143,7 +144,8 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
         for (int i = list.size() - 1; i >= 0; i--) {
             InventoryHistoryEntry entry = list.get(i);
             int current = runningStock.containsKey(entry.productId) ? runningStock.get(entry.productId) : 0;
-            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)) {
+            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)
+                    || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(entry.actionType)) {
                 current += Math.max(0, entry.quantity);
             } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
                 current = Math.max(0, current - Math.max(0, entry.quantity));
@@ -168,6 +170,9 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
         }
         if (position == 2) {
             return InventoryHistoryDao.ACTION_EXPORT;
+        }
+        if (position == 3) {
+            return InventoryHistoryDao.ACTION_CANCEL_RETURN;
         }
         return FILTER_ALL;
     }

@@ -34,12 +34,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_panel_admin"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/admin_customers_overview_title"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/admin_customers_overview_message"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="16dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
@@ -60,7 +77,7 @@
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_edittext_admin"
                 android:drawableStart="@drawable/ic_search_small"
                 android:drawablePadding="10dp"
@@ -72,14 +89,24 @@
                 android:textColorHint="@color/admin_text_secondary" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvCustomerResultCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/admin_customer_results_placeholder"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCustomers"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:clipToPadding="false"
-            android:paddingBottom="12dp" />
+            android:paddingBottom="16dp" />
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -91,5 +118,9 @@
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/admin_primary"
-        app:cornerRadius="24dp" />
+        app:cornerRadius="24dp"
+        app:icon="@drawable/ic_plus"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@android:color/white" />
 </LinearLayout>

@@ -5,7 +5,4 @@
         android:endColor="@color/admin_primary_dark"
         android:startColor="@color/admin_primary"
         android:type="linear" />
-    <corners
-        android:bottomLeftRadius="28dp"
-        android:bottomRightRadius="28dp" />
 </shape>

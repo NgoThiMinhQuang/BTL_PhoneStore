@@ -35,6 +35,7 @@ public class AdminCustomersActivity extends AppCompatActivity {
     private EditText edtSearch;
     private TextView tvCustomersCount;
     private TextView tvCustomersFiltered;
+    private TextView tvCustomerResultCount;
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
@@ -72,6 +73,7 @@ public class AdminCustomersActivity extends AppCompatActivity {
         ((TextView) cardCustomersFiltered.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_customers_search_results);
         tvCustomersCount = cardCustomersCount.findViewById(R.id.tvKpiValue);
         tvCustomersFiltered = cardCustomersFiltered.findViewById(R.id.tvKpiValue);
+        tvCustomerResultCount = findViewById(R.id.tvCustomerResultCount);
 
         RecyclerView rv = findViewById(R.id.rvCustomers);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -112,6 +114,7 @@ public class AdminCustomersActivity extends AppCompatActivity {
         adapter.setData(filteredList);
         tvCustomersCount.setText(String.valueOf(totalCustomers));
         tvCustomersFiltered.setText(String.valueOf(filteredList.size()));
+        tvCustomerResultCount.setText(getString(R.string.admin_customer_results, filteredList.size()));
     }
 
     private void showCustomerDialog(User oldUser) {
@@ -201,10 +204,10 @@ public class AdminCustomersActivity extends AppCompatActivity {
 
     private void confirmDelete(User user) {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.delete_customer)
-                .setMessage(getString(R.string.delete_customer_confirm, user.username))
+                .setTitle(R.string.admin_customer_deactivate_title)
+                .setMessage(getString(R.string.admin_customer_deactivate_confirm, user.username))
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.delete, (d, w) -> {
+                .setPositiveButton(R.string.admin_customer_deactivate_action, (d, w) -> {
                     boolean ok = userDao.adminDeleteCustomer(user.id);
                     if (!ok) {
                         Toast.makeText(this, R.string.err_delete_customer_failed, Toast.LENGTH_SHORT).show();

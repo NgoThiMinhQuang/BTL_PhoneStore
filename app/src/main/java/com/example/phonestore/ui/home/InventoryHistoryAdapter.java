@@ -43,9 +43,11 @@ public class InventoryHistoryAdapter extends RecyclerView.Adapter<InventoryHisto
     public void onBindViewHolder(@NonNull VH h, int position) {
         InventoryHistoryEntry e = data.get(position);
         Context context = h.itemView.getContext();
-        boolean isImport = InventoryHistoryDao.ACTION_IMPORT.equals(e.actionType);
+        boolean isImport = InventoryHistoryDao.ACTION_IMPORT.equals(e.actionType)
+                || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(e.actionType);
+        boolean isCancelReturn = InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(e.actionType);
 
-        h.tvTitle.setText(isImport ? R.string.inventory_history_import : R.string.inventory_history_export);
+        h.tvTitle.setText(isCancelReturn ? R.string.inventory_history_cancel_return : (isImport ? R.string.inventory_history_import : R.string.inventory_history_export));
         h.tvDate.setText(new SimpleDateFormat("yyyy-MM-dd", new Locale("vi", "VN")).format(new Date(e.createdAt)));
         h.tvProduct.setText(boldLabel(context, "Sản phẩm", fallback(e.productName)));
         h.tvRef.setText(boldLabel(context, "Chứng từ", formatReference(context, e)));

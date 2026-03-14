@@ -14,6 +14,7 @@ public class InventoryHistoryDao {
 
     public static final String ACTION_IMPORT = "IMPORT";
     public static final String ACTION_EXPORT = "EXPORT";
+    public static final String ACTION_CANCEL_RETURN = "CANCEL_RETURN";
 
     private final DBHelper dbHelper;
 
@@ -52,11 +53,10 @@ public class InventoryHistoryDao {
     public ArrayList<InventoryHistoryEntry> getRecent(int limit, String keyword) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<InventoryHistoryEntry> list = new ArrayList<>();
-        Cursor c;
-        String query = buildQuery(keyword, limit);
-        String[] args = buildArgs(keyword);
-        c = db.rawQuery(query, args);
-        while (c.moveToNext()) list.add(read(c));
+        Cursor c = db.rawQuery(buildQuery(keyword, limit), buildArgs(keyword));
+        while (c.moveToNext()) {
+            list.add(read(c));
+        }
         c.close();
         return list;
     }

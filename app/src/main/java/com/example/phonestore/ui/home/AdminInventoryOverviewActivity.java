@@ -153,7 +153,8 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
                 totals = new int[]{0, 0};
                 totalsByProduct.put(entry.productId, totals);
             }
-            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)) {
+            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)
+                    || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(entry.actionType)) {
                 totals[0] += Math.max(0, entry.quantity);
             } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
                 totals[1] += Math.max(0, entry.quantity);

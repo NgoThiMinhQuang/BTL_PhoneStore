@@ -127,8 +127,8 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
         String brand = item.brand == null ? "" : item.brand.toLowerCase(Locale.ROOT);
 
         if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
-        if (name.contains("s24") || brand.contains("samsung")) return R.drawable.ss_s24_utra;
-        if (brand.contains("xiaomi")) return R.drawable.ic_iphone15;
+        if (name.contains("s24") || brand.contains("samsung")) return findExistingSamsungImage(context);
+        if (brand.contains("xiaomi")) return android.R.drawable.ic_menu_gallery;
 
         return android.R.drawable.ic_menu_gallery;
     }
@@ -141,6 +141,14 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
         if (resId != 0) return resId;
 
         return context.getResources().getIdentifier(imageKey, "mipmap", context.getPackageName());
+    }
+
+    private int findExistingSamsungImage(Context context) {
+        int imageRes = findImageRes(context, "ss_s24_ultra");
+        if (imageRes != 0) return imageRes;
+        imageRes = findImageRes(context, "ss_s24_utra");
+        if (imageRes != 0) return imageRes;
+        return android.R.drawable.ic_menu_gallery;
     }
 
     @Override

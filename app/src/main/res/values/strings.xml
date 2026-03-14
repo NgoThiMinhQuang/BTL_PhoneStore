@@ -19,6 +19,9 @@
     <string name="admin_products_filter_message">Lọc nhanh theo tên máy hoặc thương hiệu để xử lý chính xác hơn.</string>
     <string name="admin_products_list_title">Danh sách sản phẩm hiện có</string>
     <string name="search_customers_hint">Tìm theo họ tên / tài khoản...</string>
+    <string name="admin_customers_overview_title">Danh sách khách hàng đang hoạt động</string>
+    <string name="admin_customers_overview_message">Theo dõi nhanh tài khoản mua hàng, mức chi tiêu đã giao và khóa khách không còn sử dụng ngay trên từng card.</string>
+    <string name="admin_customer_results_placeholder">Hiển thị 0 khách hàng</string>
 
     <string name="add_product">Thêm sản phẩm</string>
     <string name="edit_product">Sửa sản phẩm</string>
@@ -26,7 +29,7 @@
     <string name="delete_product_confirm">Bạn có chắc muốn xóa %1$s?</string>
     <string name="product_added">Đã thêm sản phẩm</string>
     <string name="product_updated">Đã cập nhật sản phẩm</string>
-    <string name="product_deleted">Đã xóa sản phẩm</string>
+    <string name="product_deleted">Đã chuyển sản phẩm sang ngừng kinh doanh</string>
 
     <string name="product_name">Tên sản phẩm</string>
     <string name="product_brand">Hãng</string>
@@ -69,7 +72,7 @@
 
     <string name="customer_added">Đã thêm khách hàng</string>
     <string name="customer_updated">Đã cập nhật khách hàng</string>
-    <string name="customer_deleted">Đã xóa khách hàng</string>
+    <string name="customer_deleted">Đã khóa khách hàng</string>
 
     <string name="err_fullname_required">Vui lòng nhập họ tên</string>
     <string name="err_username_required">Vui lòng nhập tên đăng nhập</string>
@@ -78,7 +81,18 @@
     <string name="err_password_not_match">Mật khẩu nhập lại không khớp</string>
     <string name="err_add_customer_failed">Không thêm được (trùng tên đăng nhập?)</string>
     <string name="customer_update_failed">Cập nhật thất bại</string>
-    <string name="err_delete_customer_failed">Không thể xóa (khách có thể đã có hóa đơn)</string>
+    <string name="err_delete_customer_failed">Không thể khóa khách hàng</string>
+    <string name="admin_customer_name_fallback">Khách chưa cập nhật tên</string>
+    <string name="admin_customer_role_customer">Khách mua hàng</string>
+    <string name="admin_customer_status_active">Đang hoạt động</string>
+    <string name="admin_customer_status_inactive">Ngừng hoạt động</string>
+    <string name="admin_customer_orders_metric">%1$d đơn hàng</string>
+    <string name="admin_customer_orders_empty">Chưa phát sinh đơn</string>
+    <string name="admin_customer_spend_metric">%1$sđ đã giao</string>
+    <string name="admin_customer_spend_empty">Chưa có chi tiêu</string>
+    <string name="admin_customer_deactivate_title">Khóa khách hàng</string>
+    <string name="admin_customer_deactivate_confirm">Bạn có chắc muốn khóa @%1$s không?</string>
+    <string name="admin_customer_deactivate_action">Khóa</string>
 
     <string name="checkout_title">Thanh toán</string>
     <string name="checkout_total">Tổng tiền: %1$s</string>
@@ -132,6 +146,7 @@
     <string name="checkout_success_with_order_id">Đặt hàng thành công. Mã đơn #%1$d</string>
     <string name="login_required_fields">Vui lòng nhập đầy đủ tài khoản và mật khẩu</string>
     <string name="login_invalid_credentials">Sai tài khoản hoặc mật khẩu</string>
+    <string name="login_inactive_or_invalid">Tài khoản không hợp lệ hoặc đã bị khóa</string>
     <string name="invalid_role">Vai trò không hợp lệ</string>
 
     <string name="admin_dashboard">Dashboard</string>
@@ -189,6 +204,9 @@
     <string name="admin_product_dialog_edit">Cập nhật sản phẩm</string>
     <string name="admin_delete_product_title">Xóa sản phẩm</string>
     <string name="admin_delete_product_message">Bạn có chắc muốn xóa &quot;%1$s&quot; không?</string>
+    <string name="admin_deactivate_product_title">Ngừng kinh doanh sản phẩm</string>
+    <string name="admin_deactivate_product_message">Bạn có chắc muốn chuyển &quot;%1$s&quot; sang ngừng kinh doanh không?</string>
+    <string name="admin_deactivate_product_action">Ngừng bán</string>
     <string name="admin_product_added_success">Thêm sản phẩm thành công</string>
     <string name="admin_product_updated_success">Cập nhật sản phẩm thành công</string>
     <string name="admin_stock_remaining">Còn %1$d sản phẩm</string>
@@ -289,6 +307,7 @@
     <string name="receipt_item_label">%1$s • SL %2$d</string>
     <string name="inventory_history_import">Nhập kho</string>
     <string name="inventory_history_export">Xuất kho</string>
+    <string name="inventory_history_cancel_return">Hoàn kho do hủy đơn</string>
     <string name="inventory_history_all_products">Tất cả sản phẩm</string>
     <string name="inventory_history_all_types">Tất cả loại</string>
     <string name="inventory_history_ref_label">Chứng từ: %1$s</string>
@@ -332,7 +351,8 @@
     <string name="filter_out_of_stock">Hết hàng</string>
     <string name="filter_low_stock">Sắp hết</string>
     <string name="receipt_deleted">Đã xóa phiếu nhập</string>
-    <string name="receipt_delete_confirm">Bạn có chắc muốn xóa phiếu nhập này không?</string>
+    <string name="receipt_delete_confirm">Bạn có chắc muốn xóa phiếu nhập nháp này không?</string>
+    <string name="receipt_delete_completed_blocked">Không thể xóa phiếu nhập đã hoàn thành</string>
     <string name="receipt_line_remove_confirm">Xóa dòng sản phẩm này khỏi phiếu nhập?</string>
     <string name="supplier_in_use">Không thể xóa nhà cung cấp vì đã có phiếu nhập liên quan.</string>
     <string name="supplier_search_hint">Tìm theo tên, thương hiệu, số điện thoại hoặc địa chỉ...</string>
@@ -394,7 +414,9 @@
     <string name="inventory_overview_history">Biến động kho: %1$d dòng</string>
     <string name="order_products_summary">%1$d sản phẩm</string>
     <string name="order_status_current">Trạng thái hiện tại: %1$s</string>
-    <string name="order_status_update_summary">Chọn trạng thái mới và cập nhật trực tiếp trên màn hình chi tiết đơn hàng.</string>
+    <string name="order_status_update_summary">Chỉ hiển thị những bước chuyển trạng thái hợp lệ theo nghiệp vụ hiện tại.</string>
+    <string name="order_status_allowed_hint">Đơn đã giao hoặc đã hủy sẽ bị khóa cập nhật.</string>
+    <string name="order_status_locked">Đã khóa trạng thái</string>
     <string name="order_status_timeline_title">Lộ trình trạng thái</string>
     <string name="order_status_timeline_summary">Sau khi tải hoặc cập nhật, màn hình sẽ tự cuộn đến đúng mục trạng thái tương ứng để dễ theo dõi hơn.</string>
     <string name="order_status_processing">Đang xử lý</string>
@@ -403,4 +425,11 @@
     <string name="order_status_processing_desc">Đơn hàng đang được chuẩn bị, kiểm tra hoặc đóng gói trước khi giao.</string>
     <string name="order_status_delivered_desc">Đơn hàng đã được giao thành công cho khách hàng.</string>
     <string name="order_status_cancelled_desc">Đơn hàng đã bị hủy và không tiếp tục xử lý.</string>
+    <string name="admin_reports_kpi_delivered_revenue">Doanh thu đã giao</string>
+    <string name="admin_reports_delivered_revenue_label">Doanh thu đã giao %1$d</string>
+    <string name="admin_reports_top_products_label">Số lượng bán đã giao</string>
+    <string name="admin_reports_status_label">Trạng thái đơn</string>
+    <string name="admin_reports_empty_revenue">Chưa có doanh thu từ đơn đã giao</string>
+    <string name="admin_reports_empty_top_products">Chưa có dữ liệu bán từ đơn đã giao</string>
+    <string name="admin_reports_empty_status">Chưa có dữ liệu trạng thái đơn</string>
 </resources>

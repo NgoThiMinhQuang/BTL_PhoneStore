@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.User;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class UserDao {
         v.put(DBHelper.COL_USERNAME, username);
         v.put(DBHelper.COL_PASSWORD, password);
         v.put(DBHelper.COL_ROLE, DBHelper.ROLE_CUSTOMER);
+        v.put(DBHelper.COL_IS_ACTIVE, 1);
 
         return db.insert(DBHelper.TBL_USERS, null, v) != -1;
     }
@@ -43,9 +45,9 @@ public class UserDao {
 
         Cursor c = db.rawQuery(
                 "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
-                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE +
+                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE + "," + DBHelper.COL_IS_ACTIVE +
                         " FROM " + DBHelper.TBL_USERS +
-                        " WHERE " + DBHelper.COL_USERNAME + "=? AND " + DBHelper.COL_PASSWORD + "=? LIMIT 1",
+                        " WHERE " + DBHelper.COL_USERNAME + "=? AND " + DBHelper.COL_PASSWORD + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
                 new String[]{username, password}
         );
 
@@ -61,9 +63,9 @@ public class UserDao {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.rawQuery(
                 "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
-                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE +
+                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE + "," + DBHelper.COL_IS_ACTIVE +
                         " FROM " + DBHelper.TBL_USERS +
-                        " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
+                        " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
                 new String[]{String.valueOf(id)}
         );
 
@@ -79,11 +81,10 @@ public class UserDao {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues v = new ContentValues();
         v.put(DBHelper.COL_FULLNAME, fullname);
-        return db.update(DBHelper.TBL_USERS, v, DBHelper.COL_ID + "=?",
+        return db.update(DBHelper.TBL_USERS, v, DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(id)}) > 0;
     }
 
-    // Đổi mật khẩu: bắt nhập đúng mật khẩu cũ
     public boolean changePassword(long id, String oldPassword, String newPassword) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues v = new ContentValues();
@@ -91,7 +92,7 @@ public class UserDao {
         return db.update(
                 DBHelper.TBL_USERS,
                 v,
-                DBHelper.COL_ID + "=? AND " + DBHelper.COL_PASSWORD + "=?",
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_PASSWORD + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(id), oldPassword}
         ) > 0;
     }
@@ -99,34 +100,9 @@ public class UserDao {
     public ArrayList<User> getCustomers(String keyword) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<User> list = new ArrayList<>();
-
-        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
-        Cursor c;
-
-        if (hasKeyword) {
-            String k = "%" + keyword.trim() + "%";
-            c = db.rawQuery(
-                    "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
-                            DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE +
-                            " FROM " + DBHelper.TBL_USERS +
-                            " WHERE " + DBHelper.COL_ROLE + "=?" +
-                            " AND (IFNULL(" + DBHelper.COL_FULLNAME + ",'') LIKE ? OR " + DBHelper.COL_USERNAME + " LIKE ?)" +
-                            " ORDER BY " + DBHelper.COL_ID + " DESC",
-                    new String[]{DBHelper.ROLE_CUSTOMER, k, k}
-            );
-        } else {
-            c = db.rawQuery(
-                    "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
-                            DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE +
-                            " FROM " + DBHelper.TBL_USERS +
-                            " WHERE " + DBHelper.COL_ROLE + "=?" +
-                            " ORDER BY " + DBHelper.COL_ID + " DESC",
-                    new String[]{DBHelper.ROLE_CUSTOMER}
-            );
-        }
-
+        Cursor c = db.rawQuery(buildCustomersQuery(keyword), buildCustomersArgs(keyword));
         while (c.moveToNext()) {
-            list.add(docNguoiDung(c));
+            list.add(docNguoiDungThongKe(c));
         }
         c.close();
         return list;
@@ -136,7 +112,7 @@ public class UserDao {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.rawQuery(
                 "SELECT COUNT(*) FROM " + DBHelper.TBL_USERS +
-                        " WHERE " + DBHelper.COL_ROLE + "=?",
+                        " WHERE " + DBHelper.COL_ROLE + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{DBHelper.ROLE_CUSTOMER}
         );
 
@@ -146,15 +122,6 @@ public class UserDao {
         return count;
     }
 
-    private User docNguoiDung(Cursor c) {
-        return new User(
-                c.getLong(0),
-                c.getString(1),
-                c.getString(2),
-                c.getString(3)
-        );
-    }
-    // NEW: Admin update customer (không cần mật khẩu cũ)
     public boolean adminUpdateCustomer(long id, String fullname, String newPasswordOrNull) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues v = new ContentValues();
@@ -167,18 +134,75 @@ public class UserDao {
         return db.update(
                 DBHelper.TBL_USERS,
                 v,
-                DBHelper.COL_ID + "=? AND " + DBHelper.COL_ROLE + "=?",
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_ROLE + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(id), DBHelper.ROLE_CUSTOMER}
         ) > 0;
     }
 
-    // NEW: Admin delete customer
     public boolean adminDeleteCustomer(long id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        return db.delete(
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_IS_ACTIVE, 0);
+        return db.update(
                 DBHelper.TBL_USERS,
-                DBHelper.COL_ID + "=? AND " + DBHelper.COL_ROLE + "=?",
+                v,
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_ROLE + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(id), DBHelper.ROLE_CUSTOMER}
         ) > 0;
+    }
+
+    private String buildCustomersQuery(String keyword) {
+        String sql = "SELECT u." + DBHelper.COL_ID + "," +
+                " u." + DBHelper.COL_FULLNAME + "," +
+                " u." + DBHelper.COL_USERNAME + "," +
+                " u." + DBHelper.COL_ROLE + "," +
+                " u." + DBHelper.COL_IS_ACTIVE + "," +
+                " COUNT(CASE WHEN o." + DBHelper.COL_ID + " IS NOT NULL THEN 1 END) AS order_count," +
+                " COALESCE(SUM(CASE WHEN o." + DBHelper.COL_O_STATUS + "='" + OrderStatus.STATUS_DA_GIAO + "' THEN o." + DBHelper.COL_O_TOTAL + " ELSE 0 END), 0) AS delivered_spend" +
+                " FROM " + DBHelper.TBL_USERS + " u" +
+                " LEFT JOIN " + DBHelper.TBL_ORDERS + " o ON o." + DBHelper.COL_O_USER_ID + " = u." + DBHelper.COL_ID +
+                " WHERE u." + DBHelper.COL_ROLE + "=? AND u." + DBHelper.COL_IS_ACTIVE + "=1";
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (IFNULL(u." + DBHelper.COL_FULLNAME + ",'') LIKE ? OR u." + DBHelper.COL_USERNAME + " LIKE ?)";
+        }
+
+        sql += " GROUP BY u." + DBHelper.COL_ID + ", u." + DBHelper.COL_FULLNAME + ", u." + DBHelper.COL_USERNAME + ", u." + DBHelper.COL_ROLE + ", u." + DBHelper.COL_IS_ACTIVE +
+                " ORDER BY u." + DBHelper.COL_ID + " DESC";
+        return sql;
+    }
+
+    private String[] buildCustomersArgs(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new String[]{DBHelper.ROLE_CUSTOMER};
+        }
+        String k = "%" + keyword.trim() + "%";
+        return new String[]{DBHelper.ROLE_CUSTOMER, k, k};
+    }
+
+    private User docNguoiDung(Cursor c) {
+        User user = new User(
+                c.getLong(0),
+                c.getString(1),
+                c.getString(2),
+                c.getString(3)
+        );
+        if (c.getColumnCount() > 4) {
+            user.isActive = c.getInt(4) == 1;
+        }
+        return user;
+    }
+
+    private User docNguoiDungThongKe(Cursor c) {
+        User user = docNguoiDung(c);
+        int orderCountIndex = c.getColumnIndex("order_count");
+        if (orderCountIndex >= 0) {
+            user.orderCount = c.getInt(orderCountIndex);
+        }
+        int deliveredSpendIndex = c.getColumnIndex("delivered_spend");
+        if (deliveredSpendIndex >= 0) {
+            user.deliveredSpend = c.getInt(deliveredSpendIndex);
+        }
+        return user;
     }
 }

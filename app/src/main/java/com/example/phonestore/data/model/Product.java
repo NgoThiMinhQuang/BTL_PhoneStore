@@ -9,4 +9,5 @@ public class Product {
     public int giamGia;
     public String moTa;
     public String tenAnh;
+    public boolean isActive = true;
 }

@@ -30,19 +30,14 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_ORDER_ID = "extra_order_id";
 
-    private static final String[] ADMIN_STATUSES = new String[]{
-            OrderStatus.STATUS_CHO_XAC_NHAN,
-            OrderStatus.STATUS_DA_THANH_TOAN,
-            OrderStatus.STATUS_DANG_XU_LY,
-            OrderStatus.STATUS_DA_GIAO,
-            OrderStatus.STATUS_DA_HUY
-    };
+    private final ArrayList<String> availableStatuses = new ArrayList<>();
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
@@ -126,18 +121,11 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     private void setupStatusSpinner() {
-        ArrayList<String> labels = new ArrayList<>();
-        for (String status : ADMIN_STATUSES) {
-            labels.add(formatStatus(status));
-        }
-
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+        spinnerStatus.setAdapter(new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
-                labels
-        );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerStatus.setAdapter(spinnerAdapter);
+                new ArrayList<>()
+        ));
     }
 
     private void loadOrder(boolean shouldScrollToStatus) {
@@ -180,16 +168,16 @@ public class OrderDetailActivity extends AppCompatActivity {
         tvOrderTotal.setText(formatCurrency(total));
         tvPaymentMethod.setText(formatPaymentMethod(order.phuongThucThanhToan));
         tvStatusCurrent.setText(getString(R.string.order_status_current, formatStatus(order.trangThai)));
-        updateSpinnerSelection(order.trangThai);
+        bindStatusControls(order.trangThai);
     }
 
     private void updateOrderStatus() {
         int selectedIndex = spinnerStatus.getSelectedItemPosition();
-        if (selectedIndex < 0 || selectedIndex >= ADMIN_STATUSES.length) {
+        if (selectedIndex < 0 || selectedIndex >= availableStatuses.size()) {
             return;
         }
 
-        boolean ok = orderDao.updateStatus(orderId, ADMIN_STATUSES[selectedIndex]);
+        boolean ok = orderDao.updateStatus(orderId, availableStatuses.get(selectedIndex));
         if (!ok) {
             Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
             return;
@@ -199,14 +187,33 @@ public class OrderDetailActivity extends AppCompatActivity {
         loadOrder(true);
     }
 
-    private void updateSpinnerSelection(String status) {
-        for (int i = 0; i < ADMIN_STATUSES.length; i++) {
-            if (ADMIN_STATUSES[i].equals(status)) {
-                spinnerStatus.setSelection(i, false);
-                return;
-            }
+    private void bindStatusControls(String currentStatus) {
+        List<String> nextStatuses = orderDao.getAllowedNextStatuses(currentStatus);
+        availableStatuses.clear();
+        availableStatuses.addAll(nextStatuses);
+
+        ArrayList<String> labels = new ArrayList<>();
+        for (String status : nextStatuses) {
+            labels.add(formatStatus(status));
         }
-        spinnerStatus.setSelection(0, false);
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                labels
+        );
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatus.setAdapter(spinnerAdapter);
+
+        boolean finalStatus = orderDao.isFinalStatus(currentStatus);
+        spinnerStatus.setEnabled(!finalStatus && !nextStatuses.isEmpty());
+        btnUpdateStatus.setEnabled(!finalStatus && !nextStatuses.isEmpty());
+
+        if (finalStatus) {
+            btnUpdateStatus.setText(R.string.order_status_locked);
+        } else {
+            btnUpdateStatus.setText(R.string.update_status);
+        }
     }
 
     private void scrollToStatusSection() {

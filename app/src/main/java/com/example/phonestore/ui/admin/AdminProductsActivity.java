@@ -135,9 +135,9 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     private void loadData() {
-        ArrayList<Product> allProducts = productDao.layTatCa();
+        ArrayList<Product> allProducts = productDao.layTatCaChoAdmin();
         String key = edtSearch.getText().toString().trim();
-        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : productDao.timKiem(key);
+        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : productDao.timKiemChoAdmin(key);
 
         adapter.setData(filteredProducts);
         updateDashboard(allProducts, filteredProducts);
@@ -279,10 +279,10 @@ public class AdminProductsActivity extends BaseHomeActivity {
 
     private void confirmDelete(Product product) {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.admin_delete_product_title)
-                .setMessage(getString(R.string.admin_delete_product_message, product.tenSanPham))
+                .setTitle(R.string.admin_deactivate_product_title)
+                .setMessage(getString(R.string.admin_deactivate_product_message, product.tenSanPham))
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.delete, (d, w) -> {
+                .setPositiveButton(R.string.admin_deactivate_product_action, (d, w) -> {
                     boolean ok = productDao.delete(product.maSanPham);
                     if (ok) {
                         Toast.makeText(this, R.string.product_deleted, Toast.LENGTH_SHORT).show();

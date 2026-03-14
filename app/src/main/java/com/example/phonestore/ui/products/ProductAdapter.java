@@ -171,8 +171,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         String brand = p.hang == null ? "" : p.hang.toLowerCase(Locale.ROOT);
 
         if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
-        if (name.contains("s24") || brand.contains("samsung")) return R.drawable.ss_s24_utra;
-        if (brand.contains("xiaomi")) return R.drawable.ic_iphone15;
+        if (name.contains("s24") || brand.contains("samsung")) return findExistingSamsungImage();
+        if (brand.contains("xiaomi")) return 0;
 
         return 0;
     }
@@ -185,6 +185,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         if (resId != 0) return resId;
 
         return ctx.getResources().getIdentifier(imageKey, "mipmap", ctx.getPackageName());
+    }
+
+    private int findExistingSamsungImage() {
+        int imageRes = findImageRes("ss_s24_ultra");
+        if (imageRes != 0) return imageRes;
+        return findImageRes("ss_s24_utra");
     }
 
     static class VH extends RecyclerView.ViewHolder {

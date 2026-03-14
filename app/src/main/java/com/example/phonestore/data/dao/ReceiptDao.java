@@ -58,18 +58,8 @@ public class ReceiptDao {
         db.beginTransaction();
         try {
             Receipt receipt = getReceiptById(db, receiptId);
-            if (receipt == null) {
+            if (receipt == null || receipt.isCompleted()) {
                 return false;
-            }
-
-            if (receipt.isCompleted()) {
-                ArrayList<ReceiptItem> items = getReceiptItems(db, receiptId);
-                rollbackInventory(db, items);
-                db.delete(
-                        DBHelper.TBL_INVENTORY_HISTORY,
-                        DBHelper.COL_H_REF_TYPE + "=? AND " + DBHelper.COL_H_REF_ID + "=?",
-                        new String[]{REFERENCE_TYPE_RECEIPT, String.valueOf(receiptId)}
-                );
             }
 
             int deleted = db.delete(DBHelper.TBL_RECEIPTS, DBHelper.COL_ID + "=?", new String[]{String.valueOf(receiptId)});
@@ -185,17 +175,6 @@ public class ReceiptDao {
                     REFERENCE_TYPE_RECEIPT,
                     receiptId,
                     note
-            );
-        }
-    }
-
-    private void rollbackInventory(SQLiteDatabase db, ArrayList<ReceiptItem> items) {
-        for (ReceiptItem item : items) {
-            db.execSQL(
-                    "UPDATE " + DBHelper.TBL_PRODUCTS +
-                            " SET " + DBHelper.COL_P_STOCK + " = MAX(0, " + DBHelper.COL_P_STOCK + " - ?)" +
-                            " WHERE " + DBHelper.COL_ID + "=?",
-                    new Object[]{item.quantity, item.productId}
             );
         }
     }

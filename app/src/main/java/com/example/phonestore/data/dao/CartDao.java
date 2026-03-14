@@ -73,7 +73,7 @@ public class CartDao {
                         " c." + DBHelper.COL_C_QTY +
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
-                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? " +
+                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1 " +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(userId)}
         );
@@ -119,6 +119,7 @@ public class CartDao {
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
                         " WHERE c." + DBHelper.COL_C_USER_ID + "=?" +
+                        " AND p." + DBHelper.COL_IS_ACTIVE + "=1" +
                         " AND c." + DBHelper.COL_C_PRODUCT_ID + " IN (" + buildInClause(productIds.size()) + ")" +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 args
@@ -205,7 +206,7 @@ public class CartDao {
         Cursor c = db.rawQuery(
                 "SELECT " + DBHelper.COL_P_STOCK +
                         " FROM " + DBHelper.TBL_PRODUCTS +
-                        " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
+                        " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
                 new String[]{String.valueOf(productId)}
         );
         int stock = 0;

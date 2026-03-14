@@ -44,7 +44,7 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
         supplierDao = new SupplierDao(this);
         productDao = new ProductDao(this);
         suppliers = supplierDao.getAll(null);
-        products = productDao.layTatCa();
+        products = productDao.layTatCaChoAdmin();
         creatorName = resolveCreatorName();
 
         Toolbar toolbar = findViewById(R.id.toolbar);

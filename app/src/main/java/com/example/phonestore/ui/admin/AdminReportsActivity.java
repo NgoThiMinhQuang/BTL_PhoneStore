@@ -2,17 +2,18 @@ package com.example.phonestore.ui.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import android.view.View;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.utils.SessionManager;
 import com.github.mikephil.charting.charts.BarChart;
@@ -30,7 +31,6 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -70,7 +70,6 @@ public class AdminReportsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // KPI
         TextView tvRevenue = findViewById(R.id.tvRevenue);
         TextView tvOrders = findViewById(R.id.tvOrders);
         TextView tvCustomers = findViewById(R.id.tvCustomers);
@@ -85,14 +84,13 @@ public class AdminReportsActivity extends AppCompatActivity {
         tvOrders.setText(getString(R.string.kpi_orders_value, orderDao.getSoDonHang()));
         tvCustomers.setText(getString(R.string.kpi_customers_value, userDao.getSoKhachHang()));
 
-        ((TextView) cardRevenue.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_revenue_month);
+        ((TextView) cardRevenue.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_reports_kpi_delivered_revenue);
         ((TextView) cardRevenue.findViewById(R.id.tvKpiValue)).setText(revenue);
         ((TextView) cardOrders.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_total_orders);
         ((TextView) cardOrders.findViewById(R.id.tvKpiValue)).setText(String.valueOf(orderDao.getSoDonHang()));
         ((TextView) cardCustomers.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_total_customers);
         ((TextView) cardCustomers.findViewById(R.id.tvKpiValue)).setText(String.valueOf(userDao.getSoKhachHang()));
 
-        // Charts
         LineChart chartRevenue = findViewById(R.id.chartRevenue);
         BarChart chartTopProducts = findViewById(R.id.chartTopProducts);
         PieChart chartOrderStatus = findViewById(R.id.chartOrderStatus);
@@ -111,11 +109,10 @@ public class AdminReportsActivity extends AppCompatActivity {
     }
 
     private void renderRevenueByMonth(LineChart chart, ArrayList<OrderDao.MonthRevenue> raw, int year) {
-        chart.setNoDataText("Chưa có dữ liệu doanh thu");
+        chart.setNoDataText(getString(R.string.admin_reports_empty_revenue));
         chart.getDescription().setEnabled(false);
 
-        // fill đủ 12 tháng
-        int[] rev = new int[13]; // 1..12
+        int[] rev = new int[13];
         for (OrderDao.MonthRevenue r : raw) {
             if (r.month >= 1 && r.month <= 12) rev[r.month] = r.revenue;
         }
@@ -125,7 +122,7 @@ public class AdminReportsActivity extends AppCompatActivity {
             entries.add(new Entry(m, rev[m]));
         }
 
-        LineDataSet set = new LineDataSet(entries, "Doanh thu " + year);
+        LineDataSet set = new LineDataSet(entries, getString(R.string.admin_reports_delivered_revenue_label, year));
         set.setLineWidth(2.5f);
         set.setCircleRadius(3.5f);
         set.setValueTextSize(10f);
@@ -136,7 +133,6 @@ public class AdminReportsActivity extends AppCompatActivity {
 
         LineData data = new LineData(set);
         chart.setData(data);
-
         chart.getAxisRight().setEnabled(false);
 
         XAxis x = chart.getXAxis();
@@ -150,7 +146,6 @@ public class AdminReportsActivity extends AppCompatActivity {
             }
         });
 
-        // format tiền bên trục Y
         NumberFormat nf = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
         chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
             @Override
@@ -163,7 +158,7 @@ public class AdminReportsActivity extends AppCompatActivity {
     }
 
     private void renderTopProducts(BarChart chart, ArrayList<OrderDao.ProductSale> list) {
-        chart.setNoDataText("Chưa có dữ liệu bán hàng");
+        chart.setNoDataText(getString(R.string.admin_reports_empty_top_products));
         chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
 
@@ -176,7 +171,7 @@ public class AdminReportsActivity extends AppCompatActivity {
             labels.add(shortName(p.name));
         }
 
-        BarDataSet set = new BarDataSet(entries, "Số lượng bán");
+        BarDataSet set = new BarDataSet(entries, getString(R.string.admin_reports_top_products_label));
         set.setColor(ContextCompat.getColor(this, R.color.admin_primary));
         set.setValueTextSize(10f);
 
@@ -196,16 +191,16 @@ public class AdminReportsActivity extends AppCompatActivity {
     }
 
     private void renderOrderStatus(PieChart chart, ArrayList<OrderDao.StatusCount> list) {
-        chart.setNoDataText("Chưa có dữ liệu trạng thái đơn");
+        chart.setNoDataText(getString(R.string.admin_reports_empty_status));
         chart.getDescription().setEnabled(false);
         chart.setDrawEntryLabels(false);
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         for (OrderDao.StatusCount s : list) {
-            entries.add(new PieEntry(s.count, s.status));
+            entries.add(new PieEntry(s.count, formatStatus(s.status)));
         }
 
-        PieDataSet set = new PieDataSet(entries, "Trạng thái");
+        PieDataSet set = new PieDataSet(entries, getString(R.string.admin_reports_status_label));
         set.setColors(
                 ContextCompat.getColor(this, R.color.admin_primary),
                 ContextCompat.getColor(this, R.color.admin_warning),
@@ -217,6 +212,15 @@ public class AdminReportsActivity extends AppCompatActivity {
         PieData data = new PieData(set);
         chart.setData(data);
         chart.invalidate();
+    }
+
+    private String formatStatus(String status) {
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
+        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
+        if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);
+        if (OrderStatus.STATUS_DA_HUY.equals(status)) return getString(R.string.order_status_cancelled);
+        return status == null ? "" : status;
     }
 
     private String shortName(String s) {

@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
 
         User user = userDao.login(username, password);
         if (user == null) {
-            Toast.makeText(this, R.string.login_invalid_credentials, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.login_inactive_or_invalid, Toast.LENGTH_SHORT).show();
             return;
         }
 

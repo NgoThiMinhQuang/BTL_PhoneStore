@@ -24,6 +24,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
 
     private ReceiptDao receiptDao;
     private long receiptId;
+    private MaterialButton btnDeleteReceipt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,8 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         findViewById(R.id.btnPrintReceipt).setOnClickListener(v ->
                 Toast.makeText(this, R.string.receipt_print_placeholder, Toast.LENGTH_SHORT).show()
         );
-        ((MaterialButton) findViewById(R.id.btnDeleteReceipt)).setOnClickListener(v -> confirmDelete());
+        btnDeleteReceipt = findViewById(R.id.btnDeleteReceipt);
+        btnDeleteReceipt.setOnClickListener(v -> confirmDelete());
 
         loadReceipt();
     }
@@ -72,6 +74,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         bindHeader(receipt);
         bindItems(items);
         bindSummary(receipt, items);
+        bindDeleteRule(receipt);
     }
 
     private void bindHeader(Receipt receipt) {
@@ -110,6 +113,12 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
     }
 
     private void confirmDelete() {
+        Receipt receipt = receiptDao.getReceiptById(receiptId);
+        if (receipt != null && receipt.isCompleted()) {
+            Toast.makeText(this, R.string.receipt_delete_completed_blocked, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle(R.string.delete)
                 .setMessage(R.string.receipt_delete_confirm)
@@ -121,11 +130,20 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
     private void deleteReceipt() {
         boolean ok = receiptDao.deleteReceipt(receiptId);
         if (!ok) {
-            Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.receipt_delete_completed_blocked, Toast.LENGTH_SHORT).show();
             return;
         }
         Toast.makeText(this, R.string.receipt_deleted, Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private void bindDeleteRule(Receipt receipt) {
+        if (btnDeleteReceipt == null) {
+            return;
+        }
+        boolean allowDelete = receipt != null && receipt.isDraft();
+        btnDeleteReceipt.setEnabled(allowDelete);
+        btnDeleteReceipt.setAlpha(allowDelete ? 1f : 0.5f);
     }
 
     private String valueOrDash(String value) {
