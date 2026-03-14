@@ -53,6 +53,12 @@ public class CartActivity extends AppCompatActivity {
         cartDao = new CartDao(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setContentInsetsRelative(0, 0);
+        toolbar.setContentInsetsAbsolute(0, 0);
+        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
+        toolbar.setTitleMarginEnd(0);
+        toolbar.setTitleMarginTop(0);
+        toolbar.setTitleMarginBottom(0);
         toolbar.setTitle(R.string.cart_title);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);

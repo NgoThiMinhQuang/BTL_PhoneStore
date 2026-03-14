@@ -46,7 +46,6 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-
                     <TextView
                         android:id="@+id/tvOrderCode"
                         android:layout_width="match_parent"
@@ -285,7 +284,16 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tvStatusCurrent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/order_status_label"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOrderStatusCurrent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
@@ -294,7 +302,6 @@
                         android:textSize="13sp" />
 
                     <TextView
-                        android:id="@+id/tvStatusHint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
@@ -302,48 +309,73 @@
                         android:textColor="@color/admin_text_secondary"
                         android:textSize="13sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <Spinner
-                            android:id="@+id/spinnerStatus"
-                            android:layout_width="0dp"
-                            android:layout_height="48dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_edittext_admin"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="14dp" />
-
-                        <ImageView
-                            android:id="@+id/ivPrint"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:layout_marginStart="12dp"
-                            android:background="@drawable/bg_chip_admin"
-                            android:contentDescription="@string/order_print"
-                            android:padding="12dp"
-                            android:src="@drawable/ic_print_admin"
-                            android:tint="@color/admin_primary" />
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUpdateStatus"
+                    <Spinner
+                        android:id="@+id/spinnerOrderStatus"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="14dp"
-                        android:text="@string/update_status"
+                        android:background="@drawable/bg_edittext_admin"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpdateOrderStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/update_order_status"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        app:backgroundTint="@color/admin_primary"
+                        app:cornerRadius="22dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:text="@string/payment_status_label"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPaymentStatusCurrent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/payment_status_update_summary"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/payment_status_allowed_hint"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textSize="13sp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerPaymentStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_edittext_admin"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpdatePaymentStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/update_payment_status"
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
                         app:backgroundTint="@color/admin_primary"
                         app:cornerRadius="22dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-
 
         </LinearLayout>
     </ScrollView>

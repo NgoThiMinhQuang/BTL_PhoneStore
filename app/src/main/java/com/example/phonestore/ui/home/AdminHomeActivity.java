@@ -16,12 +16,12 @@ import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Order;
-import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.admin.AdminProductsActivity;
 import com.example.phonestore.ui.admin.AdminReportsActivity;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.orders.OrderDetailActivity;
+import com.example.phonestore.ui.orders.OrdersAdapter;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -248,7 +248,11 @@ public class AdminHomeActivity extends BaseHomeActivity {
             String title = order.username == null
                     ? getString(R.string.admin_order_code, order.id)
                     : getString(R.string.admin_order_code_with_user, order.id, order.username);
-            String sub = formatStatus(order.trangThai);
+            String sub = getString(
+                    R.string.order_list_status_pair,
+                    OrdersAdapter.formatOrderStatus(this, order.trangThaiDon),
+                    OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)
+            );
             String meta = getString(R.string.admin_price_currency, moneyFormat.format(order.tongTien));
             View itemView = addDashboardEntry(container, title, sub, meta);
             itemView.setOnClickListener(v -> {
@@ -280,17 +284,6 @@ public class AdminHomeActivity extends BaseHomeActivity {
         tvMeta.setTextColor(ContextCompat.getColor(this, R.color.admin_dashboard_blue));
         container.addView(view);
         return view;
-    }
-
-    private String formatStatus(String status) {
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
-        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
-        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
-        if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);
-        if (OrderStatus.STATUS_DA_HUY.equals(status)) return getString(R.string.order_status_cancelled);
-        if (status == null) return "";
-        return status.replace('_', ' ');
     }
 
     private String joinNames(List<String> names) {

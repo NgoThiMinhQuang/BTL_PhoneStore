@@ -24,8 +24,8 @@
 
             <ImageView
                 android:id="@+id/ivInventoryThumb"
-                android:layout_width="92dp"
-                android:layout_height="92dp"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
                 android:background="@drawable/bg_admin_product_thumb"
                 android:contentDescription="@string/admin_product_image"
                 android:padding="4dp"
@@ -44,8 +44,8 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:textColor="@color/admin_text_primary"
-                    android:textSize="20sp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -53,20 +53,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textSize="15sp" />
+                    android:textColor="@color/text_sub"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/tvInventoryStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_admin_product_status"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/bg_inventory_alert_chip"
                     android:paddingStart="18dp"
                     android:paddingTop="8dp"
                     android:paddingEnd="18dp"
                     android:paddingBottom="8dp"
-                    android:textColor="@color/admin_product_status_low"
+                    android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -76,11 +76,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:background="@drawable/bg_edittext_admin"
-            android:backgroundTint="@color/admin_inventory_panel_bg"
+            android:background="@drawable/bg_inventory_alert_stats"
             android:baselineAligned="false"
             android:orientation="horizontal"
-            android:padding="18dp">
+            android:paddingStart="18dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="18dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -123,7 +125,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:textColor="@color/admin_text_primary"
+                    android:textColor="@color/text_primary"
                     android:textSize="26sp"
                     android:textStyle="bold" />
             </LinearLayout>

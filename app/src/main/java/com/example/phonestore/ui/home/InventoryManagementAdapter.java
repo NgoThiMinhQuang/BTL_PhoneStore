@@ -108,10 +108,14 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
         }
 
         holder.tvStatus.setText(textRes);
-        holder.tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
-        Drawable background = holder.tvStatus.getBackground();
-        if (background instanceof GradientDrawable) {
-            ((GradientDrawable) background.mutate()).setColor(ContextCompat.getColor(context, bgColorRes));
+        if (alertMode) {
+            holder.tvStatus.setTextColor(ContextCompat.getColor(context, android.R.color.white));
+        } else {
+            holder.tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
+            Drawable background = holder.tvStatus.getBackground();
+            if (background instanceof GradientDrawable) {
+                ((GradientDrawable) background.mutate()).setColor(ContextCompat.getColor(context, bgColorRes));
+            }
         }
         holder.tvCurrentStockValue.setTextColor(ContextCompat.getColor(context, stockColorRes));
         if (alertMode) {

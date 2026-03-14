@@ -13,8 +13,8 @@ import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
-import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.ui.orders.OrdersAdapter;
 import com.example.phonestore.utils.SessionManager;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -62,7 +62,7 @@ public class AdminReportsActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setContentInsetsRelative(0, 0);
         toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(0);
+        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
         toolbar.setTitleMarginEnd(0);
         toolbar.setTitleMarginTop(0);
         toolbar.setTitleMarginBottom(0);
@@ -197,7 +197,7 @@ public class AdminReportsActivity extends AppCompatActivity {
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         for (OrderDao.StatusCount s : list) {
-            entries.add(new PieEntry(s.count, formatStatus(s.status)));
+            entries.add(new PieEntry(s.count, OrdersAdapter.formatOrderStatus(this, s.status)));
         }
 
         PieDataSet set = new PieDataSet(entries, getString(R.string.admin_reports_status_label));
@@ -212,16 +212,6 @@ public class AdminReportsActivity extends AppCompatActivity {
         PieData data = new PieData(set);
         chart.setData(data);
         chart.invalidate();
-    }
-
-    private String formatStatus(String status) {
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
-        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
-        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
-        if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);
-        if (OrderStatus.STATUS_DA_HUY.equals(status)) return getString(R.string.order_status_cancelled);
-        return status == null ? "" : status;
     }
 
     private String shortName(String s) {

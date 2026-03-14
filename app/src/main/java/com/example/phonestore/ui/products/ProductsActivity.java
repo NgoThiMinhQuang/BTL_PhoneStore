@@ -34,6 +34,13 @@ public class ProductsActivity extends AppCompatActivity {
         selectedBrand = getIntent().getStringExtra(EXTRA_BRAND);
         String title = getIntent().getStringExtra(EXTRA_TITLE);
 
+        toolbar.setContentInsetsRelative(0, 0);
+        toolbar.setContentInsetsAbsolute(0, 0);
+        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
+        toolbar.setTitleMarginEnd(0);
+        toolbar.setTitleMarginTop(0);
+        toolbar.setTitleMarginBottom(0);
+
         if (title != null && !title.trim().isEmpty()) {
             toolbar.setTitle("Sản phẩm - " + title);
         } else if (selectedBrand != null && !selectedBrand.trim().isEmpty()) {

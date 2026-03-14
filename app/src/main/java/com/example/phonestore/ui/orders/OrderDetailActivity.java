@@ -22,9 +22,9 @@ import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
+import com.example.phonestore.data.model.PaymentStatus;
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -37,7 +37,8 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_ORDER_ID = "extra_order_id";
 
-    private final ArrayList<String> availableStatuses = new ArrayList<>();
+    private final ArrayList<String> availableOrderStatuses = new ArrayList<>();
+    private final ArrayList<String> availablePaymentStatuses = new ArrayList<>();
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
@@ -56,9 +57,12 @@ public class OrderDetailActivity extends AppCompatActivity {
     private TextView tvProductsSummary;
     private TextView tvOrderTotal;
     private TextView tvPaymentMethod;
-    private TextView tvStatusCurrent;
-    private Spinner spinnerStatus;
-    private MaterialButton btnUpdateStatus;
+    private TextView tvOrderStatusCurrent;
+    private TextView tvPaymentStatusCurrent;
+    private Spinner spinnerOrderStatus;
+    private Spinner spinnerPaymentStatus;
+    private MaterialButton btnUpdateOrderStatus;
+    private MaterialButton btnUpdatePaymentStatus;
     private View cardStatusUpdate;
 
     @Override
@@ -86,13 +90,14 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         bindViews();
         setupRecyclerView();
-        setupStatusSpinner();
+        setupSpinners();
 
         if (!adminMode) {
             cardStatusUpdate.setVisibility(View.GONE);
         }
 
-        btnUpdateStatus.setOnClickListener(v -> updateOrderStatus());
+        btnUpdateOrderStatus.setOnClickListener(v -> updateOrderStatus());
+        btnUpdatePaymentStatus.setOnClickListener(v -> updatePaymentStatus());
 
         loadOrder(true);
     }
@@ -109,9 +114,12 @@ public class OrderDetailActivity extends AppCompatActivity {
         tvProductsSummary = findViewById(R.id.tvProductsSummary);
         tvOrderTotal = findViewById(R.id.tvOrderTotal);
         tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
-        tvStatusCurrent = findViewById(R.id.tvStatusCurrent);
-        spinnerStatus = findViewById(R.id.spinnerStatus);
-        btnUpdateStatus = findViewById(R.id.btnUpdateStatus);
+        tvOrderStatusCurrent = findViewById(R.id.tvOrderStatusCurrent);
+        tvPaymentStatusCurrent = findViewById(R.id.tvPaymentStatusCurrent);
+        spinnerOrderStatus = findViewById(R.id.spinnerOrderStatus);
+        spinnerPaymentStatus = findViewById(R.id.spinnerPaymentStatus);
+        btnUpdateOrderStatus = findViewById(R.id.btnUpdateOrderStatus);
+        btnUpdatePaymentStatus = findViewById(R.id.btnUpdatePaymentStatus);
         cardStatusUpdate = findViewById(R.id.cardStatusUpdate);
     }
 
@@ -122,8 +130,13 @@ public class OrderDetailActivity extends AppCompatActivity {
         rvOrderItems.setAdapter(adapter);
     }
 
-    private void setupStatusSpinner() {
-        spinnerStatus.setAdapter(new ArrayAdapter<>(
+    private void setupSpinners() {
+        spinnerOrderStatus.setAdapter(new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new ArrayList<>()
+        ));
+        spinnerPaymentStatus.setAdapter(new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
                 new ArrayList<>()
@@ -148,7 +161,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         adapter.setData(items);
         bindOrder(order, items);
 
-        if (shouldScrollToStatus) {
+        if (shouldScrollToStatus && adminMode) {
             scrollToStatusSection();
         }
     }
@@ -158,7 +171,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         tvOrderCode.setText(getString(R.string.admin_order_code, order.id));
         tvOrderDate.setText(formatDate(order.ngayTao));
-        updateStatusBadge(order.trangThai);
+        updateStatusBadge(order.trangThaiDon);
 
         tvCustomerName.setText(getString(R.string.order_customer_name) + " " + valueOrDash(order.nguoiNhan));
         tvCustomerPhone.setText(getString(R.string.order_customer_phone) + " " + valueOrDash(order.sdtNhan));
@@ -175,17 +188,18 @@ public class OrderDetailActivity extends AppCompatActivity {
         tvProductsSummary.setText(getString(R.string.order_products_summary, items.size()));
         tvOrderTotal.setText(formatCurrency(total));
         tvPaymentMethod.setText(formatPaymentMethod(order.phuongThucThanhToan));
-        tvStatusCurrent.setText(getString(R.string.order_status_current, formatStatus(order.trangThai)));
-        bindStatusControls(order.trangThai);
+        tvOrderStatusCurrent.setText(getString(R.string.order_status_current, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon)));
+        tvPaymentStatusCurrent.setText(getString(R.string.payment_status_current, OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)));
+        bindStatusControls(order);
     }
 
     private void updateOrderStatus() {
-        int selectedIndex = spinnerStatus.getSelectedItemPosition();
-        if (selectedIndex < 0 || selectedIndex >= availableStatuses.size()) {
+        int selectedIndex = spinnerOrderStatus.getSelectedItemPosition();
+        if (selectedIndex < 0 || selectedIndex >= availableOrderStatuses.size()) {
             return;
         }
 
-        boolean ok = orderDao.updateStatus(orderId, availableStatuses.get(selectedIndex));
+        boolean ok = orderDao.updateOrderStatus(orderId, availableOrderStatuses.get(selectedIndex));
         if (!ok) {
             Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
             return;
@@ -195,14 +209,35 @@ public class OrderDetailActivity extends AppCompatActivity {
         loadOrder(true);
     }
 
-    private void bindStatusControls(String currentStatus) {
-        List<String> nextStatuses = orderDao.getAllowedNextStatuses(currentStatus);
-        availableStatuses.clear();
-        availableStatuses.addAll(nextStatuses);
+    private void updatePaymentStatus() {
+        int selectedIndex = spinnerPaymentStatus.getSelectedItemPosition();
+        if (selectedIndex < 0 || selectedIndex >= availablePaymentStatuses.size()) {
+            return;
+        }
+
+        boolean ok = orderDao.updatePaymentStatus(orderId, availablePaymentStatuses.get(selectedIndex));
+        if (!ok) {
+            Toast.makeText(this, R.string.payment_status_update_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(this, R.string.payment_status_updated, Toast.LENGTH_SHORT).show();
+        loadOrder(true);
+    }
+
+    private void bindStatusControls(Order order) {
+        bindOrderStatusControls(order);
+        bindPaymentStatusControls(order);
+    }
+
+    private void bindOrderStatusControls(Order order) {
+        List<String> nextStatuses = orderDao.getAllowedNextOrderStatuses(order);
+        availableOrderStatuses.clear();
+        availableOrderStatuses.addAll(nextStatuses);
 
         ArrayList<String> labels = new ArrayList<>();
         for (String status : nextStatuses) {
-            labels.add(formatStatus(status));
+            labels.add(OrdersAdapter.formatOrderStatus(this, status));
         }
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
@@ -211,17 +246,36 @@ public class OrderDetailActivity extends AppCompatActivity {
                 labels
         );
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerStatus.setAdapter(spinnerAdapter);
+        spinnerOrderStatus.setAdapter(spinnerAdapter);
 
-        boolean finalStatus = orderDao.isFinalStatus(currentStatus);
-        spinnerStatus.setEnabled(!finalStatus && !nextStatuses.isEmpty());
-        btnUpdateStatus.setEnabled(!finalStatus && !nextStatuses.isEmpty());
+        boolean enabled = !orderDao.isFinalOrderStatus(order.trangThaiDon) && !nextStatuses.isEmpty();
+        spinnerOrderStatus.setEnabled(enabled);
+        btnUpdateOrderStatus.setEnabled(enabled);
+        btnUpdateOrderStatus.setText(enabled ? R.string.update_order_status : R.string.order_status_locked);
+    }
 
-        if (finalStatus) {
-            btnUpdateStatus.setText(R.string.order_status_locked);
-        } else {
-            btnUpdateStatus.setText(R.string.update_status);
+    private void bindPaymentStatusControls(Order order) {
+        List<String> nextStatuses = orderDao.getAllowedNextPaymentStatuses(order);
+        availablePaymentStatuses.clear();
+        availablePaymentStatuses.addAll(nextStatuses);
+
+        ArrayList<String> labels = new ArrayList<>();
+        for (String status : nextStatuses) {
+            labels.add(OrdersAdapter.formatPaymentStatus(this, status));
         }
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                labels
+        );
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPaymentStatus.setAdapter(spinnerAdapter);
+
+        boolean enabled = !nextStatuses.isEmpty();
+        spinnerPaymentStatus.setEnabled(enabled);
+        btnUpdatePaymentStatus.setEnabled(enabled);
+        btnUpdatePaymentStatus.setText(enabled ? R.string.update_payment_status : R.string.payment_status_locked);
     }
 
     private void scrollToStatusSection() {
@@ -236,14 +290,12 @@ public class OrderDetailActivity extends AppCompatActivity {
         badge.setStroke(dp(1), ContextCompat.getColor(this, getStatusAccentColor(status)));
 
         tvStatusBadge.setBackground(badge);
-        tvStatusBadge.setText(formatStatus(status));
+        tvStatusBadge.setText(OrdersAdapter.formatOrderStatus(this, status));
         tvStatusBadge.setTextColor(ContextCompat.getColor(this, getStatusAccentColor(status)));
     }
 
     private int getStatusBackgroundColor(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
-        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return R.color.admin_dashboard_blue_soft;
-        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return R.color.admin_surface_soft;
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_surface_soft;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger_soft;
@@ -252,8 +304,6 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private int getStatusAccentColor(String status) {
         if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
-        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return R.color.admin_dashboard_blue;
-        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return R.color.admin_primary;
         if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_primary;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
@@ -288,17 +338,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             return getString(R.string.payment_cod);
         }
         return valueOrDash(paymentMethod);
-    }
-
-    private String formatStatus(String status) {
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return getString(R.string.order_status_pending);
-        if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) return getString(R.string.order_status_waiting_payment);
-        if (OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) return getString(R.string.order_status_paid);
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return getString(R.string.order_status_processing);
-        if (OrderStatus.STATUS_DA_GIAO.equals(status)) return getString(R.string.order_status_delivered);
-        if (OrderStatus.STATUS_DA_HUY.equals(status)) return getString(R.string.order_status_cancelled);
-        if (status == null || status.trim().isEmpty()) return "-";
-        return status.replace('_', ' ');
     }
 
     private String valueOrDash(String value) {

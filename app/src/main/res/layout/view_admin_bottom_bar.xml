@@ -30,7 +30,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_nav_home"
+            android:src="@drawable/ic_home"
             android:tint="@color/admin_bottom_bar_item_tint" />
 
         <TextView
@@ -63,7 +63,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_nav_orders"
+            android:src="@drawable/ic_product_selling"
             android:tint="@color/admin_bottom_bar_item_tint" />
 
         <TextView

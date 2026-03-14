@@ -98,7 +98,8 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setContentInsetsRelative(0, 0);
         toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(0);
+        int titleMarginStart = Math.round(getResources().getDisplayMetrics().density * (shouldShowBackButton() ? 14 : 12));
+        toolbar.setTitleMarginStart(titleMarginStart);
         toolbar.setTitleMarginEnd(0);
         toolbar.setTitleMarginTop(0);
         toolbar.setTitleMarginBottom(0);

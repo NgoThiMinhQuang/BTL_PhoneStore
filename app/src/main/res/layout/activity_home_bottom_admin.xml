@@ -7,31 +7,38 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="88dp"
-        android:background="@drawable/bg_toolbar_admin"
-        android:elevation="0dp"
-        android:gravity="center_vertical"
-        android:minHeight="88dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        app:contentInsetStartWithNavigation="0dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleMargin="0dp"
-        app:titleTextColor="@android:color/white" />
-
     <FrameLayout
-        android:id="@+id/homeContentContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="-16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="0dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="0dp" />
+        android:layout_weight="1">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:background="@drawable/bg_toolbar_admin"
+            android:elevation="0dp"
+            android:gravity="center_vertical"
+            android:minHeight="88dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="12dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleMargin="0dp"
+            app:titleTextColor="@android:color/white" />
+
+        <FrameLayout
+            android:id="@+id/homeContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="62dp"
+            android:background="@drawable/bg_shell_content_surface"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="0dp" />
+    </FrameLayout>
 
     <include layout="@layout/view_admin_bottom_bar" />
 </LinearLayout>

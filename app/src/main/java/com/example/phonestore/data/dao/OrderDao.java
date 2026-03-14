@@ -12,6 +12,7 @@ import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
+import com.example.phonestore.data.model.PaymentStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +89,11 @@ public class OrderDao {
         int total = 0;
         for (CartItem it : items) total += it.thanhTien();
 
+        String orderStatus = OrderStatus.STATUS_CHO_XAC_NHAN;
+        String paymentStatus = CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod)
+                ? PaymentStatus.STATUS_CHO_THANH_TOAN
+                : PaymentStatus.STATUS_CHUA_THANH_TOAN;
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -95,12 +101,8 @@ public class OrderDao {
             o.put(DBHelper.COL_O_USER_ID, userId);
             o.put(DBHelper.COL_O_TOTAL, total);
             o.put(DBHelper.COL_O_CREATED, System.currentTimeMillis());
-
-            String status = CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod)
-                    ? OrderStatus.STATUS_CHO_THANH_TOAN
-                    : OrderStatus.STATUS_CHO_XAC_NHAN;
-            o.put(DBHelper.COL_O_STATUS, status);
-
+            o.put(DBHelper.COL_O_ORDER_STATUS, orderStatus);
+            o.put(DBHelper.COL_O_PAYMENT_STATUS, paymentStatus);
             o.put(DBHelper.COL_O_RECEIVER, normalizeText(info.receiverName));
             o.put(DBHelper.COL_O_PHONE, normalizeText(info.receiverPhone));
             o.put(DBHelper.COL_O_ADDRESS, normalizeText(info.receiverAddress));
@@ -149,7 +151,7 @@ public class OrderDao {
                         it.soLuong,
                         REFERENCE_TYPE_ORDER,
                         orderId,
-                        status
+                        orderStatus
                 );
             }
 
@@ -178,11 +180,13 @@ public class OrderDao {
     public Order getOrderById(long orderId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.rawQuery(
-                "SELECT " + DBHelper.COL_ID + "," +
+                "SELECT " +
+                        DBHelper.COL_ID + "," +
                         DBHelper.COL_O_USER_ID + "," +
                         DBHelper.COL_O_TOTAL + "," +
                         DBHelper.COL_O_CREATED + "," +
-                        DBHelper.COL_O_STATUS + "," +
+                        DBHelper.COL_O_ORDER_STATUS + "," +
+                        DBHelper.COL_O_PAYMENT_STATUS + "," +
                         DBHelper.COL_O_RECEIVER + "," +
                         DBHelper.COL_O_PHONE + "," +
                         DBHelper.COL_O_ADDRESS + "," +
@@ -193,22 +197,12 @@ public class OrderDao {
                 new String[]{String.valueOf(orderId)}
         );
 
-        Order o = null;
+        Order order = null;
         if (c.moveToFirst()) {
-            o = new Order();
-            o.id = c.getLong(0);
-            o.userId = c.getLong(1);
-            o.tongTien = c.getInt(2);
-            o.ngayTao = c.getLong(3);
-            o.trangThai = c.getString(4);
-            o.nguoiNhan = c.getString(5);
-            o.sdtNhan = c.getString(6);
-            o.diaChiNhan = c.getString(7);
-            o.phuongThucThanhToan = c.getString(8);
-            o.ghiChu = c.getString(9);
+            order = readOrder(c);
         }
         c.close();
-        return o;
+        return order;
     }
 
     public ArrayList<Order> getOrdersByUser(long userId) {
@@ -216,25 +210,26 @@ public class OrderDao {
         ArrayList<Order> list = new ArrayList<>();
 
         Cursor c = db.rawQuery(
-                "SELECT " + DBHelper.COL_ID + "," +
+                "SELECT " +
+                        DBHelper.COL_ID + "," +
                         DBHelper.COL_O_USER_ID + "," +
                         DBHelper.COL_O_TOTAL + "," +
                         DBHelper.COL_O_CREATED + "," +
-                        DBHelper.COL_O_STATUS +
+                        DBHelper.COL_O_ORDER_STATUS + "," +
+                        DBHelper.COL_O_PAYMENT_STATUS + "," +
+                        DBHelper.COL_O_RECEIVER + "," +
+                        DBHelper.COL_O_PHONE + "," +
+                        DBHelper.COL_O_ADDRESS + "," +
+                        DBHelper.COL_O_PAY_METHOD + "," +
+                        DBHelper.COL_O_NOTE +
                         " FROM " + DBHelper.TBL_ORDERS +
-                        " WHERE " + DBHelper.COL_O_USER_ID + "=? " +
+                        " WHERE " + DBHelper.COL_O_USER_ID + "=?" +
                         " ORDER BY " + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(userId)}
         );
 
         while (c.moveToNext()) {
-            Order o = new Order();
-            o.id = c.getLong(0);
-            o.userId = c.getLong(1);
-            o.tongTien = c.getInt(2);
-            o.ngayTao = c.getLong(3);
-            o.trangThai = c.getString(4);
-            list.add(o);
+            list.add(readOrder(c));
         }
         c.close();
         return list;
@@ -245,12 +240,19 @@ public class OrderDao {
         ArrayList<Order> list = new ArrayList<>();
 
         Cursor c = db.rawQuery(
-                "SELECT o." + DBHelper.COL_ID + "," +
-                        " o." + DBHelper.COL_O_USER_ID + "," +
-                        " u." + DBHelper.COL_USERNAME + "," +
-                        " o." + DBHelper.COL_O_TOTAL + "," +
-                        " o." + DBHelper.COL_O_CREATED + "," +
-                        " o." + DBHelper.COL_O_STATUS +
+                "SELECT " +
+                        "o." + DBHelper.COL_ID + "," +
+                        "o." + DBHelper.COL_O_USER_ID + "," +
+                        "u." + DBHelper.COL_USERNAME + "," +
+                        "o." + DBHelper.COL_O_TOTAL + "," +
+                        "o." + DBHelper.COL_O_CREATED + "," +
+                        "o." + DBHelper.COL_O_ORDER_STATUS + "," +
+                        "o." + DBHelper.COL_O_PAYMENT_STATUS + "," +
+                        "o." + DBHelper.COL_O_RECEIVER + "," +
+                        "o." + DBHelper.COL_O_PHONE + "," +
+                        "o." + DBHelper.COL_O_ADDRESS + "," +
+                        "o." + DBHelper.COL_O_PAY_METHOD + "," +
+                        "o." + DBHelper.COL_O_NOTE +
                         " FROM " + DBHelper.TBL_ORDERS + " o" +
                         " JOIN " + DBHelper.TBL_USERS + " u ON u." + DBHelper.COL_ID + " = o." + DBHelper.COL_O_USER_ID +
                         " ORDER BY o." + DBHelper.COL_ID + " DESC",
@@ -258,14 +260,7 @@ public class OrderDao {
         );
 
         while (c.moveToNext()) {
-            Order o = new Order();
-            o.id = c.getLong(0);
-            o.userId = c.getLong(1);
-            o.username = c.getString(2);
-            o.tongTien = c.getInt(3);
-            o.ngayTao = c.getLong(4);
-            o.trangThai = c.getString(5);
-            list.add(o);
+            list.add(readOrder(c));
         }
         c.close();
         return list;
@@ -285,7 +280,7 @@ public class OrderDao {
                         DBHelper.COL_OI_QTY + "," +
                         DBHelper.COL_OI_AMOUNT +
                         " FROM " + DBHelper.TBL_ORDER_ITEMS +
-                        " WHERE " + DBHelper.COL_OI_ORDER_ID + "=? " +
+                        " WHERE " + DBHelper.COL_OI_ORDER_ID + "=?" +
                         " ORDER BY " + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(orderId)}
         );
@@ -306,18 +301,18 @@ public class OrderDao {
         return list;
     }
 
-    public boolean updateStatus(long orderId, String status) {
-        if (!isValidStatus(status)) return false;
+    public boolean updateOrderStatus(long orderId, String newStatus) {
+        if (!isValidOrderStatus(newStatus)) return false;
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
         try {
             Order order = getOrderByIdInTransaction(db, orderId);
-            if (order == null || !canTransition(order.trangThai, status)) {
+            if (!canTransitionOrder(order, newStatus)) {
                 return false;
             }
 
-            if (OrderStatus.STATUS_DA_HUY.equals(status) && !OrderStatus.STATUS_DA_HUY.equals(order.trangThai)) {
+            if (OrderStatus.STATUS_DA_HUY.equals(newStatus) && !OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon)) {
                 ArrayList<OrderItem> items = getOrderItemsInTransaction(db, orderId);
                 for (OrderItem item : items) {
                     db.execSQL(
@@ -340,7 +335,43 @@ public class OrderDao {
             }
 
             ContentValues v = new ContentValues();
-            v.put(DBHelper.COL_O_STATUS, status);
+            v.put(DBHelper.COL_O_ORDER_STATUS, newStatus);
+            if (OrderStatus.STATUS_DA_GIAO.equals(newStatus)
+                    && CheckoutInfo.PAYMENT_COD.equals(order.phuongThucThanhToan)
+                    && !PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+                v.put(DBHelper.COL_O_PAYMENT_STATUS, PaymentStatus.STATUS_DA_THANH_TOAN);
+            }
+
+            boolean updated = db.update(
+                    DBHelper.TBL_ORDERS,
+                    v,
+                    DBHelper.COL_ID + "=?",
+                    new String[]{String.valueOf(orderId)}
+            ) > 0;
+            if (!updated) {
+                return false;
+            }
+
+            db.setTransactionSuccessful();
+            return true;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public boolean updatePaymentStatus(long orderId, String newStatus) {
+        if (!isValidPaymentStatus(newStatus)) return false;
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Order order = getOrderByIdInTransaction(db, orderId);
+            if (!canTransitionPayment(order, newStatus)) {
+                return false;
+            }
+
+            ContentValues v = new ContentValues();
+            v.put(DBHelper.COL_O_PAYMENT_STATUS, newStatus);
             boolean updated = db.update(
                     DBHelper.TBL_ORDERS,
                     v,
@@ -362,7 +393,7 @@ public class OrderDao {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.rawQuery(
                 "SELECT SUM(" + DBHelper.COL_O_TOTAL + ") FROM " + DBHelper.TBL_ORDERS +
-                        " WHERE " + DBHelper.COL_O_STATUS + "=?",
+                        " WHERE " + DBHelper.COL_O_ORDER_STATUS + "=?",
                 new String[]{OrderStatus.STATUS_DA_GIAO}
         );
         int sum = 0;
@@ -420,7 +451,7 @@ public class OrderDao {
                         "SUM(" + DBHelper.COL_O_TOTAL + ") AS total " +
                         "FROM " + DBHelper.TBL_ORDERS + " " +
                         "WHERE strftime('%Y', datetime(" + DBHelper.COL_O_CREATED + "/1000, 'unixepoch')) = ? " +
-                        "AND " + DBHelper.COL_O_STATUS + "=? " +
+                        "AND " + DBHelper.COL_O_ORDER_STATUS + "=? " +
                         "GROUP BY m " +
                         "ORDER BY m",
                 new String[]{String.valueOf(year), OrderStatus.STATUS_DA_GIAO}
@@ -443,7 +474,7 @@ public class OrderDao {
                 "SELECT oi." + DBHelper.COL_OI_NAME + ", SUM(oi." + DBHelper.COL_OI_QTY + ") AS qty " +
                         "FROM " + DBHelper.TBL_ORDER_ITEMS + " oi " +
                         "JOIN " + DBHelper.TBL_ORDERS + " o ON o." + DBHelper.COL_ID + " = oi." + DBHelper.COL_OI_ORDER_ID + " " +
-                        "WHERE o." + DBHelper.COL_O_STATUS + "=? " +
+                        "WHERE o." + DBHelper.COL_O_ORDER_STATUS + "=? " +
                         "GROUP BY oi." + DBHelper.COL_OI_NAME + " " +
                         "ORDER BY qty DESC " +
                         "LIMIT " + limit,
@@ -464,9 +495,9 @@ public class OrderDao {
         ArrayList<StatusCount> list = new ArrayList<>();
 
         Cursor c = db.rawQuery(
-                "SELECT " + DBHelper.COL_O_STATUS + ", COUNT(*) AS cnt " +
+                "SELECT " + DBHelper.COL_O_ORDER_STATUS + ", COUNT(*) AS cnt " +
                         "FROM " + DBHelper.TBL_ORDERS + " " +
-                        "GROUP BY " + DBHelper.COL_O_STATUS,
+                        "GROUP BY " + DBHelper.COL_O_ORDER_STATUS,
                 null
         );
 
@@ -479,42 +510,91 @@ public class OrderDao {
         return list;
     }
 
-    public ArrayList<String> getAllowedNextStatuses(String currentStatus) {
+    public ArrayList<String> getAllowedNextOrderStatuses(Order order) {
         ArrayList<String> allowed = new ArrayList<>();
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(currentStatus)) {
+        if (canTransitionOrder(order, OrderStatus.STATUS_DANG_XU_LY)) {
             allowed.add(OrderStatus.STATUS_DANG_XU_LY);
-            allowed.add(OrderStatus.STATUS_DA_HUY);
-        } else if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(currentStatus)) {
-            allowed.add(OrderStatus.STATUS_DA_THANH_TOAN);
-            allowed.add(OrderStatus.STATUS_DA_HUY);
-        } else if (OrderStatus.STATUS_DA_THANH_TOAN.equals(currentStatus)) {
-            allowed.add(OrderStatus.STATUS_DANG_XU_LY);
-            allowed.add(OrderStatus.STATUS_DA_HUY);
-        } else if (OrderStatus.STATUS_DANG_XU_LY.equals(currentStatus)) {
+        }
+        if (canTransitionOrder(order, OrderStatus.STATUS_DA_GIAO)) {
             allowed.add(OrderStatus.STATUS_DA_GIAO);
+        }
+        if (canTransitionOrder(order, OrderStatus.STATUS_DA_HUY)) {
             allowed.add(OrderStatus.STATUS_DA_HUY);
         }
         return allowed;
     }
 
-    public boolean isFinalStatus(String status) {
+    public ArrayList<String> getAllowedNextPaymentStatuses(Order order) {
+        ArrayList<String> allowed = new ArrayList<>();
+        if (canTransitionPayment(order, PaymentStatus.STATUS_DA_THANH_TOAN)) {
+            allowed.add(PaymentStatus.STATUS_DA_THANH_TOAN);
+        }
+        return allowed;
+    }
+
+    public boolean isFinalOrderStatus(String status) {
         return OrderStatus.STATUS_DA_GIAO.equals(status) || OrderStatus.STATUS_DA_HUY.equals(status);
     }
 
-    public boolean canTransition(String oldStatus, String newStatus) {
-        if (!isValidStatus(oldStatus) || !isValidStatus(newStatus)) return false;
-        if (TextUtils.equals(oldStatus, newStatus)) return false;
-        if (isFinalStatus(oldStatus)) return false;
-        return getAllowedNextStatuses(oldStatus).contains(newStatus);
+    public boolean canTransitionOrder(Order order, String newStatus) {
+        if (order == null || !isValidOrderStatus(newStatus) || !isValidOrderStatus(order.trangThaiDon)) {
+            return false;
+        }
+        if (TextUtils.equals(order.trangThaiDon, newStatus) || isFinalOrderStatus(order.trangThaiDon)) {
+            return false;
+        }
+
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(newStatus)) {
+                return canMoveToProcessing(order);
+            }
+            return OrderStatus.STATUS_DA_HUY.equals(newStatus);
+        }
+
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon)) {
+            return OrderStatus.STATUS_DA_GIAO.equals(newStatus)
+                    || OrderStatus.STATUS_DA_HUY.equals(newStatus);
+        }
+
+        return false;
     }
 
-    private boolean isValidStatus(String status) {
+    public boolean canTransitionPayment(Order order, String newStatus) {
+        if (order == null || !isValidPaymentStatus(newStatus) || !isValidPaymentStatus(order.trangThaiThanhToan)) {
+            return false;
+        }
+        if (TextUtils.equals(order.trangThaiThanhToan, newStatus)) {
+            return false;
+        }
+        if (OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon)) {
+            return false;
+        }
+        if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            return false;
+        }
+        return PaymentStatus.STATUS_DA_THANH_TOAN.equals(newStatus)
+                && (PaymentStatus.STATUS_CHUA_THANH_TOAN.equals(order.trangThaiThanhToan)
+                || PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan));
+    }
+
+    private boolean canMoveToProcessing(Order order) {
+        if (!CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(order.phuongThucThanhToan)) {
+            return true;
+        }
+        return PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan);
+    }
+
+    private boolean isValidOrderStatus(String status) {
         return OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)
-                || OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)
-                || OrderStatus.STATUS_DA_THANH_TOAN.equals(status)
                 || OrderStatus.STATUS_DANG_XU_LY.equals(status)
                 || OrderStatus.STATUS_DA_GIAO.equals(status)
                 || OrderStatus.STATUS_DA_HUY.equals(status);
+    }
+
+    private boolean isValidPaymentStatus(String status) {
+        return PaymentStatus.STATUS_CHUA_THANH_TOAN.equals(status)
+                || PaymentStatus.STATUS_CHO_THANH_TOAN.equals(status)
+                || PaymentStatus.STATUS_DA_THANH_TOAN.equals(status);
     }
 
     private String validateCheckoutInfo(CheckoutInfo info) {
@@ -548,11 +628,13 @@ public class OrderDao {
 
     private Order getOrderByIdInTransaction(SQLiteDatabase db, long orderId) {
         Cursor c = db.rawQuery(
-                "SELECT " + DBHelper.COL_ID + "," +
+                "SELECT " +
+                        DBHelper.COL_ID + "," +
                         DBHelper.COL_O_USER_ID + "," +
                         DBHelper.COL_O_TOTAL + "," +
                         DBHelper.COL_O_CREATED + "," +
-                        DBHelper.COL_O_STATUS + "," +
+                        DBHelper.COL_O_ORDER_STATUS + "," +
+                        DBHelper.COL_O_PAYMENT_STATUS + "," +
                         DBHelper.COL_O_RECEIVER + "," +
                         DBHelper.COL_O_PHONE + "," +
                         DBHelper.COL_O_ADDRESS + "," +
@@ -564,19 +646,30 @@ public class OrderDao {
         );
         Order order = null;
         if (c.moveToFirst()) {
-            order = new Order();
-            order.id = c.getLong(0);
-            order.userId = c.getLong(1);
-            order.tongTien = c.getInt(2);
-            order.ngayTao = c.getLong(3);
-            order.trangThai = c.getString(4);
-            order.nguoiNhan = c.getString(5);
-            order.sdtNhan = c.getString(6);
-            order.diaChiNhan = c.getString(7);
-            order.phuongThucThanhToan = c.getString(8);
-            order.ghiChu = c.getString(9);
+            order = readOrder(c);
         }
         c.close();
+        return order;
+    }
+
+    private Order readOrder(Cursor c) {
+        Order order = new Order();
+        order.id = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_ID));
+        order.userId = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_USER_ID));
+        order.tongTien = c.getInt(c.getColumnIndexOrThrow(DBHelper.COL_O_TOTAL));
+        order.ngayTao = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_CREATED));
+        order.trangThaiDon = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_ORDER_STATUS));
+        order.trangThaiThanhToan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_PAYMENT_STATUS));
+        order.nguoiNhan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_RECEIVER));
+        order.sdtNhan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_PHONE));
+        order.diaChiNhan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_ADDRESS));
+        order.phuongThucThanhToan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_PAY_METHOD));
+        order.ghiChu = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_NOTE));
+
+        int usernameIndex = c.getColumnIndex(DBHelper.COL_USERNAME);
+        if (usernameIndex >= 0) {
+            order.username = c.getString(usernameIndex);
+        }
         return order;
     }
 
@@ -592,7 +685,7 @@ public class OrderDao {
                         DBHelper.COL_OI_QTY + "," +
                         DBHelper.COL_OI_AMOUNT +
                         " FROM " + DBHelper.TBL_ORDER_ITEMS +
-                        " WHERE " + DBHelper.COL_OI_ORDER_ID + "=? " +
+                        " WHERE " + DBHelper.COL_OI_ORDER_ID + "=?" +
                         " ORDER BY " + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(orderId)}
         );

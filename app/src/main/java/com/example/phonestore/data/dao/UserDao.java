@@ -158,7 +158,7 @@ public class UserDao {
                 " u." + DBHelper.COL_ROLE + "," +
                 " u." + DBHelper.COL_IS_ACTIVE + "," +
                 " COUNT(CASE WHEN o." + DBHelper.COL_ID + " IS NOT NULL THEN 1 END) AS order_count," +
-                " COALESCE(SUM(CASE WHEN o." + DBHelper.COL_O_STATUS + "='" + OrderStatus.STATUS_DA_GIAO + "' THEN o." + DBHelper.COL_O_TOTAL + " ELSE 0 END), 0) AS delivered_spend" +
+                " COALESCE(SUM(CASE WHEN o." + DBHelper.COL_O_ORDER_STATUS + "='" + OrderStatus.STATUS_DA_GIAO + "' THEN o." + DBHelper.COL_O_TOTAL + " ELSE 0 END), 0) AS delivered_spend" +
                 " FROM " + DBHelper.TBL_USERS + " u" +
                 " LEFT JOIN " + DBHelper.TBL_ORDERS + " o ON o." + DBHelper.COL_O_USER_ID + " = u." + DBHelper.COL_ID +
                 " WHERE u." + DBHelper.COL_ROLE + "=? AND u." + DBHelper.COL_IS_ACTIVE + "=1";

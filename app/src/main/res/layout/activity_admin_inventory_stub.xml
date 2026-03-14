@@ -28,14 +28,7 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvStubSummary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/admin_stub_message"
-                android:textColor="@color/admin_text_secondary"
-                android:textSize="13sp" />
+
         </LinearLayout>
 
         <LinearLayout

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_home"
@@ -41,65 +42,25 @@
         android:textColorHint="@color/text_hint" />
 
     <!-- Banner -->
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:background="@drawable/bg_panel"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Siêu sale cuối tuần"
-                android:textColor="@color/red_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Giảm đến 20% cho dòng máy cao cấp"
-                android:textColor="@color/text_primary"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/btnBannerBuyNow"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_button_outline"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:text="Mua ngay"
-                android:textColor="@color/red_primary"
-                android:textStyle="bold" />
-        </LinearLayout>
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="4dp">
 
         <ImageView
-            android:id="@+id/imgBannerPlaceholder"
-            android:layout_width="92dp"
-            android:layout_height="92dp"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/bg_image_soft"
-            android:contentDescription="PLACEHOLDER_BANNER"
-            android:padding="6dp"
+            android:id="@+id/btnBannerBuyNow"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:adjustViewBounds="true"
+            android:clickable="true"
+            android:contentDescription="Banner khuyến mãi"
+            android:focusable="true"
             android:scaleType="centerCrop"
-            android:src="@drawable/uu_dai" />
-    </LinearLayout>
+            android:src="@drawable/drawable_anh_uu_dai" />
+    </androidx.cardview.widget.CardView>
 
     <!-- 3 tiện ích -->
 

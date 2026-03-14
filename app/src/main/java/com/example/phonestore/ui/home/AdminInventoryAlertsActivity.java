@@ -2,6 +2,8 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,6 +27,7 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
     private ProductDao productDao;
     private InventoryHistoryDao historyDao;
     private InventoryManagementAdapter adapter;
+    private TextView tvAlertsHeaderCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,8 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
+        tvAlertsHeaderCount = findViewById(R.id.tvAlertsHeaderCount);
+
         RecyclerView rv = findViewById(R.id.rvInventoryAlerts);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InventoryManagementAdapter(item -> startActivity(new Intent(this, AdminReceiptEditorActivity.class)));
@@ -114,7 +119,17 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
             ));
         }
 
+        updateHeader(items.size());
         adapter.setData(items);
+    }
+
+    private void updateHeader(int count) {
+        if (tvAlertsHeaderCount == null) return;
+        if (count <= 0) {
+            tvAlertsHeaderCount.setText(R.string.admin_alerts_header_empty);
+            return;
+        }
+        tvAlertsHeaderCount.setText(getString(R.string.admin_alerts_summary_count, count));
     }
 
     private HashMap<Long, int[]> buildHistoryTotals() {

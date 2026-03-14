@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Order;
+import com.example.phonestore.data.model.OrderStatus;
+import com.example.phonestore.data.model.PaymentStatus;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -61,7 +63,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         h.tvTitle.setText(adminMode && o.username != null
                 ? h.itemView.getContext().getString(R.string.admin_order_code_with_user, o.id, o.username)
                 : h.itemView.getContext().getString(R.string.admin_order_code, o.id));
-        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_date_status, date, dinhDangTrangThai(h.itemView.getContext(), o.trangThai)));
+        h.tvSub.setText(h.itemView.getContext().getString(
+                R.string.admin_order_date_status,
+                date,
+                h.itemView.getContext().getString(
+                        R.string.order_list_status_pair,
+                        formatOrderStatus(h.itemView.getContext(), o.trangThaiDon),
+                        formatPaymentStatus(h.itemView.getContext(), o.trangThaiThanhToan)
+                )
+        ));
         h.tvTotal.setText(total);
 
         h.itemView.setOnClickListener(v -> listener.onClick(o));
@@ -75,25 +85,33 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         return data.size();
     }
 
-    private String dinhDangTrangThai(Context context, String status) {
+    public static String formatOrderStatus(Context context, String status) {
         if (status == null || status.trim().isEmpty()) return "-";
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) {
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) {
             return context.getString(R.string.order_status_pending);
         }
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_CHO_THANH_TOAN.equals(status)) {
-            return context.getString(R.string.order_status_waiting_payment);
-        }
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_THANH_TOAN.equals(status)) {
-            return context.getString(R.string.order_status_paid);
-        }
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_DANG_XU_LY.equals(status)) {
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) {
             return context.getString(R.string.order_status_processing);
         }
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_GIAO.equals(status)) {
+        if (OrderStatus.STATUS_DA_GIAO.equals(status)) {
             return context.getString(R.string.order_status_delivered);
         }
-        if (com.example.phonestore.data.model.OrderStatus.STATUS_DA_HUY.equals(status)) {
+        if (OrderStatus.STATUS_DA_HUY.equals(status)) {
             return context.getString(R.string.order_status_cancelled);
+        }
+        return status.replace('_', ' ');
+    }
+
+    public static String formatPaymentStatus(Context context, String status) {
+        if (status == null || status.trim().isEmpty()) return "-";
+        if (PaymentStatus.STATUS_CHUA_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.payment_status_unpaid);
+        }
+        if (PaymentStatus.STATUS_CHO_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.payment_status_waiting);
+        }
+        if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.payment_status_paid);
         }
         return status.replace('_', ' ');
     }

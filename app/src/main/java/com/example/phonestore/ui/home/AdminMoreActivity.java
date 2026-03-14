@@ -2,12 +2,8 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
-
 import com.example.phonestore.R;
 import com.example.phonestore.data.db.DBHelper;
-import com.example.phonestore.ui.admin.AdminCustomersActivity;
-import com.example.phonestore.ui.admin.AdminReportsActivity;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 
 public class AdminMoreActivity extends BaseHomeActivity {
@@ -30,7 +26,7 @@ public class AdminMoreActivity extends BaseHomeActivity {
 
     @Override
     protected int contentLayoutRes() {
-        return R.layout.content_admin_more;
+        return R.layout.content_admin_inventory_nav;
     }
 
     @Override
@@ -55,13 +51,10 @@ public class AdminMoreActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
-        TextView tvAdminUsername = findViewById(R.id.tvAdminUsername);
-        TextView tvAdminRole = findViewById(R.id.tvAdminRole);
-
-        tvAdminUsername.setText(session.getUsername() == null ? "Admin" : session.getUsername());
-        tvAdminRole.setText(getString(R.string.admin_role_access, session.getRole() == null ? DBHelper.ROLE_ADMIN : session.getRole()));
-
-        findViewById(R.id.btnOpenCustomers).setOnClickListener(v -> startActivity(new Intent(this, AdminCustomersActivity.class)));
-        findViewById(R.id.btnOpenReports).setOnClickListener(v -> startActivity(new Intent(this, AdminReportsActivity.class)));
+        findViewById(R.id.btnOpenInventoryOverview).setOnClickListener(v -> openBottomTab(new Intent(this, AdminInventoryOverviewActivity.class)));
+        findViewById(R.id.btnOpenReceipts).setOnClickListener(v -> openBottomTab(new Intent(this, AdminReceiptsActivity.class)));
+        findViewById(R.id.btnOpenSuppliers).setOnClickListener(v -> openBottomTab(new Intent(this, AdminSuppliersActivity.class)));
+        findViewById(R.id.btnOpenAlerts).setOnClickListener(v -> openBottomTab(new Intent(this, AdminInventoryAlertsActivity.class)));
+        findViewById(R.id.btnOpenHistory).setOnClickListener(v -> openBottomTab(new Intent(this, AdminInventoryHistoryActivity.class)));
     }
 }

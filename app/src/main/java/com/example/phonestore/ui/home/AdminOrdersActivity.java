@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 public class AdminOrdersActivity extends BaseHomeActivity {
 
-    private static final String FILTER_PENDING = "PENDING";
-    private static final String FILTER_PROCESSING = "PROCESSING";
+    private static final String FILTER_PENDING = OrderStatus.STATUS_CHO_XAC_NHAN;
+    private static final String FILTER_PROCESSING = OrderStatus.STATUS_DANG_XU_LY;
 
     private OrderDao orderDao;
     private OrdersAdapter adapter;
@@ -154,8 +154,7 @@ public class AdminOrdersActivity extends BaseHomeActivity {
         int pendingCount = 0;
 
         for (Order order : allOrders) {
-            if (OrderStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThai)
-                    || OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai)) {
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
                 pendingCount++;
             }
             if (matchesFilter(order)) {
@@ -170,14 +169,6 @@ public class AdminOrdersActivity extends BaseHomeActivity {
 
     private boolean matchesFilter(Order order) {
         if (currentFilter == null) return true;
-        if (FILTER_PENDING.equals(currentFilter)) {
-            return OrderStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThai)
-                    || OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThai);
-        }
-        if (FILTER_PROCESSING.equals(currentFilter)) {
-            return OrderStatus.STATUS_DA_THANH_TOAN.equals(order.trangThai)
-                    || OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThai);
-        }
-        return currentFilter.equals(order.trangThai);
+        return currentFilter.equals(order.trangThaiDon);
     }
 }

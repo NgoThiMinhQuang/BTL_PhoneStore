@@ -34,7 +34,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setContentInsetsRelative(0, 0);
         toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(0);
+        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
         toolbar.setTitleMarginEnd(0);
         toolbar.setTitleMarginTop(0);
         toolbar.setTitleMarginBottom(0);

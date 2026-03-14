@@ -6,9 +6,9 @@ public class Order {
     public String username; // admin xem tất cả
     public int tongTien;
     public long ngayTao;
-    public String trangThai;
+    public String trangThaiDon;
+    public String trangThaiThanhToan;
 
-    // NEW
     public String nguoiNhan;
     public String sdtNhan;
     public String diaChiNhan;

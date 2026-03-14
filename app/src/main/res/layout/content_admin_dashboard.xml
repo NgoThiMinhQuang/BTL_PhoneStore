@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="16dp"
         android:paddingBottom="24dp">
 
         <LinearLayout
@@ -38,15 +37,6 @@
                 android:textColor="@color/admin_text_primary"
                 android:textSize="24sp"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvDashboardSubtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/admin_dashboard_subtitle"
-                android:textColor="@color/admin_text_secondary"
-                android:textSize="13sp" />
 
             <EditText
                 android:layout_width="match_parent"

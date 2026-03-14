@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 11;
+    public static final int DB_VERSION = 12;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -45,7 +45,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_O_USER_ID = "nguoi_dung_id";
     public static final String COL_O_TOTAL = "tong_tien";
     public static final String COL_O_CREATED = "ngay_tao";
-    public static final String COL_O_STATUS = "trang_thai";
+    public static final String COL_O_ORDER_STATUS = "trang_thai_don";
+    public static final String COL_O_PAYMENT_STATUS = "trang_thai_thanh_toan";
 
     public static final String COL_O_RECEIVER = "nguoi_nhan";
     public static final String COL_O_PHONE = "sdt_nhan";
@@ -164,7 +165,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_O_USER_ID + " INTEGER NOT NULL, " +
                 COL_O_TOTAL + " INTEGER NOT NULL, " +
                 COL_O_CREATED + " INTEGER NOT NULL, " +
-                COL_O_STATUS + " TEXT NOT NULL, " +
+                COL_O_ORDER_STATUS + " TEXT NOT NULL, " +
+                COL_O_PAYMENT_STATUS + " TEXT NOT NULL, " +
                 COL_O_RECEIVER + " TEXT, " +
                 COL_O_PHONE + " TEXT, " +
                 COL_O_ADDRESS + " TEXT, " +

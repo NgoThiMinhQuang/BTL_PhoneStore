@@ -95,15 +95,14 @@ public abstract class BaseInventoryStubActivity extends BaseHomeActivity {
     @Override
     protected void onShellReady() {
         TextView tvStubTitle = findViewById(R.id.tvStubTitle);
-        TextView tvStubSummary = findViewById(R.id.tvStubSummary);
         LinearLayout layoutStubContent = findViewById(R.id.layoutStubContent);
 
         tvStubTitle.setText(stubTitle());
-        tvStubSummary.setText(stubSummary());
         bindKpi(R.id.cardStubKpiPrimary, primaryKpi());
         bindKpi(R.id.cardStubKpiSecondary, secondaryKpi());
 
         layoutStubContent.removeAllViews();
+        addEntry(layoutStubContent, stubTitle(), stubSummary(), "");
         populateStubContent(layoutStubContent);
     }
 }
