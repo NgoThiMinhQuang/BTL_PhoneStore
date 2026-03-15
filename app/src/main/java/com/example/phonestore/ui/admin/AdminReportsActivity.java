@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.example.phonestore.R;
@@ -14,8 +12,8 @@ import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.example.phonestore.ui.orders.OrdersAdapter;
-import com.example.phonestore.utils.SessionManager;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -37,18 +35,54 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class AdminReportsActivity extends AppCompatActivity {
-
-    private SessionManager session;
+public class AdminReportsActivity extends BaseHomeActivity {
     private OrderDao orderDao;
     private UserDao userDao;
 
     @Override
+    protected int shellLayoutRes() {
+        return R.layout.activity_admin_reports;
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return 0;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_admin;
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_admin_more;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.admin_reports_title);
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_reports);
 
-        session = new SessionManager(this);
         if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -58,17 +92,6 @@ public class AdminReportsActivity extends AppCompatActivity {
 
         orderDao = new OrderDao(this);
         userDao = new UserDao(this);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle(R.string.admin_reports_title);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         TextView tvRevenue = findViewById(R.id.tvRevenue);
         TextView tvOrders = findViewById(R.id.tvOrders);
@@ -100,12 +123,6 @@ public class AdminReportsActivity extends AppCompatActivity {
         renderRevenueByMonth(chartRevenue, orderDao.getDoanhThuTheoThang(year), year);
         renderTopProducts(chartTopProducts, orderDao.getTopSanPhamBanChay(5));
         renderOrderStatus(chartOrderStatus, orderDao.getSoDonTheoTrangThai());
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
     }
 
     private void renderRevenueByMonth(LineChart chart, ArrayList<OrderDao.MonthRevenue> raw, int year) {

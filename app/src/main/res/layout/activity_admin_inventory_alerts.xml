@@ -3,86 +3,106 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_toolbar_admin"
+    android:background="@color/admin_background"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="88dp"
-        android:background="@android:color/transparent"
-        android:elevation="0dp"
-        android:paddingStart="18dp"
-        android:paddingEnd="12dp"
-        app:contentInsetStartWithNavigation="0dp"
-        app:titleTextColor="@android:color/white" />
-
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="-10dp"
-        android:background="@drawable/bg_shell_content_surface"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingTop="18dp"
-        android:paddingEnd="16dp">
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/header_red_height"
+            android:background="@drawable/bg_toolbar_admin" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:background="@android:color/transparent"
+            android:elevation="0dp"
+            android:gravity="center_vertical"
+            android:minHeight="88dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:titleMargin="0dp"
+            app:titleTextColor="@android:color/white" />
 
         <LinearLayout
-            android:id="@+id/layoutAlertsHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_inventory_alert_header"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="18dp"
-            android:paddingTop="18dp"
-            android:paddingEnd="18dp"
-            android:paddingBottom="18dp">
-
-            <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:contentDescription="@string/admin_alerts_summary_title"
-                android:src="@drawable/ic_dashboard_alert"
-                android:tint="@android:color/white" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/header_admin_content_offset"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/layoutAlertsHeader"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="@dimen/header_panel_pull_up"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/bg_inventory_alert_header"
+                android:elevation="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="18dp"
+                android:paddingTop="18dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="18dp">
 
-                <TextView
-                    android:id="@+id/tvAlertsHeaderTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/admin_alerts_summary_title"
-                    android:textColor="@android:color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/admin_alerts_summary_title"
+                    android:src="@drawable/ic_dashboard_alert"
+                    android:tint="@android:color/white" />
 
-                <TextView
-                    android:id="@+id/tvAlertsHeaderCount"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp" />
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAlertsHeaderTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/admin_alerts_summary_title"
+                        android:textColor="@android:color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAlertsHeaderCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvInventoryAlerts"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="18dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="20dp" />
-    </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvInventoryAlerts"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="18dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingTop="0dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="20dp" />
+        </LinearLayout>
+    </FrameLayout>
 
     <include layout="@layout/view_admin_bottom_bar" />
 </LinearLayout>

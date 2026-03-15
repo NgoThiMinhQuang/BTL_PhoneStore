@@ -99,7 +99,6 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
         adapter = new InventoryManagementAdapter();
         rv.setAdapter(adapter);
 
-        findViewById(R.id.btnPrimaryAction).setVisibility(View.GONE);
         setupFilters();
 
         EditText edtSearch = findViewById(R.id.edtWarehouseSearch);

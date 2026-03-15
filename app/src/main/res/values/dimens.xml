@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="header_red_height">120dp</dimen>
+    <dimen name="header_customer_content_offset">60dp</dimen>
+    <dimen name="header_admin_content_offset">60dp</dimen>
+    <dimen name="header_panel_pull_up">20dp</dimen>
+</resources>

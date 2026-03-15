@@ -83,6 +83,10 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         return false;
     }
 
+    protected boolean shouldShowBottomNavigation() {
+        return true;
+    }
+
     protected void onShellReady() {
         // subclasses may override
     }
@@ -116,6 +120,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         }
 
         setupBottomNavigation();
+        updateShellNavigationVisibility();
 
         if (shouldSetupHomeInteractions()) {
             setupHomeBrandClicks();
@@ -134,7 +139,18 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!shouldShowToolbarActions()) return true;
         getMenuInflater().inflate(R.menu.menu_home_actions, menu);
+        tintToolbarMenuIcon(menu, R.id.nav_profile);
+        tintToolbarMenuIcon(menu, R.id.nav_logout);
         return true;
+    }
+
+    private void tintToolbarMenuIcon(Menu menu, int itemId) {
+        MenuItem item = menu.findItem(itemId);
+        if (item == null || item.getIcon() == null) return;
+
+        Drawable icon = item.getIcon().mutate();
+        icon.setTint(getColor(android.R.color.white));
+        item.setIcon(icon);
     }
 
     @Override
@@ -233,6 +249,20 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
             if (tab == null) continue;
             tab.setSelected(tabId == selectedBottomNavItemId());
             tab.setOnClickListener(v -> handleBottomNavigation(v.getId()));
+        }
+    }
+
+    private void updateShellNavigationVisibility() {
+        int visibility = shouldShowBottomNavigation() ? View.VISIBLE : View.GONE;
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        if (bottomNav != null) {
+            bottomNav.setVisibility(visibility);
+        }
+
+        View adminBottomBar = findViewById(R.id.adminBottomBar);
+        if (adminBottomBar != null) {
+            adminBottomBar.setVisibility(visibility);
         }
     }
 

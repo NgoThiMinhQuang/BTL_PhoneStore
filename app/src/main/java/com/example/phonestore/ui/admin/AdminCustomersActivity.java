@@ -14,8 +14,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,12 +22,10 @@ import com.example.phonestore.data.dao.UserDao;
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.User;
 import com.example.phonestore.ui.auth.WelcomeActivity;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.google.android.material.button.MaterialButton;
 
-public class AdminCustomersActivity extends AppCompatActivity {
-
-    private SessionManager session;
+public class AdminCustomersActivity extends BaseHomeActivity {
     private UserDao userDao;
     private AdminCustomersAdapter adapter;
     private EditText edtSearch;
@@ -41,11 +37,49 @@ public class AdminCustomersActivity extends AppCompatActivity {
     private Runnable searchRunnable;
 
     @Override
+    protected int shellLayoutRes() {
+        return R.layout.activity_admin_customers;
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return 0;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_admin;
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_admin_customers;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.admin_customers_title);
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_customers);
 
-        session = new SessionManager(this);
         if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -54,17 +88,6 @@ public class AdminCustomersActivity extends AppCompatActivity {
         }
 
         userDao = new UserDao(this);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle(R.string.admin_customers_title);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         edtSearch = findViewById(R.id.edtSearch);
         View cardCustomersCount = findViewById(R.id.cardCustomersCount);
@@ -225,9 +248,4 @@ public class AdminCustomersActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
 }

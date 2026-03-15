@@ -10,13 +10,20 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/header_red_height"
+            android:background="@drawable/bg_toolbar_admin_home" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="88dp"
-            android:background="@drawable/bg_toolbar_admin"
+            android:background="@android:color/transparent"
             android:elevation="0dp"
             android:gravity="center_vertical"
             android:minHeight="88dp"
@@ -31,13 +38,11 @@
             android:id="@+id/homeContentContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="62dp"
-            android:background="@drawable/bg_shell_content_surface"
+            android:layout_marginTop="@dimen/header_admin_content_offset"
+            android:background="@android:color/transparent"
+            android:clipChildren="false"
             android:clipToPadding="false"
-            android:paddingStart="16dp"
-            android:paddingTop="18dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="0dp" />
+            android:padding="0dp" />
     </FrameLayout>
 
     <include layout="@layout/view_admin_bottom_bar" />
