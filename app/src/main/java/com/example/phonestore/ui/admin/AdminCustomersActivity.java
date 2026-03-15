@@ -221,6 +221,7 @@ public class AdminCustomersActivity extends BaseHomeActivity {
         if (required && TextUtils.isEmpty(pass)) return getString(R.string.err_password_required);
         if (required && TextUtils.isEmpty(confirm)) return getString(R.string.err_confirm_password_required);
         if (!required && pass.isEmpty() && confirm.isEmpty()) return null;
+        if (pass.length() < 6) return "Mật khẩu phải có ít nhất 6 ký tự";
         if (!pass.equals(confirm)) return getString(R.string.err_password_not_match);
         return null;
     }

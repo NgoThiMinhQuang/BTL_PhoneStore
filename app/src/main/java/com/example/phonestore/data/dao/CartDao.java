@@ -73,7 +73,7 @@ public class CartDao {
                         " c." + DBHelper.COL_C_QTY +
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
-                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1 " +
+                        " WHERE c." + DBHelper.COL_C_USER_ID + "=?" +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(userId)}
         );
@@ -119,7 +119,6 @@ public class CartDao {
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
                         " WHERE c." + DBHelper.COL_C_USER_ID + "=?" +
-                        " AND p." + DBHelper.COL_IS_ACTIVE + "=1" +
                         " AND c." + DBHelper.COL_C_PRODUCT_ID + " IN (" + buildInClause(productIds.size()) + ")" +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 args

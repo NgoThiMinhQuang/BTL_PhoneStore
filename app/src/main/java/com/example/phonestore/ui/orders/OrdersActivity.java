@@ -4,37 +4,28 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
-import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Order;
 import com.example.phonestore.ui.auth.WelcomeActivity;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 
 import java.util.ArrayList;
 
-public class OrdersActivity extends AppCompatActivity {
+public class OrdersActivity extends BaseHomeActivity {
 
     public static final String EXTRA_SHOW_CHECKOUT_SUCCESS = "extra_show_checkout_success";
     public static final String EXTRA_CREATED_ORDER_ID = "extra_created_order_id";
 
-    private SessionManager session;
     private OrderDao orderDao;
     private OrdersAdapter adapter;
-    private boolean adminMode;
-    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_orders);
-
-        session = new SessionManager(this);
 
         if (!session.isLoggedIn() || session.getUserId() <= 0) {
             session.clear();
@@ -44,20 +35,6 @@ public class OrdersActivity extends AppCompatActivity {
         }
 
         orderDao = new OrderDao(this);
-        adminMode = resolveAdminMode();
-
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 14));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        setSupportActionBar(toolbar);
-        updateToolbarTitle();
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         RecyclerView rv = findViewById(R.id.rvOrders);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -74,22 +51,34 @@ public class OrdersActivity extends AppCompatActivity {
         showCheckoutSuccessIfNeeded(getIntent());
     }
 
-    private boolean resolveAdminMode() {
-        return DBHelper.ROLE_ADMIN.equals(session.getRole());
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_orders;
     }
 
-    private void updateToolbarTitle() {
-        if (toolbar != null) {
-            toolbar.setTitle(getString(adminMode ? R.string.orders_title_admin : R.string.orders_title_customer));
-        }
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_customer;
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_orders;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.orders_title_customer);
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
     }
 
     private void loadOrders() {
-        ArrayList<Order> list = adminMode
-                ? orderDao.getAllOrders()
-                : orderDao.getOrdersByUser(session.getUserId());
-
-        adapter.setData(list, adminMode);
+        ArrayList<Order> list = orderDao.getOrdersByUser(session.getUserId());
+        adapter.setData(list, false);
     }
 
     private void showCheckoutSuccessIfNeeded(Intent intent) {
@@ -115,9 +104,6 @@ public class OrdersActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-
-        adminMode = resolveAdminMode();
-        updateToolbarTitle();
         loadOrders();
         showCheckoutSuccessIfNeeded(intent);
     }
@@ -125,12 +111,8 @@ public class OrdersActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadOrders();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+        if (orderDao != null) {
+            loadOrders();
+        }
     }
 }

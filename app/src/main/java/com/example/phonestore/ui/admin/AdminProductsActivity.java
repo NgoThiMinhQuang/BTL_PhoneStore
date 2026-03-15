@@ -176,21 +176,40 @@ public class AdminProductsActivity extends BaseHomeActivity {
 
         EditText edtName = view.findViewById(R.id.edtName);
         EditText edtBrand = view.findViewById(R.id.edtBrand);
+        EditText edtImage = view.findViewById(R.id.edtImage);
         EditText edtPrice = view.findViewById(R.id.edtPrice);
         EditText edtStock = view.findViewById(R.id.edtStock);
         EditText edtDiscount = view.findViewById(R.id.edtDiscount);
+        EditText edtOs = view.findViewById(R.id.edtOs);
+        EditText edtRom = view.findViewById(R.id.edtRom);
+        EditText edtRam = view.findViewById(R.id.edtRam);
+        EditText edtBattery = view.findViewById(R.id.edtBattery);
+        EditText edtChipset = view.findViewById(R.id.edtChipset);
+        EditText edtScreen = view.findViewById(R.id.edtScreen);
+        EditText edtCamera = view.findViewById(R.id.edtCamera);
+        EditText edtColors = view.findViewById(R.id.edtColors);
         EditText edtDesc = view.findViewById(R.id.edtDesc);
-        EditText edtImage = view.findViewById(R.id.edtImage);
 
         boolean editing = oldProduct != null;
         if (editing) {
             edtName.setText(oldProduct.tenSanPham);
             edtBrand.setText(oldProduct.hang);
+            edtImage.setText(oldProduct.tenAnh);
             edtPrice.setText(String.valueOf(oldProduct.gia));
             edtStock.setText(String.valueOf(oldProduct.tonKho));
+            edtStock.setEnabled(false);
+            edtStock.setFocusable(false);
+            edtStock.setClickable(false);
             edtDiscount.setText(String.valueOf(oldProduct.giamGia));
+            edtOs.setText(oldProduct.heDieuHanh);
+            edtRom.setText(oldProduct.romGb > 0 ? String.valueOf(oldProduct.romGb) : "");
+            edtRam.setText(oldProduct.ramGb > 0 ? String.valueOf(oldProduct.ramGb) : "");
+            edtBattery.setText(oldProduct.pinMah > 0 ? String.valueOf(oldProduct.pinMah) : "");
+            edtChipset.setText(oldProduct.chipset);
+            edtScreen.setText(oldProduct.manHinh);
+            edtCamera.setText(oldProduct.camera);
+            edtColors.setText(oldProduct.mauSac);
             edtDesc.setText(oldProduct.moTa);
-            edtImage.setText(oldProduct.tenAnh);
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -203,7 +222,9 @@ public class AdminProductsActivity extends BaseHomeActivity {
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             Product p = editing ? oldProduct : new Product();
             String error = fillAndValidateProductFromForm(
-                    p, edtName, edtBrand, edtPrice, edtStock, edtDiscount, edtDesc, edtImage
+                    p, edtName, edtBrand, edtImage, edtPrice, edtStock, edtDiscount,
+                    edtOs, edtRom, edtRam, edtBattery, edtChipset, edtScreen, edtCamera,
+                    edtColors, edtDesc
             );
 
             if (error != null) {
@@ -234,45 +255,87 @@ public class AdminProductsActivity extends BaseHomeActivity {
     private String fillAndValidateProductFromForm(Product p,
                                                   EditText edtName,
                                                   EditText edtBrand,
+                                                  EditText edtImage,
                                                   EditText edtPrice,
                                                   EditText edtStock,
                                                   EditText edtDiscount,
-                                                  EditText edtDesc,
-                                                  EditText edtImage) {
+                                                  EditText edtOs,
+                                                  EditText edtRom,
+                                                  EditText edtRam,
+                                                  EditText edtBattery,
+                                                  EditText edtChipset,
+                                                  EditText edtScreen,
+                                                  EditText edtCamera,
+                                                  EditText edtColors,
+                                                  EditText edtDesc) {
 
         String name = edtName.getText().toString().trim();
         String brand = edtBrand.getText().toString().trim();
+        String image = edtImage.getText().toString().trim();
         String priceStr = edtPrice.getText().toString().trim();
         String stockStr = edtStock.getText().toString().trim();
         String discountStr = edtDiscount.getText().toString().trim();
+        String os = edtOs.getText().toString().trim();
+        String romStr = edtRom.getText().toString().trim();
+        String ramStr = edtRam.getText().toString().trim();
+        String batteryStr = edtBattery.getText().toString().trim();
+        String chipset = edtChipset.getText().toString().trim();
+        String screen = edtScreen.getText().toString().trim();
+        String camera = edtCamera.getText().toString().trim();
+        String colors = edtColors.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
         if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
         if (TextUtils.isEmpty(stockStr)) return getString(R.string.err_stock_required);
+        if (TextUtils.isEmpty(os)) return "Vui lòng nhập hệ điều hành";
+        if (TextUtils.isEmpty(romStr)) return "Vui lòng nhập dung lượng ROM";
+        if (TextUtils.isEmpty(ramStr)) return "Vui lòng nhập dung lượng RAM";
+        if (TextUtils.isEmpty(batteryStr)) return "Vui lòng nhập dung lượng pin";
+        if (TextUtils.isEmpty(chipset)) return "Vui lòng nhập chipset";
+        if (TextUtils.isEmpty(screen)) return "Vui lòng nhập màn hình";
+        if (TextUtils.isEmpty(camera)) return "Vui lòng nhập camera";
+        if (TextUtils.isEmpty(colors)) return "Vui lòng nhập màu sắc";
 
         int price;
         int stock;
         int discount;
+        int rom;
+        int ram;
+        int battery;
 
         try {
             price = Integer.parseInt(priceStr);
             stock = Integer.parseInt(stockStr);
             discount = TextUtils.isEmpty(discountStr) ? 0 : Integer.parseInt(discountStr);
+            rom = Integer.parseInt(romStr);
+            ram = Integer.parseInt(ramStr);
+            battery = Integer.parseInt(batteryStr);
         } catch (NumberFormatException e) {
             return getString(R.string.err_number_format);
         }
 
         if (price <= 0) return getString(R.string.err_price_invalid);
         if (stock < 0) return getString(R.string.err_stock_invalid);
-        if (discount < 0 || discount > 100) return getString(R.string.err_discount_invalid);
+        if (discount < 0 || discount >= 100) return getString(R.string.err_discount_invalid);
+        if (rom <= 0) return "ROM phải lớn hơn 0";
+        if (ram <= 0) return "RAM phải lớn hơn 0";
+        if (battery <= 0) return "Pin phải lớn hơn 0";
 
         p.tenSanPham = name;
         p.hang = brand;
+        p.tenAnh = image;
         p.gia = price;
         p.tonKho = stock;
         p.giamGia = discount;
+        p.heDieuHanh = os;
+        p.romGb = rom;
+        p.ramGb = ram;
+        p.pinMah = battery;
+        p.chipset = chipset;
+        p.manHinh = screen;
+        p.camera = camera;
+        p.mauSac = colors;
         p.moTa = edtDesc.getText().toString().trim();
-        p.tenAnh = edtImage.getText().toString().trim();
 
         return null;
     }
@@ -301,5 +364,4 @@ public class AdminProductsActivity extends BaseHomeActivity {
             loadData();
         }
     }
-
 }

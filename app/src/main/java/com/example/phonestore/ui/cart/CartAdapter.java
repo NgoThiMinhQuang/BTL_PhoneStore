@@ -65,7 +65,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
 
         h.tvName.setText(it.tenSanPham + (it.hang == null ? "" : " (" + it.hang + ")"));
         String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.giaSauGiam()) + "đ";
-        h.tvPrice.setText("Giá: " + giaText + (it.giamGia > 0 ? " (-" + it.giamGia + "%)" : ""));
+        h.tvPrice.setText("Giá: " + giaText + (it.giamGia > 0 ? " (" + it.giamGia + "%)" : ""));
         h.tvQty.setText(String.valueOf(it.soLuong));
 
         int resId = resolveImageRes(it.tenAnh);

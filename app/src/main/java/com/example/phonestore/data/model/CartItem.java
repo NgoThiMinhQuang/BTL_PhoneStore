@@ -13,10 +13,12 @@ public class CartItem {
 
     public int giaSauGiam() {
         int pct = Math.max(0, Math.min(100, giamGia));
-        return gia * (100 - pct) / 100;
+        long discounted = (long) gia * (100 - pct) / 100;
+        return (int) discounted;
     }
 
     public int thanhTien() {
-        return giaSauGiam() * soLuong;
+        long amount = (long) giaSauGiam() * soLuong;
+        return (int) amount;
     }
 }

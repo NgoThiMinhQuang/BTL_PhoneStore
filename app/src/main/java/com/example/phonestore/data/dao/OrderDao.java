@@ -8,11 +8,13 @@ import android.text.TextUtils;
 
 import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.CartItem;
+import com.example.phonestore.data.model.CartItem;
 import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.PaymentStatus;
+import com.example.phonestore.data.model.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +25,14 @@ public class OrderDao {
 
     private final DBHelper dbHelper;
     private final CartDao cartDao;
+    private final ProductDao productDao;
     private final InventoryHistoryDao historyDao;
     private String lastCheckoutError;
 
     public OrderDao(Context ctx) {
         dbHelper = new DBHelper(ctx);
         cartDao = new CartDao(ctx);
+        productDao = new ProductDao(ctx);
         historyDao = new InventoryHistoryDao(ctx);
     }
 
@@ -64,6 +68,23 @@ public class OrderDao {
         return checkoutWithItems(userId, info, items, true, selectedProductIds);
     }
 
+    public long checkoutSingleProduct(long userId, long productId, int quantity, CheckoutInfo info) {
+        CartItem item = buildSingleProductCartItem(productId, quantity);
+        if (item == null) {
+            setLastCheckoutError("Không tìm thấy sản phẩm");
+            return -1;
+        }
+
+        ArrayList<CartItem> items = new ArrayList<>();
+        items.add(item);
+        return checkoutWithItems(userId, info, items, false, null);
+    }
+
+    public int previewSingleProductTotal(long productId, int quantity) {
+        CartItem item = buildSingleProductCartItem(productId, quantity);
+        return item == null ? 0 : item.thanhTien();
+    }
+
     private long checkoutWithItems(long userId, CheckoutInfo info, ArrayList<CartItem> items,
                                    boolean selectedOnly, List<Long> selectedProductIds) {
         clearLastCheckoutError();
@@ -86,8 +107,11 @@ public class OrderDao {
             }
         }
 
-        int total = 0;
-        for (CartItem it : items) total += it.thanhTien();
+        int subtotal = 0;
+        for (CartItem it : items) subtotal += it.thanhTien();
+        int shippingFee = Math.max(0, info.shippingFee);
+        int discountAmount = Math.max(0, info.discountAmount);
+        int total = Math.max(0, subtotal + shippingFee - discountAmount);
 
         String orderStatus = OrderStatus.STATUS_CHO_XAC_NHAN;
         String paymentStatus = CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod)
@@ -129,30 +153,32 @@ public class OrderDao {
                     return -1;
                 }
 
-                ContentValues p = new ContentValues();
-                p.put(DBHelper.COL_P_STOCK, it.tonKho - it.soLuong);
-                int updated = db.update(
-                        DBHelper.TBL_PRODUCTS,
-                        p,
-                        DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_STOCK + " >= ?",
-                        new String[]{String.valueOf(it.productId), String.valueOf(it.soLuong)}
-                );
-                if (updated <= 0) {
-                    setLastCheckoutError("Không thể trừ tồn kho cho sản phẩm " + it.tenSanPham);
-                    return -1;
-                }
+                if (!CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod)) {
+                    ContentValues p = new ContentValues();
+                    p.put(DBHelper.COL_P_STOCK, it.tonKho - it.soLuong);
+                    int updated = db.update(
+                            DBHelper.TBL_PRODUCTS,
+                            p,
+                            DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_STOCK + " >= ?",
+                            new String[]{String.valueOf(it.productId), String.valueOf(it.soLuong)}
+                    );
+                    if (updated <= 0) {
+                        setLastCheckoutError("Không thể trừ tồn kho cho sản phẩm " + it.tenSanPham);
+                        return -1;
+                    }
 
-                it.tonKho = it.tonKho - it.soLuong;
-                historyDao.insert(
-                        db,
-                        it.productId,
-                        it.tenSanPham,
-                        InventoryHistoryDao.ACTION_EXPORT,
-                        it.soLuong,
-                        REFERENCE_TYPE_ORDER,
-                        orderId,
-                        orderStatus
-                );
+                    it.tonKho = it.tonKho - it.soLuong;
+                    historyDao.insert(
+                            db,
+                            it.productId,
+                            it.tenSanPham,
+                            InventoryHistoryDao.ACTION_EXPORT,
+                            it.soLuong,
+                            REFERENCE_TYPE_ORDER,
+                            orderId,
+                            orderStatus
+                    );
+                }
             }
 
             if (selectedOnly) {
@@ -368,6 +394,32 @@ public class OrderDao {
             Order order = getOrderByIdInTransaction(db, orderId);
             if (!canTransitionPayment(order, newStatus)) {
                 return false;
+            }
+
+            if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(newStatus)
+                    && CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(order.phuongThucThanhToan)) {
+                ArrayList<OrderItem> items = getOrderItemsInTransaction(db, orderId);
+                for (OrderItem item : items) {
+                    int updatedStock = db.update(
+                            DBHelper.TBL_PRODUCTS,
+                            buildStockDecreaseValue(db, item.productId, item.soLuong),
+                            DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_STOCK + " >= ?",
+                            new String[]{String.valueOf(item.productId), String.valueOf(item.soLuong)}
+                    );
+                    if (updatedStock <= 0) {
+                        return false;
+                    }
+                    historyDao.insert(
+                            db,
+                            item.productId,
+                            item.tenSanPham,
+                            InventoryHistoryDao.ACTION_EXPORT,
+                            item.soLuong,
+                            REFERENCE_TYPE_ORDER,
+                            orderId,
+                            "Thanh toán chuyển khoản đã xác nhận"
+                    );
+                }
             }
 
             ContentValues v = new ContentValues();
@@ -671,6 +723,41 @@ public class OrderDao {
             order.username = c.getString(usernameIndex);
         }
         return order;
+    }
+
+    private CartItem buildSingleProductCartItem(long productId, int quantity) {
+        Product product = productDao.getById(productId, true);
+        if (product == null || !product.isActive) {
+            return null;
+        }
+
+        CartItem item = new CartItem();
+        item.productId = product.maSanPham;
+        item.tenSanPham = product.tenSanPham;
+        item.hang = product.hang;
+        item.gia = product.gia;
+        item.giamGia = product.giamGia;
+        item.tonKho = product.tonKho;
+        item.soLuong = Math.max(1, quantity);
+        item.tenAnh = product.tenAnh;
+        return item;
+    }
+
+    private ContentValues buildStockDecreaseValue(SQLiteDatabase db, long productId, int qty) {
+        ContentValues values = new ContentValues();
+        Cursor c = db.rawQuery(
+                "SELECT " + DBHelper.COL_P_STOCK +
+                        " FROM " + DBHelper.TBL_PRODUCTS +
+                        " WHERE " + DBHelper.COL_ID + "=? LIMIT 1",
+                new String[]{String.valueOf(productId)}
+        );
+        int stock = 0;
+        if (c.moveToFirst()) {
+            stock = c.getInt(0);
+        }
+        c.close();
+        values.put(DBHelper.COL_P_STOCK, Math.max(0, stock - qty));
+        return values;
     }
 
     private ArrayList<OrderItem> getOrderItemsInTransaction(SQLiteDatabase db, long orderId) {

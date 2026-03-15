@@ -15,13 +15,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.Toolbar;
-
 import androidx.annotation.LayoutRes;
 import androidx.annotation.MenuRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.ProductDao;
@@ -47,6 +46,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
 
     protected SessionManager session;
     private ScrollView homeScroll;
+    private boolean suppressBottomNavNavigation;
 
     @LayoutRes
     protected int shellLayoutRes() {
@@ -75,6 +75,11 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         return true;
     }
 
+    @MenuRes
+    protected int toolbarMenuRes() {
+        return shouldShowToolbarActions() ? R.menu.menu_home_actions : 0;
+    }
+
     protected boolean shouldShowBackButton() {
         return false;
     }
@@ -87,6 +92,10 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         return true;
     }
 
+    protected boolean isBottomNavRootScreen() {
+        return true;
+    }
+
     protected void onShellReady() {
         // subclasses may override
     }
@@ -94,9 +103,9 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        session = new SessionManager(this);
         setContentView(shellLayoutRes());
 
-        session = new SessionManager(this);
         inflateContentLayoutIfNeeded();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -111,7 +120,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(shouldShowBackButton());
-            if (shouldUseAdminBackButtonStyling()) {
+            if (shouldShowBackButton() || shouldUseAdminBackButtonStyling()) {
                 Drawable upArrow = toolbar.getNavigationIcon();
                 if (upArrow != null) {
                     upArrow.setTint(getColor(android.R.color.white));
@@ -137,8 +146,10 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!shouldShowToolbarActions()) return true;
-        getMenuInflater().inflate(R.menu.menu_home_actions, menu);
+        int menuRes = toolbarMenuRes();
+        if (menuRes == 0) return true;
+
+        getMenuInflater().inflate(menuRes, menu);
         tintToolbarMenuIcon(menu, R.id.nav_profile);
         tintToolbarMenuIcon(menu, R.id.nav_logout);
         return true;
@@ -228,11 +239,15 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (bottomNav != null) {
             bottomNav.getMenu().clear();
             bottomNav.inflateMenu(bottomMenuRes());
-            bottomNav.setOnItemSelectedListener(item -> handleBottomNavigation(item.getItemId()));
+            bottomNav.setOnItemSelectedListener(item -> suppressBottomNavNavigation || handleBottomNavigation(item.getItemId()));
             bottomNav.setOnItemReselectedListener(item -> {
-                // no-op
+                if (!suppressBottomNavNavigation) {
+                    handleBottomNavigation(item.getItemId());
+                }
             });
+            suppressBottomNavNavigation = true;
             bottomNav.setSelectedItemId(selectedBottomNavItemId());
+            suppressBottomNavNavigation = false;
             return;
         }
 
@@ -267,7 +282,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     }
 
     private boolean handleBottomNavigation(int id) {
-        if (id == selectedBottomNavItemId()) {
+        if (id == selectedBottomNavItemId() && isBottomNavRootScreen()) {
             return true;
         }
 
@@ -416,11 +431,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     }
 
     private void openQuickCheckout() {
-        if (!session.isLoggedIn()) {
-            redirectToWelcome();
-            return;
-        }
-        startActivity(new Intent(this, CheckoutActivity.class));
+        openBottomTab(new Intent(this, ProductsActivity.class));
     }
 
     private void redirectToWelcome() {

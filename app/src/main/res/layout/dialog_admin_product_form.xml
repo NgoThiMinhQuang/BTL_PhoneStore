@@ -44,6 +44,19 @@
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
 
+        <EditText
+            android:id="@+id/edtImage"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Tên file ảnh hoặc đường dẫn ảnh"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -99,7 +112,123 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="Mô tả và hình ảnh"
+            android:text="Thông số điện thoại"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtOs"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Hệ điều hành (ví dụ: Android, iOS)"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtRom"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="ROM (GB)"
+            android:inputType="number"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtRam"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="RAM (GB)"
+            android:inputType="number"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtBattery"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Pin (mAh)"
+            android:inputType="number"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtChipset"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Chipset"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtScreen"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Màn hình"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtCamera"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Camera"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <EditText
+            android:id="@+id/edtColors"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edittext_admin"
+            android:hint="Màu sắc (phân tách bằng dấu phẩy)"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:singleLine="true"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="Mô tả"
             android:textColor="@color/admin_text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -118,19 +247,6 @@
             android:paddingTop="12dp"
             android:paddingEnd="14dp"
             android:paddingBottom="12dp"
-            android:textColor="@color/admin_text_primary"
-            android:textColorHint="@color/admin_text_secondary" />
-
-        <EditText
-            android:id="@+id/edtImage"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext_admin"
-            android:hint="Tên file ảnh hoặc đường dẫn ảnh"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:singleLine="true"
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
     </LinearLayout>

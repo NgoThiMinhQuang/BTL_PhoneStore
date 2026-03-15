@@ -12,9 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.OrderDao;
 import com.example.phonestore.data.dao.UserDao;
@@ -22,15 +19,14 @@ import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.User;
 import com.example.phonestore.ui.auth.WelcomeActivity;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseHomeActivity {
 
-    private SessionManager session;
     private UserDao userDao;
     private OrderDao orderDao;
 
@@ -49,11 +45,6 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-
-        session = new SessionManager(this);
-        userDao = new UserDao(this);
-        orderDao = new OrderDao(this);
 
         if (!session.isLoggedIn()) {
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -69,31 +60,45 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 14));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        userDao = new UserDao(this);
+        orderDao = new OrderDao(this);
 
         bindViews();
-        loadProfile();
         bindActions();
+        loadProfile();
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_profile;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_customer;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.profile);
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_profile;
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadProfile();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+        if (userDao != null && orderDao != null && userId > 0) {
+            loadProfile();
+        }
     }
 
     private void bindViews() {
@@ -144,7 +149,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void showEditProfileDialog() {
-        EditText edtFullName = createInput(getString(R.string.profile_fullname_hint), InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        EditText edtFullName = createInput(
+                getString(R.string.profile_fullname_hint),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        );
         edtFullName.setText(currentUser == null ? "" : valueOrFallback(currentUser.fullname, ""));
         edtFullName.setSelection(edtFullName.getText().length());
 
@@ -162,9 +170,18 @@ public class ProfileActivity extends AppCompatActivity {
         int padding = dp(20);
         container.setPadding(padding, padding, padding, dp(4));
 
-        EditText edtOldPass = createInput(getString(R.string.profile_old_password_hint), InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        EditText edtNewPass = createInput(getString(R.string.profile_new_password_hint), InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        EditText edtConfirm = createInput(getString(R.string.profile_confirm_password_hint), InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        EditText edtOldPass = createInput(
+                getString(R.string.profile_old_password_hint),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+        );
+        EditText edtNewPass = createInput(
+                getString(R.string.profile_new_password_hint),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+        );
+        EditText edtConfirm = createInput(
+                getString(R.string.profile_confirm_password_hint),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD
+        );
 
         addInput(container, edtOldPass, 0);
         addInput(container, edtNewPass, 12);
@@ -205,6 +222,14 @@ public class ProfileActivity extends AppCompatActivity {
         }
         if (!newPass.equals(confirm)) {
             Toast.makeText(this, R.string.profile_password_mismatch, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (newPass.length() < 6) {
+            Toast.makeText(this, "Mật khẩu mới phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (newPass.equals(oldPass)) {
+            Toast.makeText(this, "Mật khẩu mới phải khác mật khẩu cũ", Toast.LENGTH_SHORT).show();
             return;
         }
 

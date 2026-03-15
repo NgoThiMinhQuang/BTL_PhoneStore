@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 12;
+    public static final int DB_VERSION = 13;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -33,6 +33,14 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_P_DISCOUNT = "giam_gia";
     public static final String COL_P_DESC = "mo_ta";
     public static final String COL_P_IMAGE = "ten_anh";
+    public static final String COL_P_OS = "he_dieu_hanh";
+    public static final String COL_P_ROM_GB = "rom_gb";
+    public static final String COL_P_RAM_GB = "ram_gb";
+    public static final String COL_P_CHIPSET = "chipset";
+    public static final String COL_P_SCREEN = "man_hinh";
+    public static final String COL_P_CAMERA = "camera";
+    public static final String COL_P_BATTERY = "pin_mah";
+    public static final String COL_P_COLORS = "mau_sac";
 
     // ===== CART =====
     public static final String TBL_CART = "gio_hang";
@@ -143,12 +151,57 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_P_DISCOUNT + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_P_DESC + " TEXT, " +
                 COL_P_IMAGE + " TEXT, " +
+                COL_P_OS + " TEXT, " +
+                COL_P_ROM_GB + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_P_RAM_GB + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_P_CHIPSET + " TEXT, " +
+                COL_P_SCREEN + " TEXT, " +
+                COL_P_CAMERA + " TEXT, " +
+                COL_P_BATTERY + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_P_COLORS + " TEXT, " +
                 COL_IS_ACTIVE + " INTEGER NOT NULL DEFAULT 1" +
                 ");");
 
-        long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 10, 10, "Flagship, pin trâu, camera mạnh", "ip_15");
-        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 20, "Zoom xa, màn đẹp", "ss_s24_ultra");
-        long xiaomi14Id = seedProduct(db, "Xiaomi 14", "Xiaomi", 15990000, 6, 0, "Hiệu năng/giá tốt", "");
+        long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 10, 8,
+                "Flagship màn lớn, camera mạnh và pin bền bỉ cho nhu cầu cao cấp.", "ip_15",
+                "iOS", 256, 8, "Apple A17 Pro", "6.7\" Super Retina XDR", "48MP + 12MP + 12MP", 4422,
+                "Titan tự nhiên,Đen titan,Trắng titan,Xanh titan");
+        seedProduct(db, "iPhone 15", "Apple", 21990000, 12, 5,
+                "Hiệu năng ổn định, camera đẹp và trải nghiệm iOS mượt mà hằng ngày.", "ip_15",
+                "iOS", 128, 6, "Apple A16 Bionic", "6.1\" Super Retina XDR", "48MP + 12MP", 3349,
+                "Đen,Xanh dương,Hồng,Vàng");
+        seedProduct(db, "iPhone 14", "Apple", 16990000, 7, 12,
+                "Thiết kế quen thuộc, hiệu năng tốt và phù hợp nhu cầu sử dụng lâu dài.", "ic_iphone15",
+                "iOS", 128, 6, "Apple A15 Bionic", "6.1\" Super Retina XDR", "12MP + 12MP", 3279,
+                "Đen,Trắng,Tím,Xanh");
+        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 10,
+                "Màn hình lớn, camera zoom mạnh và bút S Pen cho người dùng chuyên sâu.", "ss_s24_utra",
+                "Android", 512, 12, "Snapdragon 8 Gen 3", "6.8\" Dynamic AMOLED 2X", "200MP + 50MP + 12MP + 10MP", 5000,
+                "Đen,Tím,Xám,Vàng");
+        seedProduct(db, "Samsung Galaxy S24", "Samsung", 19990000, 9, 7,
+                "Nhỏ gọn hơn dòng Ultra nhưng vẫn mạnh mẽ với AI và màn hình cao cấp.", "ss_s24_utra",
+                "Android", 256, 8, "Exynos 2400", "6.2\" Dynamic AMOLED 2X", "50MP + 12MP + 10MP", 4000,
+                "Đen,Xám,Tím,Vàng");
+        seedProduct(db, "Samsung Galaxy A55", "Samsung", 9990000, 15, 15,
+                "Điện thoại tầm trung cân bằng giữa thiết kế đẹp, pin khỏe và màn hình tốt.", "ss_s24_utra",
+                "Android", 256, 8, "Exynos 1480", "6.6\" Super AMOLED", "50MP + 12MP + 5MP", 5000,
+                "Xanh navy,Xanh nhạt,Tím");
+        long xiaomi14Id = seedProduct(db, "Xiaomi 14", "Xiaomi", 15990000, 6, 6,
+                "Hiệu năng cao, sạc nhanh và camera Leica nổi bật trong phân khúc.", "",
+                "Android", 256, 12, "Snapdragon 8 Gen 3", "6.36\" AMOLED 120Hz", "50MP + 50MP + 50MP", 4610,
+                "Đen,Trắng,Xanh lá");
+        seedProduct(db, "Redmi Note 13 Pro", "Xiaomi", 8990000, 11, 10,
+                "Màn hình đẹp, pin lớn và camera độ phân giải cao cho nhu cầu phổ thông nâng cao.", "",
+                "Android", 256, 8, "Snapdragon 7s Gen 2", "6.67\" AMOLED 120Hz", "200MP + 8MP + 2MP", 5100,
+                "Đen,Tím,Xanh dương");
+        seedProduct(db, "OPPO Reno11", "OPPO", 10990000, 10, 8,
+                "Thiết kế thời trang, camera chân dung đẹp và sạc nhanh tiện lợi.", "",
+                "Android", 256, 12, "Dimensity 7050", "6.7\" AMOLED 120Hz", "50MP + 32MP + 8MP", 5000,
+                "Bạc,Đen,Xanh ngọc");
+        seedProduct(db, "vivo V30", "vivo", 11990000, 9, 9,
+                "Mỏng nhẹ, pin lớn và hiệu năng ổn định cho giải trí lẫn công việc.", "",
+                "Android", 256, 12, "Snapdragon 7 Gen 3", "6.78\" AMOLED 120Hz", "50MP + 50MP", 5000,
+                "Đen,Tím,Xanh biển");
 
         db.execSQL("CREATE TABLE " + TBL_CART + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -243,7 +296,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private long seedProduct(SQLiteDatabase db,
                              String tenSanPham, String hang, int gia,
-                             int tonKho, int giamGia, String moTa, String tenAnh) {
+                             int tonKho, int giamGia, String moTa, String tenAnh,
+                             String heDieuHanh, int romGb, int ramGb, String chipset,
+                             String manHinh, String camera, int pinMah, String mauSac) {
         ContentValues v = new ContentValues();
         v.put(COL_P_NAME, tenSanPham);
         v.put(COL_P_BRAND, hang);
@@ -252,6 +307,14 @@ public class DBHelper extends SQLiteOpenHelper {
         v.put(COL_P_DISCOUNT, giamGia);
         v.put(COL_P_DESC, moTa);
         v.put(COL_P_IMAGE, tenAnh);
+        v.put(COL_P_OS, heDieuHanh);
+        v.put(COL_P_ROM_GB, romGb);
+        v.put(COL_P_RAM_GB, ramGb);
+        v.put(COL_P_CHIPSET, chipset);
+        v.put(COL_P_SCREEN, manHinh);
+        v.put(COL_P_CAMERA, camera);
+        v.put(COL_P_BATTERY, pinMah);
+        v.put(COL_P_COLORS, mauSac);
         v.put(COL_IS_ACTIVE, 1);
         return db.insert(TBL_PRODUCTS, null, v);
     }

@@ -64,6 +64,16 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        if (!username.matches("[A-Za-z0-9_]{4,30}")) {
+            Toast.makeText(this, "Tên đăng nhập chỉ gồm chữ, số hoặc dấu gạch dưới và dài 4-30 ký tự", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (password.length() < 6) {
+            Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!password.equals(confirm)) {
             Toast.makeText(this, "Mật khẩu nhập lại không khớp", Toast.LENGTH_SHORT).show();
             return;
@@ -71,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         boolean ok = userDao.registerCustomer(fullname, username, password);
         if (!ok) {
-            Toast.makeText(this, "Tên đăng nhập đã tồn tại", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không thể đăng ký. Tên đăng nhập có thể đã tồn tại", Toast.LENGTH_SHORT).show();
             return;
         }
 

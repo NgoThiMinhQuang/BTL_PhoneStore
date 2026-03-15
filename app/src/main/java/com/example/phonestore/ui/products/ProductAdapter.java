@@ -64,8 +64,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             h.tvBrand.setText(hang);
         }
 
-        String moTa = p.moTa == null ? "" : p.moTa.trim();
-        h.tvDesc.setText(moTa.isEmpty() ? "Chưa có mô tả" : moTa);
+        h.tvSpecs.setText(buildSpecsText(p));
 
         String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
         h.tvPrice.setText(giaText);
@@ -89,6 +88,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             h.tvStock.setText("Còn: " + p.tonKho);
             h.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
             h.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
+        }
+
+        if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
+            h.tvOs.setVisibility(View.GONE);
+        } else {
+            h.tvOs.setVisibility(View.VISIBLE);
+            h.tvOs.setText(p.heDieuHanh.trim());
         }
 
         int imageRes = resolveProductImage(p);
@@ -140,6 +146,18 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         return data.size();
     }
 
+    private String buildSpecsText(Product p) {
+        ArrayList<String> parts = new ArrayList<>();
+        if (p.romGb > 0) parts.add(p.romGb + "GB");
+        if (p.ramGb > 0) parts.add("RAM " + p.ramGb + "GB");
+        if (p.chipset != null && !p.chipset.trim().isEmpty()) parts.add(p.chipset.trim());
+        if (parts.isEmpty()) {
+            String moTa = p.moTa == null ? "" : p.moTa.trim();
+            return moTa.isEmpty() ? "Chưa có mô tả" : moTa;
+        }
+        return android.text.TextUtils.join(" • ", parts);
+    }
+
     private void setSelectedPosition(int newPos) {
         int oldPos = selectedPosition;
         selectedPosition = newPos;
@@ -172,7 +190,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
         if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
         if (name.contains("s24") || brand.contains("samsung")) return findExistingSamsungImage();
-        if (brand.contains("xiaomi")) return 0;
+        if (name.contains("iphone 14")) return findImageRes("ic_iphone15");
 
         return 0;
     }
@@ -197,7 +215,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         MaterialCardView cardRoot;
         ImageView ivThumb;
         View viewInteractionOverlay;
-        TextView tvName, tvBrand, tvDesc, tvDiscount, tvPrice, tvStock;
+        TextView tvName, tvBrand, tvSpecs, tvDiscount, tvPrice, tvStock, tvOs;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -206,10 +224,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             viewInteractionOverlay = itemView.findViewById(R.id.viewInteractionOverlay);
             tvName = itemView.findViewById(R.id.tvName);
             tvBrand = itemView.findViewById(R.id.tvBrand);
-            tvDesc = itemView.findViewById(R.id.tvDesc);
+            tvSpecs = itemView.findViewById(R.id.tvSpecs);
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvStock = itemView.findViewById(R.id.tvStock);
+            tvOs = itemView.findViewById(R.id.tvOs);
         }
     }
 }

@@ -79,7 +79,7 @@
     <string name="err_number_format">Vui lòng nhập đúng định dạng số</string>
     <string name="err_price_invalid">Giá phải lớn hơn 0</string>
     <string name="err_stock_invalid">Tồn kho phải từ 0 trở lên</string>
-    <string name="err_discount_invalid">Giảm giá phải trong khoảng 0-100</string>
+    <string name="err_discount_invalid">Giảm giá phải trong khoảng 0-99</string>
 
     <string name="kpi_revenue_value">Tổng doanh thu: %1$s</string>
     <string name="kpi_orders_value">Số đơn hàng: %1$d</string>
@@ -138,6 +138,23 @@
     <string name="confirm_order">XÁC NHẬN ĐẶT HÀNG</string>
 
     <string name="cart_title">Giỏ hàng của tôi</string>
+    <string name="cart_nav_title">Giỏ hàng của tôi</string>
+    <string name="nav_products_label">Sản phẩm</string>
+    <string name="products_title_with_context">Sản phẩm - %1$s</string>
+    <string name="products_found_count">Tìm thấy %1$d sản phẩm</string>
+    <string name="product_detail_title">Chi tiết sản phẩm</string>
+    <string name="product_original_price_label">Giá gốc: %1$s</string>
+    <string name="product_discount_short">-%1$d%%</string>
+    <string name="product_rating_count">(%1$d đánh giá)</string>
+    <string name="product_stock_remaining">Còn lại: %1$d sản phẩm</string>
+    <string name="product_spec_screen">Màn hình: %1$s</string>
+    <string name="product_spec_camera">Camera: %1$s</string>
+    <string name="product_spec_ram_chip">RAM: %1$s • Chip: %2$s</string>
+    <string name="product_spec_battery_os">Pin: %1$s • HĐH: %2$s</string>
+    <string name="product_not_updated">Chưa cập nhật</string>
+    <string name="order_total_summary">Tổng cộng: %1$s</string>
+    <string name="discount_applied_message">Áp dụng mã %1$s giảm %2$s</string>
+    <string name="discount_invalid_message">Mã không hợp lệ hoặc đơn chưa đạt 5.000.000đ</string>
     <string name="exceed_stock">Vượt tồn kho</string>
     <string name="cart_select_at_least_one">Vui lòng chọn ít nhất 1 sản phẩm để thanh toán</string>
 

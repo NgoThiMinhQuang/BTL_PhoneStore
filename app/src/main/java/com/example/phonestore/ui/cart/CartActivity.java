@@ -2,20 +2,20 @@ package com.example.phonestore.ui.cart;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.CartDao;
 import com.example.phonestore.data.model.CartItem;
+import com.example.phonestore.data.model.CheckoutInfo;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -24,25 +24,29 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-public class CartActivity extends AppCompatActivity {
+public class CartActivity extends BaseHomeActivity {
 
     public static final String EXTRA_SELECTED_PRODUCT_IDS = "extra_selected_product_ids";
+    public static final String EXTRA_DISCOUNT_CODE = "extra_discount_code";
 
-    private SessionManager session;
     private CartDao cartDao;
 
     private CartAdapter adapter;
     private TextView tvTotal;
+    private TextView tvSubtotal;
+    private TextView tvShippingFee;
+    private TextView tvDiscountAmount;
+    private TextView tvDiscountMessage;
+    private EditText edtDiscountCode;
 
     private final Set<Long> selectedProductIds = new HashSet<>();
     private boolean didInitSelectAll = false;
+    private String appliedDiscountCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cart);
 
-        session = new SessionManager(this);
         if (!session.isLoggedIn() || session.getUserId() <= 0) {
             session.clear();
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -52,18 +56,12 @@ public class CartActivity extends AppCompatActivity {
 
         cartDao = new CartDao(this);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle(R.string.cart_title);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         tvTotal = findViewById(R.id.tvTotal);
+        tvSubtotal = findViewById(R.id.tvSubtotal);
+        tvShippingFee = findViewById(R.id.tvShippingFee);
+        tvDiscountAmount = findViewById(R.id.tvDiscountAmount);
+        tvDiscountMessage = findViewById(R.id.tvDiscountMessage);
+        edtDiscountCode = findViewById(R.id.edtDiscountCode);
 
         RecyclerView rv = findViewById(R.id.rvCart);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -95,10 +93,38 @@ public class CartActivity extends AppCompatActivity {
         });
         rv.setAdapter(adapter);
 
+        MaterialButton btnApplyDiscount = findViewById(R.id.btnApplyDiscount);
+        btnApplyDiscount.setOnClickListener(v -> applyDiscountCode());
+
         MaterialButton btnBuy = findViewById(R.id.btnBuyNow);
         btnBuy.setOnClickListener(v -> openCheckout());
 
         reload();
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_cart;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_customer;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.cart_nav_title);
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_cart;
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
     }
 
     private void reload() {
@@ -118,10 +144,49 @@ public class CartActivity extends AppCompatActivity {
         updateSelectedTotal();
     }
 
+    private void applyDiscountCode() {
+        String rawCode = edtDiscountCode.getText().toString();
+        int subtotal = cartDao.getTotalByProductIds(session.getUserId(), new ArrayList<>(selectedProductIds));
+        String normalizedCode = CheckoutInfo.normalizeDiscountCode(rawCode);
+        int discount = CheckoutInfo.calculateDiscount(rawCode, subtotal);
+
+        if (normalizedCode == null) {
+            appliedDiscountCode = null;
+            tvDiscountMessage.setVisibility(android.view.View.GONE);
+            updateSelectedTotal();
+            return;
+        }
+
+        if (discount <= 0) {
+            appliedDiscountCode = null;
+            tvDiscountMessage.setVisibility(android.view.View.VISIBLE);
+            tvDiscountMessage.setText(R.string.discount_invalid_message);
+            updateSelectedTotal();
+            return;
+        }
+
+        appliedDiscountCode = normalizedCode;
+        edtDiscountCode.setText(normalizedCode);
+        edtDiscountCode.setSelection(normalizedCode.length());
+        tvDiscountMessage.setVisibility(android.view.View.VISIBLE);
+        tvDiscountMessage.setText(getString(R.string.discount_applied_message, normalizedCode, formatMoney(discount)));
+        updateSelectedTotal();
+    }
+
     private void updateSelectedTotal() {
-        int total = cartDao.getTotalByProductIds(session.getUserId(), new ArrayList<>(selectedProductIds));
-        String totalText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(total) + "đ";
-        tvTotal.setText(getString(R.string.checkout_total, totalText));
+        int subtotal = cartDao.getTotalByProductIds(session.getUserId(), new ArrayList<>(selectedProductIds));
+        int discount = CheckoutInfo.calculateDiscount(appliedDiscountCode, subtotal);
+        int shippingFee = subtotal > 0 ? CheckoutInfo.SHIPPING_FEE : 0;
+        int finalTotal = Math.max(0, subtotal + shippingFee - discount);
+
+        tvSubtotal.setText(formatMoney(subtotal));
+        tvShippingFee.setText(formatMoney(shippingFee));
+        tvDiscountAmount.setText(formatMoney(discount));
+        tvTotal.setText(getString(R.string.order_total_summary, formatMoney(finalTotal)));
+    }
+
+    private String formatMoney(int amount) {
+        return NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(amount) + "đ";
     }
 
     private void openCheckout() {
@@ -132,6 +197,7 @@ public class CartActivity extends AppCompatActivity {
 
         Intent i = new Intent(this, CheckoutActivity.class);
         i.putExtra(EXTRA_SELECTED_PRODUCT_IDS, toLongArray(selectedProductIds));
+        i.putExtra(EXTRA_DISCOUNT_CODE, appliedDiscountCode);
         startActivity(i);
     }
 
@@ -147,12 +213,8 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        reload();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+        if (cartDao != null) {
+            reload();
+        }
     }
 }

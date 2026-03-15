@@ -9,8 +9,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +21,7 @@ import com.example.phonestore.data.model.Order;
 import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.PaymentStatus;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -33,7 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class OrderDetailActivity extends AppCompatActivity {
+public class OrderDetailActivity extends BaseHomeActivity {
 
     public static final String EXTRA_ORDER_ID = "extra_order_id";
 
@@ -42,7 +40,6 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
-    private SessionManager session;
     private long orderId;
     private boolean adminMode;
 
@@ -68,14 +65,6 @@ public class OrderDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_order_detail);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.order_detail_title);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         orderId = getIntent().getLongExtra(EXTRA_ORDER_ID, -1);
         if (orderId == -1) {
@@ -84,7 +73,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             return;
         }
 
-        session = new SessionManager(this);
         orderDao = new OrderDao(this);
         adminMode = DBHelper.ROLE_ADMIN.equals(session.getRole());
 
@@ -100,6 +88,51 @@ public class OrderDetailActivity extends AppCompatActivity {
         btnUpdatePaymentStatus.setOnClickListener(v -> updatePaymentStatus());
 
         loadOrder(true);
+    }
+
+    @Override
+    protected int shellLayoutRes() {
+        return adminMode ? R.layout.activity_home_bottom_admin : super.shellLayoutRes();
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_order_detail;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return adminMode ? R.menu.menu_bottom_admin : R.menu.menu_bottom_customer;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.order_detail_title);
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return adminMode ? R.id.nav_orders_admin : R.id.nav_orders;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return adminMode;
+    }
+
+    @Override
+    protected boolean shouldShowToolbarActions() {
+        return false;
+    }
+
+    @Override
+    protected boolean isBottomNavRootScreen() {
+        return false;
     }
 
     private void bindViews() {
@@ -295,19 +328,35 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     private int getStatusBackgroundColor(String status) {
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_surface_soft;
+        if (adminMode) {
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_surface_soft;
+            if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
+            if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger_soft;
+            return R.color.admin_surface_soft;
+        }
+
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.panel_soft;
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.panel_soft;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger_soft;
-        return R.color.admin_surface_soft;
+        return R.color.panel_soft;
     }
 
     private int getStatusAccentColor(String status) {
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_primary;
+        if (adminMode) {
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_primary;
+            if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
+            if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
+            return R.color.admin_primary;
+        }
+
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.red_primary;
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.red_primary;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
-        return R.color.admin_primary;
+        return R.color.red_primary;
     }
 
     private int calculateTotal(ArrayList<OrderItem> items) {
@@ -346,11 +395,5 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private int dp(int value) {
         return Math.round(getResources().getDisplayMetrics().density * value);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
     }
 }

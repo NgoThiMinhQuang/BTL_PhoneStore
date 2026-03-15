@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,8 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.example.phonestore.R;
@@ -25,21 +24,19 @@ import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.LoginActivity;
 import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
-import com.example.phonestore.utils.SessionManager;
+import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class ProductDetailActivity extends AppCompatActivity {
+public class ProductDetailActivity extends BaseHomeActivity {
 
     public static final String EXTRA_PRODUCT_ID = "extra_product_id";
 
-    private SessionManager session;
     private ProductDao productDao;
     private CartDao cartDao;
 
@@ -53,23 +50,9 @@ public class ProductDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_detail);
-
-        session = new SessionManager(this);
 
         productDao = new ProductDao(this);
         cartDao = new CartDao(this);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setContentInsetsRelative(0, 0);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 12));
-        toolbar.setTitleMarginEnd(0);
-        toolbar.setTitleMarginTop(0);
-        toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle("Chi tiết sản phẩm");
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         long id = getIntent().getLongExtra(EXTRA_PRODUCT_ID, -1);
         product = productDao.getById(id);
@@ -120,30 +103,30 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         int discountPercent = Math.max(0, Math.min(100, product.giamGia));
         int originalPrice = Math.max(0, product.gia);
-        int discountedPrice = originalPrice * (100 - discountPercent) / 100;
+        int discountedPrice = (int) ((long) originalPrice * (100 - discountPercent) / 100);
 
         tvPrice.setText(formatMoney(discountedPrice));
-        tvPriceOriginal.setText("Giá gốc: " + formatMoney(originalPrice));
+        tvPriceOriginal.setText(getString(R.string.product_original_price_label, formatMoney(originalPrice)));
         tvPriceOriginal.setPaintFlags(tvPriceOriginal.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        tvDiscountBadge.setText("-" + discountPercent + "%");
+        tvDiscountBadge.setText(getString(R.string.product_discount_short, discountPercent));
+        tvDiscountBadge.setVisibility(discountPercent > 0 ? View.VISIBLE : View.GONE);
 
         float rating = buildRating(product);
         int ratingCount = buildRatingCount(product);
         tvRatingValue.setText(String.format(Locale.US, "%.1f", rating));
         tvRatingStars.setText(buildStarText(rating));
-        tvRatingMeta.setText("(" + ratingCount + " đánh giá)");
+        tvRatingMeta.setText(getString(R.string.product_rating_count, ratingCount));
 
-        tvStock.setText("Còn lại: " + product.tonKho + " sản phẩm");
+        tvStock.setText(getString(R.string.product_stock_remaining, product.tonKho));
         tvDesc.setText(product.moTa == null ? "" : product.moTa);
 
         populateOptionChips(layoutStorageOptions, buildStorageOptions(product), true);
         populateOptionChips(layoutColorOptions, buildColorOptions(product), false);
 
-        String[] specs = buildSpecs(product);
-        tvSpecScreen.setText("Màn hình: " + specs[0]);
-        tvSpecCamera.setText("Camera: " + specs[1]);
-        tvSpecRam.setText("RAM: " + specs[2]);
-        tvSpecPin.setText("Pin: " + specs[3]);
+        tvSpecScreen.setText(getString(R.string.product_spec_screen, safeValue(product.manHinh, getString(R.string.product_not_updated))));
+        tvSpecCamera.setText(getString(R.string.product_spec_camera, safeValue(product.camera, getString(R.string.product_not_updated))));
+        tvSpecRam.setText(buildRamChipsetLine(product));
+        tvSpecPin.setText(buildBatteryOsLine(product));
 
         tvQty.setText(String.valueOf(qty));
 
@@ -166,19 +149,50 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         btnBuyNow.setOnClickListener(v -> {
             if (!ensureLoggedIn()) return;
-            if (!addToCart()) return;
-            refreshCartBadge();
-
-            Intent i = new Intent(this, CheckoutActivity.class);
-            int selectedTotal = cartDao.getTotalByProductIds(
-                    session.getUserId(),
-                    new ArrayList<>(Collections.singletonList(product.maSanPham))
-            );
-            if (selectedTotal > 0) {
-                i.putExtra(CartActivity.EXTRA_SELECTED_PRODUCT_IDS, new long[]{product.maSanPham});
+            if (product.tonKho <= 0) {
+                Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
+                return;
             }
+            Intent i = new Intent(this, CheckoutActivity.class);
+            i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_PRODUCT_ID, product.maSanPham);
+            i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_QTY, qty);
             startActivity(i);
         });
+    }
+
+    @Override
+    protected int contentLayoutRes() {
+        return R.layout.activity_product_detail;
+    }
+
+    @Override
+    protected int bottomMenuRes() {
+        return R.menu.menu_bottom_customer;
+    }
+
+    @Override
+    protected String screenTitle() {
+        return getString(R.string.product_detail_title);
+    }
+
+    @Override
+    protected int selectedBottomNavItemId() {
+        return R.id.nav_products;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
+    }
+
+    @Override
+    protected boolean isBottomNavRootScreen() {
+        return false;
+    }
+
+    @Override
+    protected int toolbarMenuRes() {
+        return R.menu.menu_product_detail_actions;
     }
 
     private String formatMoney(int value) {
@@ -263,54 +277,49 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private List<String> buildStorageOptions(Product p) {
-        String key = normalizedKey(p);
-        if (key.contains("iphone") || key.contains("apple")) {
-            return Arrays.asList("128GB", "256GB", "512GB");
+        ArrayList<String> options = new ArrayList<>();
+        if (p.romGb > 0) {
+            options.add(p.romGb + "GB");
         }
-        if (key.contains("samsung") || key.contains("galaxy")) {
-            return Arrays.asList("256GB", "512GB", "1TB");
+        if (options.isEmpty()) {
+            options.add("128GB");
         }
-        if (key.contains("xiaomi") || key.contains("redmi")) {
-            return Arrays.asList("128GB", "256GB", "512GB");
-        }
-        if (key.contains("oppo") || key.contains("vivo")) {
-            return Arrays.asList("128GB", "256GB");
-        }
-        return Arrays.asList("128GB", "256GB", "512GB");
+        return options;
     }
 
     private List<String> buildColorOptions(Product p) {
-        String key = normalizedKey(p);
-        if (key.contains("iphone") || key.contains("apple")) {
-            return Arrays.asList("Titan tự nhiên", "Đen", "Trắng", "Xanh");
+        ArrayList<String> options = new ArrayList<>();
+        if (p.mauSac != null) {
+            String[] rawColors = p.mauSac.split(",");
+            for (String color : rawColors) {
+                String trimmed = color.trim();
+                if (!trimmed.isEmpty()) {
+                    options.add(trimmed);
+                }
+            }
         }
-        if (key.contains("samsung") || key.contains("galaxy")) {
-            return Arrays.asList("Đen", "Xám", "Tím", "Xanh");
+        if (options.isEmpty()) {
+            options.add("Đen");
         }
-        if (key.contains("xiaomi") || key.contains("redmi")) {
-            return Arrays.asList("Đen", "Bạc", "Xanh dương");
-        }
-        if (key.contains("oppo") || key.contains("vivo")) {
-            return Arrays.asList("Đen", "Tím", "Vàng");
-        }
-        return Arrays.asList("Đen", "Bạc", "Xanh");
+        return options;
     }
 
-    private String[] buildSpecs(Product p) {
-        String key = normalizedKey(p);
-        if (key.contains("iphone") || key.contains("apple")) {
-            return new String[]{"Super Retina XDR", "48MP", "8GB", "~29 giờ phát video"};
-        }
-        if (key.contains("samsung") || key.contains("galaxy")) {
-            return new String[]{"Dynamic AMOLED 2X", "200MP", "12GB", "5.000mAh"};
-        }
-        if (key.contains("xiaomi") || key.contains("redmi")) {
-            return new String[]{"AMOLED 120Hz", "108MP", "8GB", "5.000mAh"};
-        }
-        if (key.contains("oppo") || key.contains("vivo")) {
-            return new String[]{"AMOLED FHD+", "50MP", "8GB", "4.800mAh"};
-        }
-        return new String[]{"OLED FHD+", "50MP", "8GB", "4.500mAh"};
+    private String buildRamChipsetLine(Product p) {
+        String ramText = p.ramGb > 0 ? p.ramGb + "GB" : getString(R.string.product_not_updated);
+        String chipsetText = safeValue(p.chipset, getString(R.string.product_not_updated));
+        return getString(R.string.product_spec_ram_chip, ramText, chipsetText);
+    }
+
+    private String buildBatteryOsLine(Product p) {
+        String batteryText = p.pinMah > 0
+                ? NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.pinMah) + "mAh"
+                : getString(R.string.product_not_updated);
+        String osText = safeValue(p.heDieuHanh, getString(R.string.product_not_updated));
+        return getString(R.string.product_spec_battery_os, batteryText, osText);
+    }
+
+    private String safeValue(String value, String fallback) {
+        return TextUtils.isEmpty(value == null ? null : value.trim()) ? fallback : value.trim();
     }
 
     private String normalizedKey(Product p) {
@@ -345,16 +354,17 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_product_detail_actions, menu);
-
+        boolean created = super.onCreateOptionsMenu(menu);
         MenuItem cartItem = menu.findItem(R.id.action_cart);
+        if (cartItem == null) return created;
+
         View actionView = cartItem.getActionView();
         if (actionView != null) {
             tvCartBadge = actionView.findViewById(R.id.tvCartBadge);
             actionView.setOnClickListener(v -> openCartFromToolbar());
             refreshCartBadge();
         }
-        return true;
+        return created;
     }
 
     @Override
@@ -392,11 +402,5 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         tvCartBadge.setText(totalQty > 99 ? "99+" : String.valueOf(totalQty));
         tvCartBadge.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
     }
 }

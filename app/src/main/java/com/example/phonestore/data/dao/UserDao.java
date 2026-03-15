@@ -9,6 +9,9 @@ import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.User;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class UserDao {
@@ -33,7 +36,7 @@ public class UserDao {
         ContentValues v = new ContentValues();
         v.put(DBHelper.COL_FULLNAME, fullname);
         v.put(DBHelper.COL_USERNAME, username);
-        v.put(DBHelper.COL_PASSWORD, password);
+        v.put(DBHelper.COL_PASSWORD, hashPassword(password));
         v.put(DBHelper.COL_ROLE, DBHelper.ROLE_CUSTOMER);
         v.put(DBHelper.COL_IS_ACTIVE, 1);
 
@@ -45,15 +48,19 @@ public class UserDao {
 
         Cursor c = db.rawQuery(
                 "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_FULLNAME + "," +
-                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE + "," + DBHelper.COL_IS_ACTIVE +
+                        DBHelper.COL_USERNAME + "," + DBHelper.COL_ROLE + "," + DBHelper.COL_IS_ACTIVE + "," + DBHelper.COL_PASSWORD +
                         " FROM " + DBHelper.TBL_USERS +
-                        " WHERE " + DBHelper.COL_USERNAME + "=? AND " + DBHelper.COL_PASSWORD + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
-                new String[]{username, password}
+                        " WHERE " + DBHelper.COL_USERNAME + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
+                new String[]{username}
         );
 
         User u = null;
         if (c.moveToFirst()) {
-            u = docNguoiDung(c);
+            String storedPassword = c.getString(5);
+            if (passwordMatches(password, storedPassword)) {
+                u = docNguoiDung(c);
+                upgradePasswordHashIfNeeded(db, u.id, storedPassword, password);
+            }
         }
         c.close();
         return u;
@@ -87,13 +94,30 @@ public class UserDao {
 
     public boolean changePassword(long id, String oldPassword, String newPassword) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT " + DBHelper.COL_PASSWORD +
+                        " FROM " + DBHelper.TBL_USERS +
+                        " WHERE " + DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
+                new String[]{String.valueOf(id)}
+        );
+
+        String storedPassword = null;
+        if (c.moveToFirst()) {
+            storedPassword = c.getString(0);
+        }
+        c.close();
+
+        if (!passwordMatches(oldPassword, storedPassword)) {
+            return false;
+        }
+
         ContentValues v = new ContentValues();
-        v.put(DBHelper.COL_PASSWORD, newPassword);
+        v.put(DBHelper.COL_PASSWORD, hashPassword(newPassword));
         return db.update(
                 DBHelper.TBL_USERS,
                 v,
-                DBHelper.COL_ID + "=? AND " + DBHelper.COL_PASSWORD + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
-                new String[]{String.valueOf(id), oldPassword}
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
+                new String[]{String.valueOf(id)}
         ) > 0;
     }
 
@@ -128,7 +152,7 @@ public class UserDao {
         v.put(DBHelper.COL_FULLNAME, fullname);
 
         if (newPasswordOrNull != null && !newPasswordOrNull.trim().isEmpty()) {
-            v.put(DBHelper.COL_PASSWORD, newPasswordOrNull.trim());
+            v.put(DBHelper.COL_PASSWORD, hashPassword(newPasswordOrNull.trim()));
         }
 
         return db.update(
@@ -191,6 +215,36 @@ public class UserDao {
             user.isActive = c.getInt(4) == 1;
         }
         return user;
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+        if (rawPassword == null || storedPassword == null) {
+            return false;
+        }
+        return storedPassword.equals(rawPassword) || storedPassword.equals(hashPassword(rawPassword));
+    }
+
+    private void upgradePasswordHashIfNeeded(SQLiteDatabase db, long userId, String storedPassword, String rawPassword) {
+        if (storedPassword == null || storedPassword.equals(hashPassword(rawPassword))) {
+            return;
+        }
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_PASSWORD, hashPassword(rawPassword));
+        db.update(DBHelper.TBL_USERS, v, DBHelper.COL_ID + "=?", new String[]{String.valueOf(userId)});
+    }
+
+    private String hashPassword(String rawPassword) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawPassword.getBytes(StandardCharsets.UTF_8));
+            StringBuilder builder = new StringBuilder();
+            for (byte b : hash) {
+                builder.append(String.format("%02x", b));
+            }
+            return builder.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
     }
 
     private User docNguoiDungThongKe(Cursor c) {
