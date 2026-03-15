@@ -140,19 +140,24 @@ public class AdminInventoryHistoryActivity extends BaseHomeActivity {
     }
 
     private void enrichStockAfter(ArrayList<InventoryHistoryEntry> list) {
-        HashMap<Long, Integer> runningStock = new HashMap<>();
-        for (int i = list.size() - 1; i >= 0; i--) {
-            InventoryHistoryEntry entry = list.get(i);
-            int current = runningStock.containsKey(entry.productId) ? runningStock.get(entry.productId) : 0;
-            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)
-                    || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(entry.actionType)) {
-                current += Math.max(0, entry.quantity);
-            } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
-                current = Math.max(0, current - Math.max(0, entry.quantity));
-            }
-            entry.stockAfter = current;
-            runningStock.put(entry.productId, current);
+        HashMap<Long, Integer> runningStock = productDao.getCurrentStockMap(true);
+        for (InventoryHistoryEntry entry : list) {
+            int currentStock = runningStock.containsKey(entry.productId) ? runningStock.get(entry.productId) : 0;
+            entry.stockAfter = Math.max(0, currentStock);
+            runningStock.put(entry.productId, reverseEntryEffect(entry, currentStock));
         }
+    }
+
+    private int reverseEntryEffect(InventoryHistoryEntry entry, int currentStock) {
+        int quantity = Math.max(0, entry.quantity);
+        if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)
+                || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(entry.actionType)) {
+            return Math.max(0, currentStock - quantity);
+        }
+        if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
+            return Math.max(0, currentStock + quantity);
+        }
+        return Math.max(0, currentStock);
     }
 
     private long getSelectedProductId() {

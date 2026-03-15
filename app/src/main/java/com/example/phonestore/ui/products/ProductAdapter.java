@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Product;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.NumberFormat;
@@ -76,19 +77,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             h.tvDiscount.setVisibility(View.GONE);
         }
 
-        if (p.tonKho <= 0) {
-            h.tvStock.setText("Hết hàng");
-            h.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.red_primary));
-            h.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
-        } else if (p.tonKho <= 5) {
-            h.tvStock.setText("Sắp hết: " + p.tonKho);
-            h.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.red_primary));
-            h.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
-        } else {
-            h.tvStock.setText("Còn: " + p.tonKho);
-            h.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
-            h.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
-        }
+        bindStock(h, p.tonKho);
 
         if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
             h.tvOs.setVisibility(View.GONE);
@@ -144,6 +133,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
     @Override
     public int getItemCount() {
         return data.size();
+    }
+
+    private void bindStock(VH holder, int stock) {
+        String status = InventoryPolicy.resolveStatus(stock);
+        holder.tvStock.setText(InventoryPolicy.getCustomerStockText(holder.itemView.getContext(), stock));
+        holder.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
+        if (InventoryPolicy.STATUS_IN_STOCK.equals(status)) {
+            holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
+        } else {
+            holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.red_primary));
+        }
     }
 
     private String buildSpecsText(Product p) {

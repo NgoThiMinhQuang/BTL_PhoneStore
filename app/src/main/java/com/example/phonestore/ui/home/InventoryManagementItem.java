@@ -1,10 +1,12 @@
 package com.example.phonestore.ui.home;
 
+import com.example.phonestore.utils.InventoryPolicy;
+
 public class InventoryManagementItem {
 
-    static final String STATUS_IN_STOCK = "IN_STOCK";
-    static final String STATUS_LOW_STOCK = "LOW_STOCK";
-    static final String STATUS_OUT_OF_STOCK = "OUT_OF_STOCK";
+    static final String STATUS_IN_STOCK = InventoryPolicy.STATUS_IN_STOCK;
+    static final String STATUS_LOW_STOCK = InventoryPolicy.STATUS_LOW_STOCK;
+    static final String STATUS_OUT_OF_STOCK = InventoryPolicy.STATUS_OUT_OF_STOCK;
 
     final long productId;
     final String productName;

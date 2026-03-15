@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 13;
+    public static final int DB_VERSION = 14;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -47,6 +47,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_C_USER_ID = "nguoi_dung_id";
     public static final String COL_C_PRODUCT_ID = "san_pham_id";
     public static final String COL_C_QTY = "so_luong";
+    public static final String COL_C_STORAGE = "dung_luong";
+    public static final String COL_C_COLOR = "mau_sac_chon";
 
     // ===== ORDERS (hoa_don) =====
     public static final String TBL_ORDERS = "hoa_don";
@@ -61,6 +63,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_O_ADDRESS = "dia_chi_nhan";
     public static final String COL_O_PAY_METHOD = "phuong_thuc_thanh_toan";
     public static final String COL_O_NOTE = "ghi_chu";
+    public static final String COL_O_SUBTOTAL = "tam_tinh";
+    public static final String COL_O_SHIPPING_FEE = "phi_van_chuyen";
+    public static final String COL_O_DISCOUNT_CODE = "ma_giam_gia";
+    public static final String COL_O_DISCOUNT_AMOUNT = "tien_giam";
 
     public static final String TBL_ORDER_ITEMS = "hoa_don_ct";
     public static final String COL_OI_ORDER_ID = "hoa_don_id";
@@ -70,6 +76,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_OI_DISCOUNT = "giam_gia";
     public static final String COL_OI_QTY = "so_luong";
     public static final String COL_OI_AMOUNT = "thanh_tien";
+    public static final String COL_OI_STORAGE = "dung_luong";
+    public static final String COL_OI_COLOR = "mau_sac_chon";
 
     // ===== SUPPLIERS / RECEIPTS / INVENTORY HISTORY =====
     public static final String TBL_SUPPLIERS = "nha_cung_cap";
@@ -208,7 +216,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_C_USER_ID + " INTEGER NOT NULL, " +
                 COL_C_PRODUCT_ID + " INTEGER NOT NULL, " +
                 COL_C_QTY + " INTEGER NOT NULL DEFAULT 1, " +
-                "UNIQUE(" + COL_C_USER_ID + "," + COL_C_PRODUCT_ID + "), " +
+                COL_C_STORAGE + " TEXT, " +
+                COL_C_COLOR + " TEXT, " +
+                "UNIQUE(" + COL_C_USER_ID + "," + COL_C_PRODUCT_ID + "," + COL_C_STORAGE + "," + COL_C_COLOR + "), " +
                 "FOREIGN KEY(" + COL_C_USER_ID + ") REFERENCES " + TBL_USERS + "(" + COL_ID + "), " +
                 "FOREIGN KEY(" + COL_C_PRODUCT_ID + ") REFERENCES " + TBL_PRODUCTS + "(" + COL_ID + ")" +
                 ");");
@@ -225,6 +235,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_O_ADDRESS + " TEXT, " +
                 COL_O_PAY_METHOD + " TEXT, " +
                 COL_O_NOTE + " TEXT, " +
+                COL_O_SUBTOTAL + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_SHIPPING_FEE + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_DISCOUNT_CODE + " TEXT, " +
+                COL_O_DISCOUNT_AMOUNT + " INTEGER NOT NULL DEFAULT 0, " +
                 "FOREIGN KEY(" + COL_O_USER_ID + ") REFERENCES " + TBL_USERS + "(" + COL_ID + ")" +
                 ");");
 
@@ -237,6 +251,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_OI_DISCOUNT + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_OI_QTY + " INTEGER NOT NULL, " +
                 COL_OI_AMOUNT + " INTEGER NOT NULL, " +
+                COL_OI_STORAGE + " TEXT, " +
+                COL_OI_COLOR + " TEXT, " +
                 "FOREIGN KEY(" + COL_OI_ORDER_ID + ") REFERENCES " + TBL_ORDERS + "(" + COL_ID + ") ON DELETE CASCADE" +
                 ");");
 

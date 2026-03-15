@@ -11,18 +11,14 @@ import com.example.phonestore.R;
 import com.example.phonestore.data.dao.InventoryHistoryDao;
 import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.db.DBHelper;
-import com.example.phonestore.data.model.InventoryHistoryEntry;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.utils.InventoryPolicy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AdminInventoryAlertsActivity extends BaseHomeActivity {
-
-    private static final String FILTER_OUT = InventoryManagementItem.STATUS_OUT_OF_STOCK;
-    private static final String FILTER_LOW = InventoryManagementItem.STATUS_LOW_STOCK;
-    private static final int MINIMUM_STOCK = 20;
 
     private ProductDao productDao;
     private InventoryHistoryDao historyDao;
@@ -96,27 +92,14 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
 
     private void loadData() {
         ArrayList<Product> products = productDao.layTatCa();
-        HashMap<Long, int[]> totalsByProduct = buildHistoryTotals();
+        HashMap<Long, int[]> totalsByProduct = InventoryDataHelper.buildHistoryTotals(historyDao.getAll());
         ArrayList<InventoryManagementItem> items = new ArrayList<>();
 
         for (Product product : products) {
-            String status = resolveStatus(product.tonKho);
-            if (InventoryManagementItem.STATUS_IN_STOCK.equals(status)) {
+            if (InventoryPolicy.isInStock(product.tonKho)) {
                 continue;
             }
-
-            int[] totals = totalsByProduct.get(product.maSanPham);
-            items.add(new InventoryManagementItem(
-                    product.maSanPham,
-                    normalizeName(product.tenSanPham),
-                    normalizeBrand(product.hang),
-                    product.tenAnh,
-                    Math.max(0, product.tonKho),
-                    MINIMUM_STOCK,
-                    totals == null ? 0 : totals[0],
-                    totals == null ? 0 : totals[1],
-                    status
-            ));
+            items.add(InventoryDataHelper.toInventoryItem(this, product, totalsByProduct));
         }
 
         updateHeader(items.size());
@@ -130,42 +113,5 @@ public class AdminInventoryAlertsActivity extends BaseHomeActivity {
             return;
         }
         tvAlertsHeaderCount.setText(getString(R.string.admin_alerts_summary_count, count));
-    }
-
-    private HashMap<Long, int[]> buildHistoryTotals() {
-        ArrayList<InventoryHistoryEntry> histories = historyDao.getAll();
-        HashMap<Long, int[]> totalsByProduct = new HashMap<>();
-        for (InventoryHistoryEntry entry : histories) {
-            int[] totals = totalsByProduct.get(entry.productId);
-            if (totals == null) {
-                totals = new int[]{0, 0};
-                totalsByProduct.put(entry.productId, totals);
-            }
-            if (InventoryHistoryDao.ACTION_IMPORT.equals(entry.actionType)
-                    || InventoryHistoryDao.ACTION_CANCEL_RETURN.equals(entry.actionType)) {
-                totals[0] += Math.max(0, entry.quantity);
-            } else if (InventoryHistoryDao.ACTION_EXPORT.equals(entry.actionType)) {
-                totals[1] += Math.max(0, entry.quantity);
-            }
-        }
-        return totalsByProduct;
-    }
-
-    private String resolveStatus(int stock) {
-        if (stock <= 0) {
-            return FILTER_OUT;
-        }
-        if (stock <= MINIMUM_STOCK) {
-            return FILTER_LOW;
-        }
-        return InventoryManagementItem.STATUS_IN_STOCK;
-    }
-
-    private String normalizeName(String name) {
-        return name == null || name.trim().isEmpty() ? getString(R.string.admin_product_unknown_name) : name.trim();
-    }
-
-    private String normalizeBrand(String brand) {
-        return brand == null || brand.trim().isEmpty() ? getString(R.string.admin_product_unknown_brand) : brand.trim();
     }
 }

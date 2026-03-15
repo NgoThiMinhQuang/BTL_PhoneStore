@@ -25,11 +25,11 @@ import com.example.phonestore.ui.auth.LoginActivity;
 import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
 import com.example.phonestore.ui.home.BaseHomeActivity;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -117,7 +117,9 @@ public class ProductDetailActivity extends BaseHomeActivity {
         tvRatingStars.setText(buildStarText(rating));
         tvRatingMeta.setText(getString(R.string.product_rating_count, ratingCount));
 
-        tvStock.setText(getString(R.string.product_stock_remaining, product.tonKho));
+        tvStock.setText(InventoryPolicy.getCustomerStockText(this, product.tonKho));
+        tvStock.setTextColor(ContextCompat.getColor(this,
+                InventoryPolicy.isInStock(product.tonKho) ? R.color.text_sub : R.color.red_primary));
         tvDesc.setText(product.moTa == null ? "" : product.moTa);
 
         populateOptionChips(layoutStorageOptions, buildStorageOptions(product), true);
@@ -156,6 +158,8 @@ public class ProductDetailActivity extends BaseHomeActivity {
             Intent i = new Intent(this, CheckoutActivity.class);
             i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_PRODUCT_ID, product.maSanPham);
             i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_QTY, qty);
+            i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_STORAGE, selectedStorage);
+            i.putExtra(CheckoutActivity.EXTRA_BUY_NOW_COLOR, selectedColor);
             startActivity(i);
         });
     }
@@ -344,9 +348,9 @@ public class ProductDetailActivity extends BaseHomeActivity {
             Toast.makeText(this, "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
             return false;
         }
-        boolean ok = cartDao.addOrIncrease(session.getUserId(), product.maSanPham, qty);
+        boolean ok = cartDao.addOrIncrease(session.getUserId(), product.maSanPham, qty, selectedStorage, selectedColor);
         if (!ok) {
-            Toast.makeText(this, "Không thể thêm (vượt tồn kho)", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không thể thêm (vượt tồn kho hoặc sản phẩm đã ngừng bán)", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

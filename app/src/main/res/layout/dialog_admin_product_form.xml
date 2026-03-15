@@ -86,13 +86,22 @@
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_edittext_admin"
-            android:hint="Số lượng tồn kho"
+            android:hint="@string/admin_product_stock_form_hint"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
+
+        <TextView
+            android:id="@+id/tvStockPolicyHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/admin_product_stock_policy_hint"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="13sp" />
 
         <EditText
             android:id="@+id/edtDiscount"

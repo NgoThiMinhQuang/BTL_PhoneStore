@@ -1,7 +1,6 @@
 package com.example.phonestore.ui.admin;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Product;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -92,30 +91,11 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
     }
 
     private void bindStatus(Context context, VH h, int stock) {
-        int textRes;
-        int textColorRes;
-        int bgColorRes;
-
-        if (stock <= 0) {
-            textRes = R.string.admin_product_status_out_of_stock;
-            textColorRes = R.color.admin_product_status_empty;
-            bgColorRes = R.color.admin_product_status_empty_bg;
-            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_product_status_empty));
-        } else if (stock <= 5) {
-            textRes = R.string.admin_product_status_low_stock;
-            textColorRes = R.color.admin_product_status_low;
-            bgColorRes = R.color.admin_product_status_low_bg;
-            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_product_status_low));
-        } else {
-            textRes = R.string.admin_product_status_in_stock;
-            textColorRes = R.color.admin_product_status_ok;
-            bgColorRes = R.color.admin_product_status_ok_bg;
-            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_text_primary));
-        }
-
-        h.tvStatus.setText(textRes);
-        h.tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
-        h.tvStatus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, bgColorRes)));
+        InventoryPolicy.StatusAppearance appearance = InventoryPolicy.getAppearance(context, stock);
+        h.tvStatus.setText(appearance.label);
+        h.tvStatus.setTextColor(appearance.labelColor);
+        h.tvStatus.setBackgroundTintList(appearance.labelBackgroundTint);
+        h.tvStock.setTextColor(appearance.stockColor);
     }
 
     private int resolveProductImage(Context context, Product p) {

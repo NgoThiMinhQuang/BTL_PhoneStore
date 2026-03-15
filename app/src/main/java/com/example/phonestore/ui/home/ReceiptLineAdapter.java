@@ -48,7 +48,9 @@ public class ReceiptLineAdapter extends RecyclerView.Adapter<ReceiptLineAdapter.
             ReceiptItem existing = data.get(i);
             if (existing.productId == item.productId) {
                 existing.quantity += item.quantity;
-                existing.unitCost = item.unitCost;
+                if (item.unitCost > 0) {
+                    existing.unitCost = item.unitCost;
+                }
                 existing.recalculateAmount();
                 notifyItemChanged(i);
                 notifyChanged();

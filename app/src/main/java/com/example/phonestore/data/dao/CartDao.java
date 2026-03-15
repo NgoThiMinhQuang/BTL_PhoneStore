@@ -20,24 +20,36 @@ public class CartDao {
         dbHelper = new DBHelper(ctx);
     }
 
-    // thêm vào giỏ, có check tồn kho
     public boolean addOrIncrease(long userId, long productId, int qtyAdd) {
+        return addOrIncrease(userId, productId, qtyAdd, "", "");
+    }
+
+    public boolean addOrIncrease(long userId, long productId, int qtyAdd, String storage, String color) {
         if (qtyAdd <= 0) return false;
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String normalizedStorage = normalizeVariantValue(storage);
+        String normalizedColor = normalizeVariantValue(color);
 
         int stock = getStock(productId);
         if (stock <= 0) return false;
 
         Cursor c = db.rawQuery(
-                "SELECT " + DBHelper.COL_C_QTY +
+                "SELECT " + DBHelper.COL_ID + "," + DBHelper.COL_C_QTY +
                         " FROM " + DBHelper.TBL_CART +
-                        " WHERE " + DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + "=? LIMIT 1",
-                new String[]{String.valueOf(userId), String.valueOf(productId)}
+                        " WHERE " + DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + "=? AND " +
+                        DBHelper.COL_C_STORAGE + "=? AND " + DBHelper.COL_C_COLOR + "=? LIMIT 1",
+                new String[]{
+                        String.valueOf(userId),
+                        String.valueOf(productId),
+                        normalizedStorage,
+                        normalizedColor
+                }
         );
 
         boolean exists = c.moveToFirst();
-        int oldQty = exists ? c.getInt(0) : 0;
+        long cartItemId = exists ? c.getLong(0) : -1;
+        int oldQty = exists ? c.getInt(1) : 0;
         c.close();
 
         int newQty = oldQty + qtyAdd;
@@ -46,16 +58,21 @@ public class CartDao {
         if (exists) {
             ContentValues v = new ContentValues();
             v.put(DBHelper.COL_C_QTY, newQty);
-            return db.update(DBHelper.TBL_CART, v,
-                    DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + "=?",
-                    new String[]{String.valueOf(userId), String.valueOf(productId)}) > 0;
-        } else {
-            ContentValues v = new ContentValues();
-            v.put(DBHelper.COL_C_USER_ID, userId);
-            v.put(DBHelper.COL_C_PRODUCT_ID, productId);
-            v.put(DBHelper.COL_C_QTY, qtyAdd);
-            return db.insert(DBHelper.TBL_CART, null, v) != -1;
+            return db.update(
+                    DBHelper.TBL_CART,
+                    v,
+                    DBHelper.COL_ID + "=? AND " + DBHelper.COL_C_USER_ID + "=?",
+                    new String[]{String.valueOf(cartItemId), String.valueOf(userId)}
+            ) > 0;
         }
+
+        ContentValues v = new ContentValues();
+        v.put(DBHelper.COL_C_USER_ID, userId);
+        v.put(DBHelper.COL_C_PRODUCT_ID, productId);
+        v.put(DBHelper.COL_C_QTY, qtyAdd);
+        v.put(DBHelper.COL_C_STORAGE, normalizedStorage);
+        v.put(DBHelper.COL_C_COLOR, normalizedColor);
+        return db.insert(DBHelper.TBL_CART, null, v) != -1;
     }
 
     public ArrayList<CartItem> getCartItems(long userId) {
@@ -63,32 +80,26 @@ public class CartDao {
         ArrayList<CartItem> list = new ArrayList<>();
 
         Cursor c = db.rawQuery(
-                "SELECT p." + DBHelper.COL_ID + "," +
+                "SELECT c." + DBHelper.COL_ID + "," +
+                        " p." + DBHelper.COL_ID + "," +
                         " p." + DBHelper.COL_P_NAME + "," +
                         " p." + DBHelper.COL_P_BRAND + "," +
                         " p." + DBHelper.COL_P_PRICE + "," +
                         " p." + DBHelper.COL_P_DISCOUNT + "," +
                         " p." + DBHelper.COL_P_STOCK + "," +
                         " p." + DBHelper.COL_P_IMAGE + "," +
-                        " c." + DBHelper.COL_C_QTY +
+                        " c." + DBHelper.COL_C_QTY + "," +
+                        " c." + DBHelper.COL_C_STORAGE + "," +
+                        " c." + DBHelper.COL_C_COLOR +
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
-                        " WHERE c." + DBHelper.COL_C_USER_ID + "=?" +
+                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1" +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 new String[]{String.valueOf(userId)}
         );
 
         while (c.moveToNext()) {
-            CartItem it = new CartItem();
-            it.productId = c.getLong(0);
-            it.tenSanPham = c.getString(1);
-            it.hang = c.getString(2);
-            it.gia = c.getInt(3);
-            it.giamGia = c.getInt(4);
-            it.tonKho = c.getInt(5);
-            it.tenAnh = c.getString(6);
-            it.soLuong = c.getInt(7);
-            list.add(it);
+            list.add(readCartItem(c));
         }
         c.close();
         return list;
@@ -100,60 +111,54 @@ public class CartDao {
         return total;
     }
 
-    public ArrayList<CartItem> getCartItemsByProductIds(long userId, List<Long> productIds) {
+    public ArrayList<CartItem> getCartItemsByIds(long userId, List<Long> cartItemIds) {
         ArrayList<CartItem> list = new ArrayList<>();
-        if (productIds == null || productIds.isEmpty()) return list;
+        if (cartItemIds == null || cartItemIds.isEmpty()) return list;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] args = buildArgs(userId, productIds);
+        String[] args = buildArgs(userId, cartItemIds);
 
         Cursor c = db.rawQuery(
-                "SELECT p." + DBHelper.COL_ID + "," +
+                "SELECT c." + DBHelper.COL_ID + "," +
+                        " p." + DBHelper.COL_ID + "," +
                         " p." + DBHelper.COL_P_NAME + "," +
                         " p." + DBHelper.COL_P_BRAND + "," +
                         " p." + DBHelper.COL_P_PRICE + "," +
                         " p." + DBHelper.COL_P_DISCOUNT + "," +
                         " p." + DBHelper.COL_P_STOCK + "," +
                         " p." + DBHelper.COL_P_IMAGE + "," +
-                        " c." + DBHelper.COL_C_QTY +
+                        " c." + DBHelper.COL_C_QTY + "," +
+                        " c." + DBHelper.COL_C_STORAGE + "," +
+                        " c." + DBHelper.COL_C_COLOR +
                         " FROM " + DBHelper.TBL_CART + " c" +
                         " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
-                        " WHERE c." + DBHelper.COL_C_USER_ID + "=?" +
-                        " AND c." + DBHelper.COL_C_PRODUCT_ID + " IN (" + buildInClause(productIds.size()) + ")" +
+                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1" +
+                        " AND c." + DBHelper.COL_ID + " IN (" + buildInClause(cartItemIds.size()) + ")" +
                         " ORDER BY c." + DBHelper.COL_ID + " DESC",
                 args
         );
 
         while (c.moveToNext()) {
-            CartItem it = new CartItem();
-            it.productId = c.getLong(0);
-            it.tenSanPham = c.getString(1);
-            it.hang = c.getString(2);
-            it.gia = c.getInt(3);
-            it.giamGia = c.getInt(4);
-            it.tonKho = c.getInt(5);
-            it.tenAnh = c.getString(6);
-            it.soLuong = c.getInt(7);
-            list.add(it);
+            list.add(readCartItem(c));
         }
         c.close();
         return list;
     }
 
-    public int getTotalByProductIds(long userId, List<Long> productIds) {
+    public int getTotalByIds(long userId, List<Long> cartItemIds) {
         int total = 0;
-        for (CartItem it : getCartItemsByProductIds(userId, productIds)) total += it.thanhTien();
+        for (CartItem it : getCartItemsByIds(userId, cartItemIds)) total += it.thanhTien();
         return total;
     }
 
-    public void deleteItems(long userId, List<Long> productIds) {
-        if (productIds == null || productIds.isEmpty()) return;
+    public void deleteItemsByIds(long userId, List<Long> cartItemIds) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) return;
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String[] args = buildArgs(userId, productIds);
+        String[] args = buildArgs(userId, cartItemIds);
         db.delete(
                 DBHelper.TBL_CART,
-                DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + " IN (" + buildInClause(productIds.size()) + ")",
+                DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_ID + " IN (" + buildInClause(cartItemIds.size()) + ")",
                 args
         );
     }
@@ -161,9 +166,10 @@ public class CartDao {
     public int getTotalQty(long userId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor c = db.rawQuery(
-                "SELECT COALESCE(SUM(" + DBHelper.COL_C_QTY + "), 0)" +
-                        " FROM " + DBHelper.TBL_CART +
-                        " WHERE " + DBHelper.COL_C_USER_ID + "=?",
+                "SELECT COALESCE(SUM(c." + DBHelper.COL_C_QTY + "), 0)" +
+                        " FROM " + DBHelper.TBL_CART + " c" +
+                        " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
+                        " WHERE c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1",
                 new String[]{String.valueOf(userId)}
         );
         int totalQty = 0;
@@ -172,26 +178,46 @@ public class CartDao {
         return totalQty;
     }
 
-    public boolean updateQty(long userId, long productId, int newQty) {
-        if (newQty <= 0) return deleteItem(userId, productId);
+    public boolean updateQtyById(long userId, long cartItemId, int newQty) {
+        if (newQty <= 0) return deleteItemById(userId, cartItemId);
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT c." + DBHelper.COL_C_PRODUCT_ID +
+                        " FROM " + DBHelper.TBL_CART + " c" +
+                        " JOIN " + DBHelper.TBL_PRODUCTS + " p ON p." + DBHelper.COL_ID + " = c." + DBHelper.COL_C_PRODUCT_ID +
+                        " WHERE c." + DBHelper.COL_ID + "=? AND c." + DBHelper.COL_C_USER_ID + "=? AND p." + DBHelper.COL_IS_ACTIVE + "=1 LIMIT 1",
+                new String[]{String.valueOf(cartItemId), String.valueOf(userId)}
+        );
+        long productId = -1;
+        if (c.moveToFirst()) {
+            productId = c.getLong(0);
+        }
+        c.close();
+        if (productId <= 0) return false;
 
         int stock = getStock(productId);
         if (newQty > stock) return false;
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabase writableDb = dbHelper.getWritableDatabase();
         ContentValues v = new ContentValues();
         v.put(DBHelper.COL_C_QTY, newQty);
 
-        return db.update(DBHelper.TBL_CART, v,
-                DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + "=?",
-                new String[]{String.valueOf(userId), String.valueOf(productId)}) > 0;
+        return writableDb.update(
+                DBHelper.TBL_CART,
+                v,
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_C_USER_ID + "=?",
+                new String[]{String.valueOf(cartItemId), String.valueOf(userId)}
+        ) > 0;
     }
 
-    public boolean deleteItem(long userId, long productId) {
+    public boolean deleteItemById(long userId, long cartItemId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        return db.delete(DBHelper.TBL_CART,
-                DBHelper.COL_C_USER_ID + "=? AND " + DBHelper.COL_C_PRODUCT_ID + "=?",
-                new String[]{String.valueOf(userId), String.valueOf(productId)}) > 0;
+        return db.delete(
+                DBHelper.TBL_CART,
+                DBHelper.COL_ID + "=? AND " + DBHelper.COL_C_USER_ID + "=?",
+                new String[]{String.valueOf(cartItemId), String.valueOf(userId)}
+        ) > 0;
     }
 
     public void clear(long userId) {
@@ -214,18 +240,39 @@ public class CartDao {
         return stock;
     }
 
+    private CartItem readCartItem(Cursor c) {
+        CartItem it = new CartItem();
+        it.id = c.getLong(0);
+        it.productId = c.getLong(1);
+        it.tenSanPham = c.getString(2);
+        it.hang = c.getString(3);
+        it.gia = c.getInt(4);
+        it.giamGia = c.getInt(5);
+        it.tonKho = c.getInt(6);
+        it.tenAnh = c.getString(7);
+        it.soLuong = c.getInt(8);
+        it.dungLuong = c.getString(9);
+        it.mauSac = c.getString(10);
+        return it;
+    }
+
     private String buildInClause(int size) {
         StringJoiner joiner = new StringJoiner(",");
         for (int i = 0; i < size; i++) joiner.add("?");
         return joiner.toString();
     }
 
-    private String[] buildArgs(long userId, List<Long> productIds) {
-        String[] args = new String[productIds.size() + 1];
+    private String[] buildArgs(long userId, List<Long> ids) {
+        String[] args = new String[ids.size() + 1];
         args[0] = String.valueOf(userId);
-        for (int i = 0; i < productIds.size(); i++) {
-            args[i + 1] = String.valueOf(productIds.get(i));
+        for (int i = 0; i < ids.size(); i++) {
+            args[i + 1] = String.valueOf(ids.get(i));
         }
         return args;
+    }
+
+    private String normalizeVariantValue(String value) {
+        if (value == null) return "";
+        return value.trim();
     }
 }

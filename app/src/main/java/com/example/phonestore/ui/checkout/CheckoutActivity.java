@@ -27,6 +27,8 @@ public class CheckoutActivity extends BaseHomeActivity {
 
     public static final String EXTRA_BUY_NOW_PRODUCT_ID = "extra_buy_now_product_id";
     public static final String EXTRA_BUY_NOW_QTY = "extra_buy_now_qty";
+    public static final String EXTRA_BUY_NOW_STORAGE = "extra_buy_now_storage";
+    public static final String EXTRA_BUY_NOW_COLOR = "extra_buy_now_color";
 
     private CartDao cartDao;
     private OrderDao orderDao;
@@ -39,9 +41,11 @@ public class CheckoutActivity extends BaseHomeActivity {
     private EditText edtName, edtPhone, edtAddress, edtNote, edtDiscountCode;
     private RadioButton rbCod, rbBank;
 
-    private final ArrayList<Long> selectedProductIds = new ArrayList<>();
+    private final ArrayList<Long> selectedCartItemIds = new ArrayList<>();
     private long buyNowProductId = -1;
     private int buyNowQty = 1;
+    private String buyNowStorage = "";
+    private String buyNowColor = "";
     private String appliedDiscountCode;
     private int subtotal;
     private int discountAmount;
@@ -75,15 +79,17 @@ public class CheckoutActivity extends BaseHomeActivity {
         rbCod = findViewById(R.id.rbCod);
         rbBank = findViewById(R.id.rbChuyenKhoan);
 
-        long[] selectedIds = getIntent().getLongArrayExtra(CartActivity.EXTRA_SELECTED_PRODUCT_IDS);
+        long[] selectedIds = getIntent().getLongArrayExtra(CartActivity.EXTRA_SELECTED_CART_ITEM_IDS);
         if (selectedIds != null) {
             for (long id : selectedIds) {
-                selectedProductIds.add(id);
+                selectedCartItemIds.add(id);
             }
         }
 
         buyNowProductId = getIntent().getLongExtra(EXTRA_BUY_NOW_PRODUCT_ID, -1);
         buyNowQty = Math.max(1, getIntent().getIntExtra(EXTRA_BUY_NOW_QTY, 1));
+        buyNowStorage = normalizeVariant(getIntent().getStringExtra(EXTRA_BUY_NOW_STORAGE));
+        buyNowColor = normalizeVariant(getIntent().getStringExtra(EXTRA_BUY_NOW_COLOR));
 
         appliedDiscountCode = CheckoutInfo.normalizeDiscountCode(getIntent().getStringExtra(CartActivity.EXTRA_DISCOUNT_CODE));
         if (appliedDiscountCode != null) {
@@ -149,9 +155,9 @@ public class CheckoutActivity extends BaseHomeActivity {
         if (buyNowProductId > 0) {
             subtotal = orderDao.previewSingleProductTotal(buyNowProductId, buyNowQty);
         } else {
-            subtotal = selectedProductIds.isEmpty()
+            subtotal = selectedCartItemIds.isEmpty()
                     ? cartDao.getTotal(session.getUserId())
-                    : cartDao.getTotalByProductIds(session.getUserId(), selectedProductIds);
+                    : cartDao.getTotalByIds(session.getUserId(), selectedCartItemIds);
         }
         shippingFee = subtotal > 0 ? CheckoutInfo.SHIPPING_FEE : 0;
         discountAmount = CheckoutInfo.calculateDiscount(appliedDiscountCode, subtotal);
@@ -220,11 +226,18 @@ public class CheckoutActivity extends BaseHomeActivity {
     private void createOrder(CheckoutInfo info) {
         long orderId;
         if (buyNowProductId > 0) {
-            orderId = orderDao.checkoutSingleProduct(session.getUserId(), buyNowProductId, buyNowQty, info);
-        } else if (selectedProductIds.isEmpty()) {
+            orderId = orderDao.checkoutSingleProduct(
+                    session.getUserId(),
+                    buyNowProductId,
+                    buyNowQty,
+                    buyNowStorage,
+                    buyNowColor,
+                    info
+            );
+        } else if (selectedCartItemIds.isEmpty()) {
             orderId = orderDao.checkout(session.getUserId(), info);
         } else {
-            orderId = orderDao.checkout(session.getUserId(), info, selectedProductIds);
+            orderId = orderDao.checkout(session.getUserId(), info, selectedCartItemIds);
         }
 
         if (orderId == -1) {
@@ -247,5 +260,9 @@ public class CheckoutActivity extends BaseHomeActivity {
 
     private String formatMoney(int amount) {
         return NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(amount) + "đ";
+    }
+
+    private String normalizeVariant(String value) {
+        return value == null ? "" : value.trim();
     }
 }

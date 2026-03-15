@@ -26,7 +26,8 @@ import java.util.Set;
 
 public class CartActivity extends BaseHomeActivity {
 
-    public static final String EXTRA_SELECTED_PRODUCT_IDS = "extra_selected_product_ids";
+    public static final String EXTRA_SELECTED_CART_ITEM_IDS = "extra_selected_cart_item_ids";
+    public static final String EXTRA_SELECTED_PRODUCT_IDS = EXTRA_SELECTED_CART_ITEM_IDS;
     public static final String EXTRA_DISCOUNT_CODE = "extra_discount_code";
 
     private CartDao cartDao;
@@ -39,7 +40,7 @@ public class CartActivity extends BaseHomeActivity {
     private TextView tvDiscountMessage;
     private EditText edtDiscountCode;
 
-    private final Set<Long> selectedProductIds = new HashSet<>();
+    private final Set<Long> selectedCartItemIds = new HashSet<>();
     private boolean didInitSelectAll = false;
     private String appliedDiscountCode;
 
@@ -69,24 +70,24 @@ public class CartActivity extends BaseHomeActivity {
         adapter = new CartAdapter(new CartAdapter.Listener() {
             @Override
             public void onChangeQty(CartItem item, int newQty) {
-                boolean ok = cartDao.updateQty(session.getUserId(), item.productId, newQty);
+                boolean ok = cartDao.updateQtyById(session.getUserId(), item.id, newQty);
                 if (!ok) Toast.makeText(CartActivity.this, R.string.exceed_stock, Toast.LENGTH_SHORT).show();
                 reload();
             }
 
             @Override
             public void onRemove(CartItem item) {
-                cartDao.deleteItem(session.getUserId(), item.productId);
-                selectedProductIds.remove(item.productId);
+                cartDao.deleteItemById(session.getUserId(), item.id);
+                selectedCartItemIds.remove(item.id);
                 reload();
             }
 
             @Override
             public void onToggleSelection(CartItem item, boolean isSelected) {
                 if (isSelected) {
-                    selectedProductIds.add(item.productId);
+                    selectedCartItemIds.add(item.id);
                 } else {
-                    selectedProductIds.remove(item.productId);
+                    selectedCartItemIds.remove(item.id);
                 }
                 updateSelectedTotal();
             }
@@ -131,22 +132,22 @@ public class CartActivity extends BaseHomeActivity {
         ArrayList<CartItem> list = cartDao.getCartItems(session.getUserId());
 
         Set<Long> availableIds = new HashSet<>();
-        for (CartItem item : list) availableIds.add(item.productId);
-        selectedProductIds.retainAll(availableIds);
+        for (CartItem item : list) availableIds.add(item.id);
+        selectedCartItemIds.retainAll(availableIds);
 
         if (!didInitSelectAll) {
-            selectedProductIds.addAll(availableIds);
+            selectedCartItemIds.addAll(availableIds);
             didInitSelectAll = true;
         }
 
         adapter.setData(list);
-        adapter.setSelectedProductIds(selectedProductIds);
+        adapter.setSelectedCartItemIds(selectedCartItemIds);
         updateSelectedTotal();
     }
 
     private void applyDiscountCode() {
         String rawCode = edtDiscountCode.getText().toString();
-        int subtotal = cartDao.getTotalByProductIds(session.getUserId(), new ArrayList<>(selectedProductIds));
+        int subtotal = cartDao.getTotalByIds(session.getUserId(), new ArrayList<>(selectedCartItemIds));
         String normalizedCode = CheckoutInfo.normalizeDiscountCode(rawCode);
         int discount = CheckoutInfo.calculateDiscount(rawCode, subtotal);
 
@@ -174,7 +175,7 @@ public class CartActivity extends BaseHomeActivity {
     }
 
     private void updateSelectedTotal() {
-        int subtotal = cartDao.getTotalByProductIds(session.getUserId(), new ArrayList<>(selectedProductIds));
+        int subtotal = cartDao.getTotalByIds(session.getUserId(), new ArrayList<>(selectedCartItemIds));
         int discount = CheckoutInfo.calculateDiscount(appliedDiscountCode, subtotal);
         int shippingFee = subtotal > 0 ? CheckoutInfo.SHIPPING_FEE : 0;
         int finalTotal = Math.max(0, subtotal + shippingFee - discount);
@@ -190,13 +191,13 @@ public class CartActivity extends BaseHomeActivity {
     }
 
     private void openCheckout() {
-        if (selectedProductIds.isEmpty()) {
+        if (selectedCartItemIds.isEmpty()) {
             Toast.makeText(this, R.string.cart_select_at_least_one, Toast.LENGTH_SHORT).show();
             return;
         }
 
         Intent i = new Intent(this, CheckoutActivity.class);
-        i.putExtra(EXTRA_SELECTED_PRODUCT_IDS, toLongArray(selectedProductIds));
+        i.putExtra(EXTRA_SELECTED_CART_ITEM_IDS, toLongArray(selectedCartItemIds));
         i.putExtra(EXTRA_DISCOUNT_CODE, appliedDiscountCode);
         startActivity(i);
     }

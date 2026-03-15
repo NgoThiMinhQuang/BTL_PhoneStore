@@ -31,7 +31,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
     }
 
     private final ArrayList<CartItem> data = new ArrayList<>();
-    private final Set<Long> selectedProductIds = new HashSet<>();
+    private final Set<Long> selectedCartItemIds = new HashSet<>();
     private final Listener listener;
     private Context ctx;
 
@@ -45,9 +45,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
         notifyDataSetChanged();
     }
 
-    public void setSelectedProductIds(Set<Long> ids) {
-        selectedProductIds.clear();
-        if (ids != null) selectedProductIds.addAll(ids);
+    public void setSelectedCartItemIds(Set<Long> ids) {
+        selectedCartItemIds.clear();
+        if (ids != null) selectedCartItemIds.addAll(ids);
         notifyDataSetChanged();
     }
 
@@ -63,7 +63,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int position) {
         CartItem it = data.get(position);
 
-        h.tvName.setText(it.tenSanPham + (it.hang == null ? "" : " (" + it.hang + ")"));
+        String variant = buildVariantLabel(it);
+        String name = it.tenSanPham + (it.hang == null ? "" : " (" + it.hang + ")");
+        if (!variant.isEmpty()) {
+            name += " • " + variant;
+        }
+        h.tvName.setText(name);
+
         String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(it.giaSauGiam()) + "đ";
         h.tvPrice.setText("Giá: " + giaText + (it.giamGia > 0 ? " (" + it.giamGia + "%)" : ""));
         h.tvQty.setText(String.valueOf(it.soLuong));
@@ -71,7 +77,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
         int resId = resolveImageRes(it.tenAnh);
         h.ivThumb.setImageResource(resId != 0 ? resId : android.R.drawable.ic_menu_gallery);
 
-        boolean isSelected = selectedProductIds.contains(it.productId);
+        boolean isSelected = selectedCartItemIds.contains(it.id);
         h.cbSelect.setOnCheckedChangeListener(null);
         h.cbSelect.setChecked(isSelected);
         bindSelectionStyle(h, isSelected);
@@ -81,11 +87,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
             listener.onToggleSelection(it, checked);
         });
 
-        h.itemView.setOnClickListener(v -> {
-            boolean checked = !h.cbSelect.isChecked();
-            h.cbSelect.setChecked(checked);
-        });
-
+        h.itemView.setOnClickListener(v -> h.cbSelect.setChecked(!h.cbSelect.isChecked()));
         h.btnMinus.setOnClickListener(v -> listener.onChangeQty(it, it.soLuong - 1));
         h.btnPlus.setOnClickListener(v -> listener.onChangeQty(it, it.soLuong + 1));
         h.btnDelete.setOnClickListener(v -> listener.onRemove(it));
@@ -112,6 +114,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
         if (resId != 0) return resId;
 
         return ctx.getResources().getIdentifier(imageKey, "mipmap", ctx.getPackageName());
+    }
+
+    private String buildVariantLabel(CartItem item) {
+        String storage = item.dungLuong == null ? "" : item.dungLuong.trim();
+        String color = item.mauSac == null ? "" : item.mauSac.trim();
+        if (storage.isEmpty()) return color;
+        if (color.isEmpty()) return storage;
+        return storage + " • " + color;
     }
 
     static class VH extends RecyclerView.ViewHolder {

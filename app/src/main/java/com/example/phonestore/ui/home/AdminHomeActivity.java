@@ -22,6 +22,7 @@ import com.example.phonestore.ui.admin.AdminReportsActivity;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.orders.OrderDetailActivity;
 import com.example.phonestore.ui.orders.OrdersAdapter;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -118,7 +119,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
         int lowStockCount = 0;
         List<String> highlightNames = new ArrayList<>();
         for (Product product : products) {
-            if (product.tonKho > 0 && product.tonKho <= 5) {
+            if (InventoryPolicy.isLowStock(product)) {
                 lowStockCount++;
                 if (highlightNames.size() < 2) {
                     highlightNames.add(product.tenSanPham);

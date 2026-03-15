@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -90,34 +91,18 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
     }
 
     private void bindStatus(Context context, VH holder, String status, int currentStock) {
-        int textRes = R.string.admin_product_status_in_stock;
-        int textColorRes = R.color.admin_product_status_ok;
-        int bgColorRes = R.color.admin_product_status_ok_bg;
-        int stockColorRes = R.color.admin_text_primary;
-
-        if (InventoryManagementItem.STATUS_LOW_STOCK.equals(status)) {
-            textRes = R.string.admin_product_status_low_stock;
-            textColorRes = R.color.admin_product_status_low;
-            bgColorRes = R.color.admin_product_status_low_bg;
-            stockColorRes = R.color.admin_product_status_low;
-        } else if (InventoryManagementItem.STATUS_OUT_OF_STOCK.equals(status)) {
-            textRes = R.string.admin_product_status_out_of_stock;
-            textColorRes = R.color.admin_product_status_empty;
-            bgColorRes = R.color.admin_product_status_empty_bg;
-            stockColorRes = R.color.admin_product_status_empty;
-        }
-
-        holder.tvStatus.setText(textRes);
+        InventoryPolicy.StatusAppearance appearance = InventoryPolicy.getAppearance(context, currentStock);
+        holder.tvStatus.setText(appearance.label);
         if (alertMode) {
             holder.tvStatus.setTextColor(ContextCompat.getColor(context, android.R.color.white));
         } else {
-            holder.tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
+            holder.tvStatus.setTextColor(appearance.labelColor);
             Drawable background = holder.tvStatus.getBackground();
             if (background instanceof GradientDrawable) {
-                ((GradientDrawable) background.mutate()).setColor(ContextCompat.getColor(context, bgColorRes));
+                ((GradientDrawable) background.mutate()).setColor(appearance.labelBackgroundTint.getDefaultColor());
             }
         }
-        holder.tvCurrentStockValue.setTextColor(ContextCompat.getColor(context, stockColorRes));
+        holder.tvCurrentStockValue.setTextColor(appearance.stockColor);
         if (alertMode) {
             holder.tvCurrentStockValue.setContentDescription(context.getString(R.string.admin_inventory_current_stock_value, currentStock));
         }

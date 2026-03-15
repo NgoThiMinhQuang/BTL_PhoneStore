@@ -9,4 +9,6 @@ public class OrderItem {
     public int giamGia;
     public int soLuong;
     public int thanhTien;
+    public String dungLuong;
+    public String mauSac;
 }

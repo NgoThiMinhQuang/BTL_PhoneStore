@@ -220,7 +220,14 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     }
 
     protected boolean isAdminSession() {
-        return DBHelper.ROLE_ADMIN.equals(session.getRole());
+        return DBHelper.ROLE_ADMIN.equals(getSessionRole());
+    }
+
+    protected String getSessionRole() {
+        if (session != null) {
+            return session.getRole();
+        }
+        return new SessionManager(this).getRole();
     }
 
     private void inflateContentLayoutIfNeeded() {

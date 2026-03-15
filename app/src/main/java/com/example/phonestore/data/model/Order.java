@@ -5,6 +5,10 @@ public class Order {
     public long userId;
     public String username; // admin xem tất cả
     public int tongTien;
+    public int tamTinh;
+    public int phiVanChuyen;
+    public String maGiamGia;
+    public int tienGiam;
     public long ngayTao;
     public String trangThaiDon;
     public String trangThaiThanhToan;

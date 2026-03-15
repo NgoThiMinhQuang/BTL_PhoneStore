@@ -21,6 +21,7 @@ import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.home.BaseHomeActivity;
+import com.example.phonestore.utils.InventoryPolicy;
 import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
@@ -151,9 +152,9 @@ public class AdminProductsActivity extends BaseHomeActivity {
 
         if (allProducts != null) {
             for (Product p : allProducts) {
-                if (p == null) continue;
-                if (p.tonKho > 0) inStock++;
-                if (p.tonKho > 0 && p.tonKho <= 5) lowStock++;
+                if (p == null || !p.isActive) continue;
+                if (!InventoryPolicy.isOutOfStock(p.tonKho)) inStock++;
+                if (InventoryPolicy.isLowStock(p)) lowStock++;
             }
         }
 
@@ -189,17 +190,21 @@ public class AdminProductsActivity extends BaseHomeActivity {
         EditText edtCamera = view.findViewById(R.id.edtCamera);
         EditText edtColors = view.findViewById(R.id.edtColors);
         EditText edtDesc = view.findViewById(R.id.edtDesc);
+        TextView tvStockHint = view.findViewById(R.id.tvStockPolicyHint);
 
         boolean editing = oldProduct != null;
+        edtStock.setEnabled(false);
+        edtStock.setFocusable(false);
+        edtStock.setClickable(false);
+        if (tvStockHint != null) {
+            tvStockHint.setVisibility(View.VISIBLE);
+        }
         if (editing) {
             edtName.setText(oldProduct.tenSanPham);
             edtBrand.setText(oldProduct.hang);
             edtImage.setText(oldProduct.tenAnh);
             edtPrice.setText(String.valueOf(oldProduct.gia));
-            edtStock.setText(String.valueOf(oldProduct.tonKho));
-            edtStock.setEnabled(false);
-            edtStock.setFocusable(false);
-            edtStock.setClickable(false);
+            edtStock.setText(String.valueOf(Math.max(0, oldProduct.tonKho)));
             edtDiscount.setText(String.valueOf(oldProduct.giamGia));
             edtOs.setText(oldProduct.heDieuHanh);
             edtRom.setText(oldProduct.romGb > 0 ? String.valueOf(oldProduct.romGb) : "");
@@ -210,6 +215,8 @@ public class AdminProductsActivity extends BaseHomeActivity {
             edtCamera.setText(oldProduct.camera);
             edtColors.setText(oldProduct.mauSac);
             edtDesc.setText(oldProduct.moTa);
+        } else {
+            edtStock.setText(String.valueOf(0));
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -222,7 +229,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             Product p = editing ? oldProduct : new Product();
             String error = fillAndValidateProductFromForm(
-                    p, edtName, edtBrand, edtImage, edtPrice, edtStock, edtDiscount,
+                    p, editing, edtName, edtBrand, edtImage, edtPrice, edtDiscount,
                     edtOs, edtRom, edtRam, edtBattery, edtChipset, edtScreen, edtCamera,
                     edtColors, edtDesc
             );
@@ -253,11 +260,11 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     private String fillAndValidateProductFromForm(Product p,
+                                                  boolean editing,
                                                   EditText edtName,
                                                   EditText edtBrand,
                                                   EditText edtImage,
                                                   EditText edtPrice,
-                                                  EditText edtStock,
                                                   EditText edtDiscount,
                                                   EditText edtOs,
                                                   EditText edtRom,
@@ -273,7 +280,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
         String brand = edtBrand.getText().toString().trim();
         String image = edtImage.getText().toString().trim();
         String priceStr = edtPrice.getText().toString().trim();
-        String stockStr = edtStock.getText().toString().trim();
         String discountStr = edtDiscount.getText().toString().trim();
         String os = edtOs.getText().toString().trim();
         String romStr = edtRom.getText().toString().trim();
@@ -286,7 +292,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
 
         if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
         if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
-        if (TextUtils.isEmpty(stockStr)) return getString(R.string.err_stock_required);
         if (TextUtils.isEmpty(os)) return "Vui lòng nhập hệ điều hành";
         if (TextUtils.isEmpty(romStr)) return "Vui lòng nhập dung lượng ROM";
         if (TextUtils.isEmpty(ramStr)) return "Vui lòng nhập dung lượng RAM";
@@ -297,7 +302,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
         if (TextUtils.isEmpty(colors)) return "Vui lòng nhập màu sắc";
 
         int price;
-        int stock;
         int discount;
         int rom;
         int ram;
@@ -305,7 +309,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
 
         try {
             price = Integer.parseInt(priceStr);
-            stock = Integer.parseInt(stockStr);
             discount = TextUtils.isEmpty(discountStr) ? 0 : Integer.parseInt(discountStr);
             rom = Integer.parseInt(romStr);
             ram = Integer.parseInt(ramStr);
@@ -315,7 +318,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
         }
 
         if (price <= 0) return getString(R.string.err_price_invalid);
-        if (stock < 0) return getString(R.string.err_stock_invalid);
         if (discount < 0 || discount >= 100) return getString(R.string.err_discount_invalid);
         if (rom <= 0) return "ROM phải lớn hơn 0";
         if (ram <= 0) return "RAM phải lớn hơn 0";
@@ -325,7 +327,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         p.hang = brand;
         p.tenAnh = image;
         p.gia = price;
-        p.tonKho = stock;
+        p.tonKho = editing ? Math.max(0, p.tonKho) : 0;
         p.giamGia = discount;
         p.heDieuHanh = os;
         p.romGb = rom;
@@ -336,11 +338,20 @@ public class AdminProductsActivity extends BaseHomeActivity {
         p.camera = camera;
         p.mauSac = colors;
         p.moTa = edtDesc.getText().toString().trim();
+        if (!editing) {
+            p.isActive = true;
+        }
 
         return null;
     }
 
     private void confirmDelete(Product product) {
+        ProductDao.ProductDeactivationCheck check = productDao.checkDeactivationEligibility(product.maSanPham);
+        if (!check.canDeactivate()) {
+            Toast.makeText(this, buildDeactivateBlockedMessage(check), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle(R.string.admin_deactivate_product_title)
                 .setMessage(getString(R.string.admin_deactivate_product_message, product.tenSanPham))
@@ -351,10 +362,29 @@ public class AdminProductsActivity extends BaseHomeActivity {
                         Toast.makeText(this, R.string.product_deleted, Toast.LENGTH_SHORT).show();
                         loadData();
                     } else {
-                        Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, buildDeactivateBlockedMessage(productDao.checkDeactivationEligibility(product.maSanPham)), Toast.LENGTH_LONG).show();
                     }
                 })
                 .show();
+    }
+
+    private String buildDeactivateBlockedMessage(ProductDao.ProductDeactivationCheck check) {
+        if (check == null || check.product == null) {
+            return getString(R.string.action_failed);
+        }
+        if (check.alreadyInactive) {
+            return getString(R.string.admin_product_deactivate_blocked_inactive);
+        }
+        if (check.currentStock > 0) {
+            return getString(R.string.admin_product_deactivate_blocked_stock, check.currentStock);
+        }
+        if (check.activeCartCount > 0) {
+            return getString(R.string.admin_product_deactivate_blocked_cart, check.activeCartCount);
+        }
+        if (check.openOrderCount > 0) {
+            return getString(R.string.admin_product_deactivate_blocked_order, check.openOrderCount);
+        }
+        return getString(R.string.action_failed);
     }
 
     @Override

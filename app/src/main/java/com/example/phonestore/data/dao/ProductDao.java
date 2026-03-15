@@ -7,9 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.Product;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ProductDao {
 
@@ -25,6 +27,22 @@ public class ProductDao {
         public boolean onlyInStock;
         public boolean onlyDiscounted;
         public boolean includeInactive;
+    }
+
+    public static class ProductDeactivationCheck {
+        public Product product;
+        public int currentStock;
+        public int activeCartCount;
+        public int openOrderCount;
+        public boolean alreadyInactive;
+
+        public boolean canDeactivate() {
+            return product != null
+                    && !alreadyInactive
+                    && currentStock <= 0
+                    && activeCartCount <= 0
+                    && openOrderCount <= 0;
+        }
     }
 
     private final DBHelper dbHelper;
@@ -43,6 +61,21 @@ public class ProductDao {
 
     public ArrayList<Product> layTheoHang(String hang) {
         return queryProducts(DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_BRAND + "=?", new String[]{hang}, null);
+    }
+
+    public ArrayList<Product> laySanPhamDangBanTheoHang(String brand) {
+        String normalizedBrand = trimToNull(brand);
+        if (normalizedBrand == null) {
+            return new ArrayList<>();
+        }
+        String whereClause = DBHelper.COL_IS_ACTIVE + "=1" +
+                " AND TRIM(IFNULL(" + DBHelper.COL_P_BRAND + ",'') ) <> ''" +
+                " AND UPPER(TRIM(" + DBHelper.COL_P_BRAND + ")) = UPPER(?)";
+        return queryProducts(
+                whereClause,
+                new String[]{normalizedBrand},
+                DBHelper.COL_P_NAME + " COLLATE NOCASE ASC, " + DBHelper.COL_ID + " DESC"
+        );
     }
 
     public ArrayList<Product> timKiem(String tuKhoa) {
@@ -139,6 +172,44 @@ public class ProductDao {
         return p;
     }
 
+    public HashMap<Long, Integer> getCurrentStockMap(boolean includeInactive) {
+        ArrayList<Product> products = includeInactive ? layTatCaChoAdmin() : layTatCa();
+        HashMap<Long, Integer> stockByProductId = new HashMap<>();
+        for (Product product : products) {
+            stockByProductId.put(product.maSanPham, Math.max(0, product.tonKho));
+        }
+        return stockByProductId;
+    }
+
+    public ProductDeactivationCheck checkDeactivationEligibility(long productId) {
+        ProductDeactivationCheck result = new ProductDeactivationCheck();
+        result.product = getById(productId, true);
+        if (result.product == null) {
+            return result;
+        }
+
+        result.alreadyInactive = !result.product.isActive;
+        result.currentStock = Math.max(0, result.product.tonKho);
+        result.activeCartCount = queryCount(
+                "SELECT COUNT(DISTINCT " + DBHelper.COL_C_USER_ID + ") FROM " + DBHelper.TBL_CART +
+                        " WHERE " + DBHelper.COL_C_PRODUCT_ID + "=?",
+                new String[]{String.valueOf(productId)}
+        );
+        result.openOrderCount = queryCount(
+                "SELECT COUNT(DISTINCT oi." + DBHelper.COL_OI_ORDER_ID + ")" +
+                        " FROM " + DBHelper.TBL_ORDER_ITEMS + " oi" +
+                        " JOIN " + DBHelper.TBL_ORDERS + " o ON o." + DBHelper.COL_ID + " = oi." + DBHelper.COL_OI_ORDER_ID +
+                        " WHERE oi." + DBHelper.COL_OI_PRODUCT_ID + "=?" +
+                        " AND o." + DBHelper.COL_O_ORDER_STATUS + " IN (?, ?)",
+                new String[]{
+                        String.valueOf(productId),
+                        OrderStatus.STATUS_CHO_XAC_NHAN,
+                        OrderStatus.STATUS_DANG_XU_LY
+                }
+        );
+        return result;
+    }
+
     public long insert(Product p) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         return db.insert(DBHelper.TBL_PRODUCTS, null, toValues(p));
@@ -151,6 +222,11 @@ public class ProductDao {
     }
 
     public boolean delete(long id) {
+        ProductDeactivationCheck check = checkDeactivationEligibility(id);
+        if (!check.canDeactivate()) {
+            return false;
+        }
+
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues v = new ContentValues();
         v.put(DBHelper.COL_IS_ACTIVE, 0);
@@ -162,13 +238,13 @@ public class ProductDao {
     public boolean giamTonKho(SQLiteDatabase db, long productId, int qty) {
         return db.update(
                 DBHelper.TBL_PRODUCTS,
-                buildStockDecreaseValues(db, productId, qty),
+                buildStockDecreaseValues(productId, qty),
                 DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1 AND " + DBHelper.COL_P_STOCK + " >= ?",
                 new String[]{String.valueOf(productId), String.valueOf(qty)}
         ) > 0;
     }
 
-    private ContentValues buildStockDecreaseValues(SQLiteDatabase db, long productId, int qty) {
+    private ContentValues buildStockDecreaseValues(long productId, int qty) {
         Product product = getById(productId, true);
         ContentValues values = new ContentValues();
         if (product == null) {
@@ -177,6 +253,17 @@ public class ProductDao {
         }
         values.put(DBHelper.COL_P_STOCK, Math.max(0, product.tonKho - qty));
         return values;
+    }
+
+    private int queryCount(String sql, String[] args) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(sql, args);
+        int count = 0;
+        if (c.moveToFirst() && !c.isNull(0)) {
+            count = c.getInt(0);
+        }
+        c.close();
+        return count;
     }
 
     private ArrayList<Product> queryProducts(String whereClause, String[] args, String orderBy) {

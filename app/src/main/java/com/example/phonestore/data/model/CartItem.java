@@ -10,6 +10,14 @@ public class CartItem {
     public int tonKho;
     public int soLuong;
     public String tenAnh;
+    public String dungLuong;
+    public String mauSac;
+
+    public String uniqueKey() {
+        String storage = dungLuong == null ? "" : dungLuong.trim();
+        String color = mauSac == null ? "" : mauSac.trim();
+        return productId + "|" + storage + "|" + color;
+    }
 
     public int giaSauGiam() {
         int pct = Math.max(0, Math.min(100, giamGia));

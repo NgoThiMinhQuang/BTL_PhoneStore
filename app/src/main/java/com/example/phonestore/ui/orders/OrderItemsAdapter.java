@@ -1,5 +1,6 @@
 package com.example.phonestore.ui.orders;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,12 +47,27 @@ public class OrderItemsAdapter extends RecyclerView.Adapter<OrderItemsAdapter.VH
         );
 
         h.tvName.setText(it.tenSanPham);
-        h.tvSub.setText(h.itemView.getContext().getString(R.string.admin_order_item_sub, gia, it.soLuong, it.giamGia));
+        h.tvSub.setText(buildSubLine(h.itemView.getContext().getString(R.string.admin_order_item_sub, gia, it.soLuong, it.giamGia), it));
         h.tvAmount.setText(tt);
     }
 
     @Override
     public int getItemCount() { return data.size(); }
+
+    private String buildSubLine(String base, OrderItem item) {
+        String storage = item.dungLuong == null ? "" : item.dungLuong.trim();
+        String color = item.mauSac == null ? "" : item.mauSac.trim();
+        if (TextUtils.isEmpty(storage) && TextUtils.isEmpty(color)) {
+            return base;
+        }
+        if (TextUtils.isEmpty(storage)) {
+            return base + " • " + color;
+        }
+        if (TextUtils.isEmpty(color)) {
+            return base + " • " + storage;
+        }
+        return base + " • " + storage + " • " + color;
+    }
 
     static class VH extends RecyclerView.ViewHolder {
         TextView tvName, tvSub, tvAmount;

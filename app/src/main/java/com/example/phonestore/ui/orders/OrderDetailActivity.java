@@ -1,9 +1,11 @@
 package com.example.phonestore.ui.orders;
 
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,6 +24,7 @@ import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.PaymentStatus;
 import com.example.phonestore.ui.home.BaseHomeActivity;
+import com.example.phonestore.ui.home.AdminOrdersActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -41,7 +44,6 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
     private long orderId;
-    private boolean adminMode;
 
     private ScrollView scrollViewOrderDetail;
     private TextView tvOrderCode;
@@ -52,15 +54,29 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private TextView tvCustomerAddress;
     private TextView tvCustomerNote;
     private TextView tvProductsSummary;
+    private TextView tvOrderSubtotal;
+    private TextView tvOrderShippingFee;
+    private TextView tvOrderDiscount;
     private TextView tvOrderTotal;
     private TextView tvPaymentMethod;
+    private TextView tvPaymentStatusOverview;
     private TextView tvOrderStatusCurrent;
     private TextView tvPaymentStatusCurrent;
+    private TextView tvActionHeadline;
+    private TextView tvActionSummary;
+    private TextView tvStatusCompletedTitle;
+    private TextView tvStatusCompletedMessage;
+    private TextView tvOrderActionHint;
+    private TextView tvPaymentActionHint;
     private Spinner spinnerOrderStatus;
     private Spinner spinnerPaymentStatus;
     private MaterialButton btnUpdateOrderStatus;
     private MaterialButton btnUpdatePaymentStatus;
     private View cardStatusUpdate;
+    private View cardStatusCompleted;
+    private View viewStatusDivider;
+    private LinearLayout layoutOrderStatusAction;
+    private LinearLayout layoutPaymentStatusAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,13 +90,12 @@ public class OrderDetailActivity extends BaseHomeActivity {
         }
 
         orderDao = new OrderDao(this);
-        adminMode = DBHelper.ROLE_ADMIN.equals(session.getRole());
 
         bindViews();
         setupRecyclerView();
         setupSpinners();
 
-        if (!adminMode) {
+        if (!isAdminDetail()) {
             cardStatusUpdate.setVisibility(View.GONE);
         }
 
@@ -92,7 +107,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     @Override
     protected int shellLayoutRes() {
-        return adminMode ? R.layout.activity_home_bottom_admin : super.shellLayoutRes();
+        return isAdminDetail() ? R.layout.activity_home_bottom_admin : super.shellLayoutRes();
     }
 
     @Override
@@ -102,7 +117,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     @Override
     protected int bottomMenuRes() {
-        return adminMode ? R.menu.menu_bottom_admin : R.menu.menu_bottom_customer;
+        return isAdminDetail() ? R.menu.menu_bottom_admin : R.menu.menu_bottom_customer;
     }
 
     @Override
@@ -112,7 +127,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     @Override
     protected int selectedBottomNavItemId() {
-        return adminMode ? R.id.nav_orders_admin : R.id.nav_orders;
+        return isAdminDetail() ? R.id.nav_orders_admin : R.id.nav_orders;
     }
 
     @Override
@@ -122,7 +137,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     @Override
     protected boolean shouldUseAdminBackButtonStyling() {
-        return adminMode;
+        return isAdminDetail();
     }
 
     @Override
@@ -135,6 +150,26 @@ public class OrderDetailActivity extends BaseHomeActivity {
         return false;
     }
 
+    @Override
+    public void onBackPressed() {
+        if (isAdminDetail() && isTaskRoot()) {
+            startActivity(new Intent(this, AdminOrdersActivity.class));
+            finish();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (isAdminDetail() && isTaskRoot()) {
+            startActivity(new Intent(this, AdminOrdersActivity.class));
+            finish();
+            return true;
+        }
+        return super.onSupportNavigateUp();
+    }
+
     private void bindViews() {
         scrollViewOrderDetail = findViewById(R.id.scrollViewOrderDetail);
         tvOrderCode = findViewById(R.id.tvOrderCode);
@@ -145,15 +180,29 @@ public class OrderDetailActivity extends BaseHomeActivity {
         tvCustomerAddress = findViewById(R.id.tvCustomerAddress);
         tvCustomerNote = findViewById(R.id.tvCustomerNote);
         tvProductsSummary = findViewById(R.id.tvProductsSummary);
+        tvOrderSubtotal = findViewById(R.id.tvOrderSubtotal);
+        tvOrderShippingFee = findViewById(R.id.tvOrderShippingFee);
+        tvOrderDiscount = findViewById(R.id.tvOrderDiscount);
         tvOrderTotal = findViewById(R.id.tvOrderTotal);
         tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
+        tvPaymentStatusOverview = findViewById(R.id.tvPaymentStatusOverview);
         tvOrderStatusCurrent = findViewById(R.id.tvOrderStatusCurrent);
         tvPaymentStatusCurrent = findViewById(R.id.tvPaymentStatusCurrent);
+        tvActionHeadline = findViewById(R.id.tvActionHeadline);
+        tvActionSummary = findViewById(R.id.tvActionSummary);
+        tvStatusCompletedTitle = findViewById(R.id.tvStatusCompletedTitle);
+        tvStatusCompletedMessage = findViewById(R.id.tvStatusCompletedMessage);
+        tvOrderActionHint = findViewById(R.id.tvOrderActionHint);
+        tvPaymentActionHint = findViewById(R.id.tvPaymentActionHint);
         spinnerOrderStatus = findViewById(R.id.spinnerOrderStatus);
         spinnerPaymentStatus = findViewById(R.id.spinnerPaymentStatus);
         btnUpdateOrderStatus = findViewById(R.id.btnUpdateOrderStatus);
         btnUpdatePaymentStatus = findViewById(R.id.btnUpdatePaymentStatus);
         cardStatusUpdate = findViewById(R.id.cardStatusUpdate);
+        cardStatusCompleted = findViewById(R.id.cardStatusCompleted);
+        viewStatusDivider = findViewById(R.id.viewStatusDivider);
+        layoutOrderStatusAction = findViewById(R.id.layoutOrderStatusAction);
+        layoutPaymentStatusAction = findViewById(R.id.layoutPaymentStatusAction);
     }
 
     private void setupRecyclerView() {
@@ -184,7 +233,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
             return;
         }
 
-        if (!adminMode && order.userId != session.getUserId()) {
+        if (!isAdminDetail() && order.userId != session.getUserId()) {
             Toast.makeText(this, R.string.order_access_denied, Toast.LENGTH_SHORT).show();
             finish();
             return;
@@ -194,13 +243,16 @@ public class OrderDetailActivity extends BaseHomeActivity {
         adapter.setData(items);
         bindOrder(order, items);
 
-        if (shouldScrollToStatus && adminMode) {
+        if (shouldScrollToStatus && isAdminDetail() && cardStatusUpdate.getVisibility() == View.VISIBLE) {
             scrollToStatusSection();
         }
     }
 
     private void bindOrder(Order order, ArrayList<OrderItem> items) {
-        int total = order.tongTien > 0 ? order.tongTien : calculateTotal(items);
+        int subtotal = order.tamTinh > 0 ? order.tamTinh : calculateTotal(items);
+        int shippingFee = Math.max(0, order.phiVanChuyen);
+        int discountAmount = Math.max(0, order.tienGiam);
+        int total = order.tongTien > 0 ? order.tongTien : Math.max(0, subtotal + shippingFee - discountAmount);
 
         tvOrderCode.setText(getString(R.string.admin_order_code, order.id));
         tvOrderDate.setText(formatDate(order.ngayTao));
@@ -219,8 +271,15 @@ public class OrderDetailActivity extends BaseHomeActivity {
         }
 
         tvProductsSummary.setText(getString(R.string.order_products_summary, items.size()));
+        tvOrderSubtotal.setText(formatCurrency(subtotal));
+        tvOrderShippingFee.setText(formatCurrency(shippingFee));
+        tvOrderDiscount.setText(getString(R.string.order_discount_value, formatCurrency(discountAmount), valueOrDash(order.maGiamGia)));
         tvOrderTotal.setText(formatCurrency(total));
         tvPaymentMethod.setText(formatPaymentMethod(order.phuongThucThanhToan));
+        tvPaymentStatusOverview.setText(getString(
+                R.string.order_payment_overview,
+                OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)
+        ));
         tvOrderStatusCurrent.setText(getString(R.string.order_status_current, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon)));
         tvPaymentStatusCurrent.setText(getString(R.string.payment_status_current, OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)));
         bindStatusControls(order);
@@ -259,17 +318,94 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void bindStatusControls(Order order) {
-        bindOrderStatusControls(order);
-        bindPaymentStatusControls(order);
+        if (!isAdminDetail()) {
+            cardStatusUpdate.setVisibility(View.GONE);
+            return;
+        }
+
+        cardStatusUpdate.setVisibility(View.VISIBLE);
+        availableOrderStatuses.clear();
+        availablePaymentStatuses.clear();
+        availableOrderStatuses.addAll(orderDao.getAllowedNextOrderStatuses(order));
+        availablePaymentStatuses.addAll(orderDao.getAllowedNextPaymentStatuses(order));
+
+        boolean finalState = orderDao.isFinalOrderStatus(order.trangThaiDon);
+        boolean hasOrderActions = !availableOrderStatuses.isEmpty();
+        boolean hasPaymentActions = !availablePaymentStatuses.isEmpty();
+
+        bindActionHeader(order, finalState, hasOrderActions, hasPaymentActions);
+        bindOrderStatusControls(order, hasOrderActions);
+        bindPaymentStatusControls(order, hasPaymentActions);
+        bindCompletedState(order, finalState);
+
+        layoutOrderStatusAction.setVisibility(!finalState && hasOrderActions ? View.VISIBLE : View.GONE);
+        layoutPaymentStatusAction.setVisibility(!finalState && hasPaymentActions ? View.VISIBLE : View.GONE);
+        viewStatusDivider.setVisibility(!finalState && hasOrderActions && hasPaymentActions ? View.VISIBLE : View.GONE);
     }
 
-    private void bindOrderStatusControls(Order order) {
-        List<String> nextStatuses = orderDao.getAllowedNextOrderStatuses(order);
-        availableOrderStatuses.clear();
-        availableOrderStatuses.addAll(nextStatuses);
+    private void bindActionHeader(Order order, boolean finalState, boolean hasOrderActions, boolean hasPaymentActions) {
+        if (finalState) {
+            tvActionHeadline.setText(OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon)
+                    ? R.string.order_admin_completed_title
+                    : R.string.order_admin_cancelled_title);
+            tvActionSummary.setText(OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon)
+                    ? R.string.order_admin_completed_summary
+                    : R.string.order_admin_cancelled_summary);
+            return;
+        }
 
+        if (isBankTransfer(order) && PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            tvActionHeadline.setText(R.string.order_admin_waiting_payment_title);
+            tvActionSummary.setText(R.string.order_admin_waiting_payment_summary);
+            return;
+        }
+
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
+            tvActionHeadline.setText(R.string.order_admin_pending_title);
+            tvActionSummary.setText(isCod(order)
+                    ? R.string.order_admin_pending_cod_summary
+                    : R.string.order_admin_pending_bank_summary);
+            return;
+        }
+
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon)) {
+            tvActionHeadline.setText(R.string.order_admin_processing_title);
+            tvActionSummary.setText(R.string.order_admin_processing_summary);
+            return;
+        }
+
+        if (!hasOrderActions && !hasPaymentActions) {
+            tvActionHeadline.setText(R.string.order_admin_read_only_title);
+            tvActionSummary.setText(R.string.order_admin_read_only_summary);
+        }
+    }
+
+    private void bindCompletedState(Order order, boolean finalState) {
+        if (!finalState) {
+            cardStatusCompleted.setVisibility(View.GONE);
+            return;
+        }
+
+        cardStatusCompleted.setVisibility(View.VISIBLE);
+        if (OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon)) {
+            tvStatusCompletedTitle.setText(R.string.order_admin_completed_card_title);
+            tvStatusCompletedMessage.setText(getString(
+                    R.string.order_admin_completed_card_message,
+                    OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)
+            ));
+        } else {
+            tvStatusCompletedTitle.setText(R.string.order_admin_cancelled_card_title);
+            tvStatusCompletedMessage.setText(isBankTransfer(order)
+                    ? getString(R.string.order_admin_cancelled_bank_card_message,
+                    OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan))
+                    : getString(R.string.order_admin_cancelled_cod_card_message,
+                    OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)));
+        }
+    }
+
+    private void bindOrderStatusControls(Order order, boolean enabled) {
         ArrayList<String> labels = new ArrayList<>();
-        for (String status : nextStatuses) {
+        for (String status : availableOrderStatuses) {
             labels.add(OrdersAdapter.formatOrderStatus(this, status));
         }
 
@@ -281,19 +417,15 @@ public class OrderDetailActivity extends BaseHomeActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOrderStatus.setAdapter(spinnerAdapter);
 
-        boolean enabled = !orderDao.isFinalOrderStatus(order.trangThaiDon) && !nextStatuses.isEmpty();
         spinnerOrderStatus.setEnabled(enabled);
         btnUpdateOrderStatus.setEnabled(enabled);
-        btnUpdateOrderStatus.setText(enabled ? R.string.update_order_status : R.string.order_status_locked);
+        btnUpdateOrderStatus.setText(R.string.update_order_status);
+        tvOrderActionHint.setText(getOrderActionHint(order, enabled));
     }
 
-    private void bindPaymentStatusControls(Order order) {
-        List<String> nextStatuses = orderDao.getAllowedNextPaymentStatuses(order);
-        availablePaymentStatuses.clear();
-        availablePaymentStatuses.addAll(nextStatuses);
-
+    private void bindPaymentStatusControls(Order order, boolean enabled) {
         ArrayList<String> labels = new ArrayList<>();
-        for (String status : nextStatuses) {
+        for (String status : availablePaymentStatuses) {
             labels.add(OrdersAdapter.formatPaymentStatus(this, status));
         }
 
@@ -305,10 +437,47 @@ public class OrderDetailActivity extends BaseHomeActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerPaymentStatus.setAdapter(spinnerAdapter);
 
-        boolean enabled = !nextStatuses.isEmpty();
         spinnerPaymentStatus.setEnabled(enabled);
         btnUpdatePaymentStatus.setEnabled(enabled);
-        btnUpdatePaymentStatus.setText(enabled ? R.string.update_payment_status : R.string.payment_status_locked);
+        btnUpdatePaymentStatus.setText(R.string.update_payment_status);
+        tvPaymentActionHint.setText(getPaymentActionHint(order, enabled));
+    }
+
+    private String getOrderActionHint(Order order, boolean enabled) {
+        if (enabled) {
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
+                return getString(isCod(order)
+                        ? R.string.order_admin_order_hint_cod_pending
+                        : R.string.order_admin_order_hint_bank_pending);
+            }
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon)) {
+                return getString(R.string.order_admin_order_hint_processing);
+            }
+        }
+
+        if (orderDao.isFinalOrderStatus(order.trangThaiDon)) {
+            return getString(R.string.order_admin_order_hint_final);
+        }
+        if (isBankTransfer(order) && PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            return getString(R.string.order_admin_order_hint_wait_payment);
+        }
+        return getString(R.string.order_admin_order_hint_read_only);
+    }
+
+    private String getPaymentActionHint(Order order, boolean enabled) {
+        if (enabled) {
+            return getString(R.string.order_admin_payment_hint_ready);
+        }
+        if (orderDao.isFinalOrderStatus(order.trangThaiDon)) {
+            return getString(R.string.order_admin_payment_hint_final);
+        }
+        if (isCod(order)) {
+            return getString(R.string.order_admin_payment_hint_cod);
+        }
+        if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            return getString(R.string.order_admin_payment_hint_paid);
+        }
+        return getString(R.string.order_admin_payment_hint_waiting);
     }
 
     private void scrollToStatusSection() {
@@ -328,7 +497,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private int getStatusBackgroundColor(String status) {
-        if (adminMode) {
+        if (isAdminDetail()) {
             if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
             if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_surface_soft;
             if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
@@ -344,7 +513,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private int getStatusAccentColor(String status) {
-        if (adminMode) {
+        if (isAdminDetail()) {
             if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
             if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_primary;
             if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
@@ -395,5 +564,17 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     private int dp(int value) {
         return Math.round(getResources().getDisplayMetrics().density * value);
+    }
+
+    private boolean isAdminDetail() {
+        return DBHelper.ROLE_ADMIN.equals(getSessionRole());
+    }
+
+    private boolean isCod(Order order) {
+        return order != null && CheckoutInfo.PAYMENT_COD.equals(order.phuongThucThanhToan);
+    }
+
+    private boolean isBankTransfer(Order order) {
+        return order != null && CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(order.phuongThucThanhToan);
     }
 }
