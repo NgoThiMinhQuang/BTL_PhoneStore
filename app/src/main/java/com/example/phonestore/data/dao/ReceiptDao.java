@@ -6,8 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.phonestore.data.db.DBHelper;
+import com.example.phonestore.data.model.Product;
 import com.example.phonestore.data.model.Receipt;
 import com.example.phonestore.data.model.ReceiptItem;
+import com.example.phonestore.data.model.Supplier;
 
 import java.util.ArrayList;
 
@@ -16,10 +18,12 @@ public class ReceiptDao {
     private static final String REFERENCE_TYPE_RECEIPT = "RECEIPT";
     private static final String DEFAULT_CREATOR = "Admin";
 
+    private final Context context;
     private final DBHelper dbHelper;
     private final InventoryHistoryDao historyDao;
 
     public ReceiptDao(Context ctx) {
+        context = ctx;
         dbHelper = new DBHelper(ctx);
         historyDao = new InventoryHistoryDao(ctx);
     }
@@ -105,7 +109,14 @@ public class ReceiptDao {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            ArrayList<ReceiptItem> normalizedItems = normalizeItems(items);
+            SupplierDao supplierDao = new SupplierDao(context);
+            ProductDao productDao = new ProductDao(context);
+            Supplier supplier = supplierDao.getById(supplierId);
+            if (supplier == null) {
+                return -1;
+            }
+
+            ArrayList<ReceiptItem> normalizedItems = normalizeItems(items, supplier, productDao);
             if (normalizedItems.isEmpty()) {
                 return -1;
             }
@@ -218,8 +229,13 @@ public class ReceiptDao {
                 (suffix == null ? " ORDER BY r." + DBHelper.COL_ID + " DESC" : suffix);
     }
 
-    private ArrayList<ReceiptItem> normalizeItems(ArrayList<ReceiptItem> items) {
+    private ArrayList<ReceiptItem> normalizeItems(ArrayList<ReceiptItem> items, Supplier supplier, ProductDao productDao) {
         ArrayList<ReceiptItem> normalized = new ArrayList<>();
+        String supplierBrand = normalizeBrand(supplier == null ? null : supplier.brand);
+        if (supplier == null || supplierBrand == null) {
+            return normalized;
+        }
+
         for (ReceiptItem item : items) {
             if (item == null) {
                 continue;
@@ -227,13 +243,29 @@ public class ReceiptDao {
             if (item.productId <= 0 || item.quantity <= 0 || item.unitCost <= 0) {
                 continue;
             }
-            item.recalculateAmount();
-            if (item.productName == null) {
-                item.productName = "";
+
+            Product product = productDao.getById(item.productId, true);
+            if (product == null || !product.isActive) {
+                continue;
             }
+            String productBrand = normalizeBrand(product.hang);
+            if (productBrand == null || !supplierBrand.equalsIgnoreCase(productBrand)) {
+                continue;
+            }
+
+            item.productName = product.tenSanPham == null ? "" : product.tenSanPham;
+            item.recalculateAmount();
             normalized.add(item);
         }
         return normalized;
+    }
+
+    private String normalizeBrand(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private String normalizeNote(String note) {

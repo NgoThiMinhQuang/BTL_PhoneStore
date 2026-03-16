@@ -138,7 +138,7 @@ public class AdminSuppliersActivity extends BaseHomeActivity {
                 .setMessage(getString(R.string.supplier_delete_confirm, supplier.name))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (d, w) -> {
-                    if (receiptDao.hasReceiptForSupplier(supplier.id)) {
+                    if (supplierDao.hasReceipts(supplier.id)) {
                         Toast.makeText(this, R.string.supplier_in_use, Toast.LENGTH_SHORT).show();
                         return;
                     }

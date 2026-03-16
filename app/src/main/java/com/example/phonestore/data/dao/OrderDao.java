@@ -116,8 +116,9 @@ public class OrderDao {
             subtotal += it.thanhTien();
         }
 
-        int shippingFee = Math.max(0, info.shippingFee);
-        int discountAmount = Math.max(0, info.discountAmount);
+        int shippingFee = subtotal > 0 ? CheckoutInfo.SHIPPING_FEE : 0;
+        String discountCode = CheckoutInfo.normalizeDiscountCode(info.discountCode);
+        int discountAmount = CheckoutInfo.calculateDiscount(discountCode, subtotal);
         int total = Math.max(0, subtotal + shippingFee - discountAmount);
         boolean bankTransfer = CheckoutInfo.PAYMENT_BANK_TRANSFER.equals(info.paymentMethod);
 
@@ -138,7 +139,7 @@ public class OrderDao {
             orderValues.put(DBHelper.COL_O_NOTE, normalizeOptionalText(info.note));
             orderValues.put(DBHelper.COL_O_SUBTOTAL, subtotal);
             orderValues.put(DBHelper.COL_O_SHIPPING_FEE, shippingFee);
-            orderValues.put(DBHelper.COL_O_DISCOUNT_CODE, normalizeOptionalText(info.discountCode));
+            orderValues.put(DBHelper.COL_O_DISCOUNT_CODE, normalizeOptionalText(discountCode));
             orderValues.put(DBHelper.COL_O_DISCOUNT_AMOUNT, discountAmount);
 
             long orderId = db.insert(DBHelper.TBL_ORDERS, null, orderValues);
@@ -377,6 +378,16 @@ public class OrderDao {
         }
     }
 
+    public static class MonthCount {
+        public int month;
+        public int count;
+
+        public MonthCount(int month, int count) {
+            this.month = month;
+            this.count = count;
+        }
+    }
+
     public static class ReportMetrics {
         public int totalOrders;
         public int deliveredPaidOrders;
@@ -384,6 +395,7 @@ public class OrderDao {
         public int cancelledOrders;
         public int recognizedRevenue;
         public int averageDeliveredOrderValue;
+        public int deliveredUnits;
     }
 
     public ArrayList<MonthRevenue> getDoanhThuTheoThang(int year) {
@@ -477,6 +489,25 @@ public class OrderDao {
         return list;
     }
 
+    public ArrayList<MonthCount> getSoDonTheoThang(int year) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<MonthCount> list = new ArrayList<>();
+        Cursor c = db.rawQuery(
+                "SELECT " +
+                        "CAST(strftime('%m', datetime(" + DBHelper.COL_O_CREATED + "/1000, 'unixepoch')) AS INTEGER) AS m, " +
+                        "COUNT(*) AS total " +
+                        "FROM " + DBHelper.TBL_ORDERS + " " +
+                        "WHERE strftime('%Y', datetime(" + DBHelper.COL_O_CREATED + "/1000, 'unixepoch')) = ? " +
+                        "GROUP BY m ORDER BY m",
+                new String[]{String.valueOf(year)}
+        );
+        while (c.moveToNext()) {
+            list.add(new MonthCount(c.isNull(0) ? 0 : c.getInt(0), c.isNull(1) ? 0 : c.getInt(1)));
+        }
+        c.close();
+        return list;
+    }
+
     public ReportMetrics getReportMetrics() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ReportMetrics metrics = new ReportMetrics();
@@ -486,7 +517,10 @@ public class OrderDao {
                         "SUM(CASE WHEN " + DBHelper.COL_O_ORDER_STATUS + "=? AND " + DBHelper.COL_O_PAYMENT_STATUS + "=? THEN 1 ELSE 0 END) AS delivered_paid_orders, " +
                         "SUM(CASE WHEN " + DBHelper.COL_O_PAYMENT_STATUS + "=? AND " + DBHelper.COL_O_ORDER_STATUS + "<>? THEN 1 ELSE 0 END) AS waiting_payment_orders, " +
                         "SUM(CASE WHEN " + DBHelper.COL_O_ORDER_STATUS + "=? THEN 1 ELSE 0 END) AS cancelled_orders, " +
-                        "SUM(CASE WHEN " + DBHelper.COL_O_ORDER_STATUS + "=? AND " + DBHelper.COL_O_PAYMENT_STATUS + "=? THEN " + DBHelper.COL_O_TOTAL + " ELSE 0 END) AS recognized_revenue " +
+                        "SUM(CASE WHEN " + DBHelper.COL_O_ORDER_STATUS + "=? AND " + DBHelper.COL_O_PAYMENT_STATUS + "=? THEN " + DBHelper.COL_O_TOTAL + " ELSE 0 END) AS recognized_revenue, " +
+                        "IFNULL((SELECT SUM(oi." + DBHelper.COL_OI_QTY + ") FROM " + DBHelper.TBL_ORDER_ITEMS + " oi " +
+                        "JOIN " + DBHelper.TBL_ORDERS + " o2 ON o2." + DBHelper.COL_ID + " = oi." + DBHelper.COL_OI_ORDER_ID + " " +
+                        "WHERE o2." + DBHelper.COL_O_ORDER_STATUS + "='" + OrderStatus.STATUS_DA_GIAO + "' AND o2." + DBHelper.COL_O_PAYMENT_STATUS + "='" + PaymentStatus.STATUS_DA_THANH_TOAN + "'), 0) AS delivered_units " +
                         "FROM " + DBHelper.TBL_ORDERS,
                 new String[]{
                         OrderStatus.STATUS_DA_GIAO,
@@ -505,6 +539,7 @@ public class OrderDao {
             metrics.waitingPaymentOrders = c.isNull(2) ? 0 : c.getInt(2);
             metrics.cancelledOrders = c.isNull(3) ? 0 : c.getInt(3);
             metrics.recognizedRevenue = c.isNull(4) ? 0 : c.getInt(4);
+            metrics.deliveredUnits = c.isNull(5) ? 0 : c.getInt(5);
             metrics.averageDeliveredOrderValue = metrics.deliveredPaidOrders == 0
                     ? 0
                     : metrics.recognizedRevenue / metrics.deliveredPaidOrders;

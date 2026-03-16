@@ -72,8 +72,22 @@ public class SupplierDao {
     }
 
     public boolean delete(long id) {
+        if (hasReceipts(id)) {
+            return false;
+        }
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         return db.delete(DBHelper.TBL_SUPPLIERS, DBHelper.COL_ID + "=?", new String[]{String.valueOf(id)}) > 0;
+    }
+
+    public boolean hasReceipts(long supplierId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT 1 FROM " + DBHelper.TBL_RECEIPTS + " WHERE " + DBHelper.COL_R_SUPPLIER_ID + "=? LIMIT 1",
+                new String[]{String.valueOf(supplierId)}
+        );
+        boolean exists = c.moveToFirst();
+        c.close();
+        return exists;
     }
 
     public int countAll() {

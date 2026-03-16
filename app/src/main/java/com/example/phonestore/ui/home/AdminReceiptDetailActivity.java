@@ -1,6 +1,7 @@
 package com.example.phonestore.ui.home;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,8 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.ReceiptDao;
+import com.example.phonestore.data.db.DBHelper;
 import com.example.phonestore.data.model.Receipt;
 import com.example.phonestore.data.model.ReceiptItem;
+import com.example.phonestore.ui.auth.WelcomeActivity;
+import com.example.phonestore.utils.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -30,6 +34,14 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt_detail);
+
+        SessionManager session = new SessionManager(this);
+        if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
+            session.clear();
+            startActivity(new Intent(this, WelcomeActivity.class));
+            finish();
+            return;
+        }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setContentInsetsRelative(0, 0);

@@ -170,7 +170,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_IS_ACTIVE + " INTEGER NOT NULL DEFAULT 1" +
                 ");");
 
-        long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 10, 8,
+        long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 0, 8,
                 "Flagship màn lớn, camera mạnh và pin bền bỉ cho nhu cầu cao cấp.", "ip_15",
                 "iOS", 256, 8, "Apple A17 Pro", "6.7\" Super Retina XDR", "48MP + 12MP + 12MP", 4422,
                 "Titan tự nhiên,Đen titan,Trắng titan,Xanh titan");
@@ -182,7 +182,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "Thiết kế quen thuộc, hiệu năng tốt và phù hợp nhu cầu sử dụng lâu dài.", "ic_iphone15",
                 "iOS", 128, 6, "Apple A15 Bionic", "6.1\" Super Retina XDR", "12MP + 12MP", 3279,
                 "Đen,Trắng,Tím,Xanh");
-        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 8, 10,
+        long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 0, 10,
                 "Màn hình lớn, camera zoom mạnh và bút S Pen cho người dùng chuyên sâu.", "ss_s24_utra",
                 "Android", 512, 12, "Snapdragon 8 Gen 3", "6.8\" Dynamic AMOLED 2X", "200MP + 50MP + 12MP + 10MP", 5000,
                 "Đen,Tím,Xám,Vàng");
@@ -378,6 +378,13 @@ public class DBHelper extends SQLiteOpenHelper {
         if (!Receipt.STATUS_COMPLETED.equals(status)) {
             return;
         }
+
+        db.execSQL(
+                "UPDATE " + TBL_PRODUCTS +
+                        " SET " + COL_P_STOCK + " = " + COL_P_STOCK + " + ?" +
+                        " WHERE " + COL_ID + "=?",
+                new Object[]{quantity, productId}
+        );
 
         ContentValues history = new ContentValues();
         history.put(COL_H_PRODUCT_ID, productId);

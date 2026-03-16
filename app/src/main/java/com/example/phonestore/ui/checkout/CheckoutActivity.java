@@ -99,9 +99,9 @@ public class CheckoutActivity extends BaseHomeActivity {
         recalculateSummary();
         if (subtotal <= 0) {
             Toast.makeText(this, R.string.empty_cart, Toast.LENGTH_SHORT).show();
-            Intent ordersIntent = new Intent(this, OrdersActivity.class);
-            ordersIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            startActivity(ordersIntent);
+            Intent cartIntent = new Intent(this, CartActivity.class);
+            cartIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(cartIntent);
             finish();
             return;
         }
