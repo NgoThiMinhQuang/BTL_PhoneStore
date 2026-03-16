@@ -96,6 +96,7 @@ public class CheckoutActivity extends BaseHomeActivity {
             edtDiscountCode.setText(appliedDiscountCode);
         }
 
+        orderDao.reconcileExpiredTransferOrders();
         recalculateSummary();
         if (subtotal <= 0) {
             Toast.makeText(this, R.string.empty_cart, Toast.LENGTH_SHORT).show();

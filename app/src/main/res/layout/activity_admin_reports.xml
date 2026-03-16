@@ -45,32 +45,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="@dimen/header_panel_pull_up"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/bg_panel_admin"
                 android:elevation="6dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/admin_reports_title"
-                    android:textColor="@color/admin_text_primary"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/admin_report_summary"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textSize="13sp" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="0dp"
                     android:baselineAligned="false"
                     android:orientation="horizontal">
 
@@ -90,7 +74,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:baselineAligned="false"
                     android:orientation="horizontal">
 
@@ -132,7 +116,7 @@
                 android:layout_weight="1"
                 android:fillViewport="true"
                 android:paddingLeft="16dp"
-                android:paddingTop="16dp"
+                android:paddingTop="10dp"
                 android:paddingRight="16dp"
                 android:paddingBottom="24dp"
                 android:background="@color/admin_background">
@@ -199,37 +183,6 @@
                                 android:id="@+id/chartRevenueProfit"
                                 android:layout_width="match_parent"
                                 android:layout_height="300dp"
-                                android:layout_marginTop="10dp" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:cardBackgroundColor="@color/admin_surface"
-                        app:cardCornerRadius="22dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/admin_stroke"
-                        app:strokeWidth="1dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Top sản phẩm bán chạy"
-                                android:textColor="@color/admin_text_primary"
-                                android:textStyle="bold" />
-
-                            <com.github.mikephil.charting.charts.BarChart
-                                android:id="@+id/chartTopProducts"
-                                android:layout_width="match_parent"
-                                android:layout_height="280dp"
                                 android:layout_marginTop="10dp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>

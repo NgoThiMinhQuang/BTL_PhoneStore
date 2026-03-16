@@ -60,6 +60,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private TextView tvOrderTotal;
     private TextView tvPaymentMethod;
     private TextView tvPaymentStatusOverview;
+    private TextView tvPaymentLifecycleInfo;
+    private TextView tvRefundInfo;
     private TextView tvOrderStatusCurrent;
     private TextView tvPaymentStatusCurrent;
     private TextView tvActionHeadline;
@@ -170,6 +172,14 @@ public class OrderDetailActivity extends BaseHomeActivity {
         return super.onSupportNavigateUp();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (orderDao != null) {
+            loadOrder(false);
+        }
+    }
+
     private void bindViews() {
         scrollViewOrderDetail = findViewById(R.id.scrollViewOrderDetail);
         tvOrderCode = findViewById(R.id.tvOrderCode);
@@ -186,6 +196,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
         tvOrderTotal = findViewById(R.id.tvOrderTotal);
         tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
         tvPaymentStatusOverview = findViewById(R.id.tvPaymentStatusOverview);
+        tvPaymentLifecycleInfo = findViewById(R.id.tvPaymentLifecycleInfo);
+        tvRefundInfo = findViewById(R.id.tvRefundInfo);
         tvOrderStatusCurrent = findViewById(R.id.tvOrderStatusCurrent);
         tvPaymentStatusCurrent = findViewById(R.id.tvPaymentStatusCurrent);
         tvActionHeadline = findViewById(R.id.tvActionHeadline);
@@ -226,6 +238,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void loadOrder(boolean shouldScrollToStatus) {
+        orderDao.reconcileExpiredTransferOrders();
         Order order = orderDao.getOrderById(orderId);
         if (order == null) {
             Toast.makeText(this, R.string.order_not_found, Toast.LENGTH_SHORT).show();
@@ -280,6 +293,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
                 R.string.order_payment_overview,
                 OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)
         ));
+        bindPaymentLifecycleInfo(order);
+        bindRefundInfo(order);
         tvOrderStatusCurrent.setText(getString(R.string.order_status_current, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon)));
         tvPaymentStatusCurrent.setText(getString(R.string.payment_status_current, OrdersAdapter.formatPaymentStatus(this, order.trangThaiThanhToan)));
         bindStatusControls(order);
@@ -543,7 +558,70 @@ public class OrderDetailActivity extends BaseHomeActivity {
         );
     }
 
+    private void bindPaymentLifecycleInfo(Order order) {
+        if (tvPaymentLifecycleInfo == null) {
+            return;
+        }
+        String lifecycleInfo = buildPaymentLifecycleInfo(order);
+        if (lifecycleInfo == null) {
+            tvPaymentLifecycleInfo.setVisibility(View.GONE);
+            tvPaymentLifecycleInfo.setText("");
+            return;
+        }
+        tvPaymentLifecycleInfo.setVisibility(View.VISIBLE);
+        tvPaymentLifecycleInfo.setText(lifecycleInfo);
+    }
+
+    private void bindRefundInfo(Order order) {
+        if (tvRefundInfo == null) {
+            return;
+        }
+        String refundInfo = buildRefundInfo(order);
+        if (refundInfo == null) {
+            tvRefundInfo.setVisibility(View.GONE);
+            tvRefundInfo.setText("");
+            return;
+        }
+        tvRefundInfo.setVisibility(View.VISIBLE);
+        tvRefundInfo.setText(refundInfo);
+    }
+
+    private String buildPaymentLifecycleInfo(Order order) {
+        if (order == null || !isBankTransfer(order)) {
+            return null;
+        }
+        if (PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan) && order.hasPaymentDeadline()) {
+            return getString(R.string.order_transfer_deadline_info, formatDate(order.paymentDeadline));
+        }
+        if (PaymentStatus.STATUS_HET_HAN_THANH_TOAN.equals(order.trangThaiThanhToan) && order.expiredAt > 0) {
+            return getString(R.string.order_transfer_expired_info, formatDate(order.expiredAt));
+        }
+        if (order.cancelledAt > 0 && order.cancelReason != null && !order.cancelReason.trim().isEmpty()) {
+            return getString(R.string.order_cancel_reason_info, order.cancelReason.trim(), formatDate(order.cancelledAt));
+        }
+        return null;
+    }
+
+    private String buildRefundInfo(Order order) {
+        if (order == null || order.refundStatus == null || order.refundStatus.trim().isEmpty()) {
+            return null;
+        }
+        if (Order.REFUND_STATUS_CHO_HOAN_TIEN.equals(order.refundStatus)) {
+            String note = order.refundNote == null || order.refundNote.trim().isEmpty()
+                    ? getString(R.string.order_refund_pending_short)
+                    : order.refundNote.trim();
+            return getString(R.string.order_refund_pending_info, note);
+        }
+        if (Order.REFUND_STATUS_DA_HOAN_TIEN.equals(order.refundStatus)) {
+            return getString(R.string.order_refund_done_info, formatDate(order.refundedAt));
+        }
+        return null;
+    }
+
     private String formatDate(long timestamp) {
+        if (timestamp <= 0) {
+            return "-";
+        }
         return new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("vi", "VN"))
                 .format(new Date(timestamp));
     }

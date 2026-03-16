@@ -113,6 +113,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(status)) {
             return context.getString(R.string.payment_status_paid);
         }
+        if (PaymentStatus.STATUS_HET_HAN_THANH_TOAN.equals(status)) {
+            return context.getString(R.string.payment_status_expired);
+        }
         return status.replace('_', ' ');
     }
 

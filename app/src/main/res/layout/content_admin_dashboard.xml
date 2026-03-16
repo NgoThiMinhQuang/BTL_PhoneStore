@@ -90,6 +90,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="16dp">
 
@@ -112,6 +113,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
+                            android:gravity="center"
                             android:text="@string/admin_revenue_month"
                             android:textColor="@color/admin_text_secondary"
                             android:textSize="12sp" />
@@ -121,6 +123,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:gravity="center"
                             android:text="0đ"
                             android:textColor="@color/admin_text_primary"
                             android:textSize="22sp"
@@ -142,6 +145,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="16dp">
 
@@ -164,6 +168,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
+                            android:gravity="center"
                             android:text="@string/admin_total_orders"
                             android:textColor="@color/admin_text_secondary"
                             android:textSize="12sp" />
@@ -173,6 +178,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:gravity="center"
                             android:text="0"
                             android:textColor="@color/admin_text_primary"
                             android:textSize="22sp"
@@ -201,6 +207,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="16dp">
 
@@ -223,6 +230,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
+                            android:gravity="center"
                             android:text="@string/admin_total_customers"
                             android:textColor="@color/admin_text_secondary"
                             android:textSize="12sp" />
@@ -232,6 +240,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:gravity="center"
                             android:text="0"
                             android:textColor="@color/admin_text_primary"
                             android:textSize="22sp"
@@ -253,6 +262,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="16dp">
 
@@ -275,6 +285,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="14dp"
+                            android:gravity="center"
                             android:text="@string/admin_total_products"
                             android:textColor="@color/admin_text_secondary"
                             android:textSize="12sp" />
@@ -284,6 +295,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
+                            android:gravity="center"
                             android:text="0"
                             android:textColor="@color/admin_text_primary"
                             android:textSize="22sp"

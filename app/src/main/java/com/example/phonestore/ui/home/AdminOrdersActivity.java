@@ -149,6 +149,7 @@ public class AdminOrdersActivity extends BaseHomeActivity {
     private void loadOrders() {
         if (adapter == null || orderDao == null) return;
 
+        orderDao.reconcileExpiredTransferOrders();
         ArrayList<Order> allOrders = orderDao.getAllOrders();
         ArrayList<Order> filteredOrders = new ArrayList<>();
         int pendingCount = 0;

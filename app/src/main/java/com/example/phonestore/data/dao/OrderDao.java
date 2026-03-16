@@ -14,13 +14,23 @@ import com.example.phonestore.data.model.OrderItem;
 import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.PaymentStatus;
 import com.example.phonestore.data.model.Product;
+import com.example.phonestore.data.model.Receipt;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class OrderDao {
 
     private static final String REFERENCE_TYPE_ORDER = "ORDER";
+    private static final long BANK_TRANSFER_PAYMENT_WINDOW_MS = 30L * 60L * 1000L;
+    private static final String CANCEL_REASON_EXPIRED_TRANSFER = "Quá hạn thanh toán chuyển khoản";
+    private static final String CANCEL_REASON_CANCELLED_TRANSFER_PAID = "Hủy đơn chuyển khoản đã thanh toán";
+    private static final String CANCEL_REASON_CANCELLED_TRANSFER_PENDING = "Hủy đơn chuyển khoản chưa thanh toán";
+    private static final String CANCEL_REASON_CANCELLED_COD = "Hủy đơn COD";
 
     private final DBHelper dbHelper;
     private final CartDao cartDao;
@@ -128,7 +138,6 @@ public class OrderDao {
             ContentValues orderValues = new ContentValues();
             orderValues.put(DBHelper.COL_O_USER_ID, userId);
             orderValues.put(DBHelper.COL_O_TOTAL, total);
-            orderValues.put(DBHelper.COL_O_CREATED, System.currentTimeMillis());
             orderValues.put(DBHelper.COL_O_ORDER_STATUS, OrderStatus.STATUS_CHO_XAC_NHAN);
             orderValues.put(DBHelper.COL_O_PAYMENT_STATUS,
                     bankTransfer ? PaymentStatus.STATUS_CHO_THANH_TOAN : PaymentStatus.STATUS_CHUA_THANH_TOAN);
@@ -136,11 +145,21 @@ public class OrderDao {
             orderValues.put(DBHelper.COL_O_PHONE, normalizeText(info.receiverPhone));
             orderValues.put(DBHelper.COL_O_ADDRESS, normalizeText(info.receiverAddress));
             orderValues.put(DBHelper.COL_O_PAY_METHOD, info.paymentMethod);
+            long createdAt = System.currentTimeMillis();
+            long paymentDeadline = bankTransfer ? createdAt + BANK_TRANSFER_PAYMENT_WINDOW_MS : 0L;
+            orderValues.put(DBHelper.COL_O_CREATED, createdAt);
             orderValues.put(DBHelper.COL_O_NOTE, normalizeOptionalText(info.note));
             orderValues.put(DBHelper.COL_O_SUBTOTAL, subtotal);
             orderValues.put(DBHelper.COL_O_SHIPPING_FEE, shippingFee);
             orderValues.put(DBHelper.COL_O_DISCOUNT_CODE, normalizeOptionalText(discountCode));
             orderValues.put(DBHelper.COL_O_DISCOUNT_AMOUNT, discountAmount);
+            orderValues.put(DBHelper.COL_O_PAYMENT_DEADLINE, paymentDeadline);
+            orderValues.put(DBHelper.COL_O_EXPIRED_AT, 0L);
+            orderValues.put(DBHelper.COL_O_CANCELLED_AT, 0L);
+            orderValues.put(DBHelper.COL_O_CANCEL_REASON, "");
+            orderValues.put(DBHelper.COL_O_REFUND_STATUS, Order.REFUND_STATUS_NONE);
+            orderValues.put(DBHelper.COL_O_REFUNDED_AT, 0L);
+            orderValues.put(DBHelper.COL_O_REFUND_NOTE, "");
 
             long orderId = db.insert(DBHelper.TBL_ORDERS, null, orderValues);
             if (orderId == -1) {
@@ -265,18 +284,7 @@ public class OrderDao {
                 return false;
             }
 
-            if (OrderStatus.STATUS_DA_HUY.equals(newStatus) && !restoreStockForOrder(db, orderId, getCancelRestockNote(order))) {
-                return false;
-            }
-
-            ContentValues values = new ContentValues();
-            values.put(DBHelper.COL_O_ORDER_STATUS, newStatus);
-            if (OrderStatus.STATUS_DA_GIAO.equals(newStatus)
-                    && isCod(order)
-                    && !PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
-                values.put(DBHelper.COL_O_PAYMENT_STATUS, PaymentStatus.STATUS_DA_THANH_TOAN);
-            }
-
+            ContentValues values = buildOrderStatusUpdateValues(order, newStatus);
             boolean updated = db.update(
                     DBHelper.TBL_ORDERS,
                     values,
@@ -284,6 +292,11 @@ public class OrderDao {
                     new String[]{String.valueOf(orderId)}
             ) > 0;
             if (!updated) {
+                return false;
+            }
+
+            if (OrderStatus.STATUS_DA_HUY.equals(newStatus)
+                    && !handleCancelledOrderStockAfterUpdate(db, orderId, values, order)) {
                 return false;
             }
 
@@ -307,6 +320,10 @@ public class OrderDao {
 
             ContentValues values = new ContentValues();
             values.put(DBHelper.COL_O_PAYMENT_STATUS, newStatus);
+            if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(newStatus)) {
+                values.put(DBHelper.COL_O_PAYMENT_DEADLINE, 0L);
+                values.put(DBHelper.COL_O_EXPIRED_AT, 0L);
+            }
             boolean updated = db.update(
                     DBHelper.TBL_ORDERS,
                     values,
@@ -394,12 +411,70 @@ public class OrderDao {
         public int waitingPaymentOrders;
         public int cancelledOrders;
         public int recognizedRevenue;
+        public int recognizedProfit;
         public int averageDeliveredOrderValue;
         public int deliveredUnits;
+        public int recentSixMonthRevenue;
+        public int recentSixMonthProfit;
+        public int recentSixMonthDeliveredPaidOrders;
+        public int recentSixMonthAverageOrderValue;
+    }
+
+    public static class RecentMonthReport {
+        public int year;
+        public int month;
+        public String label;
+        public int revenue;
+        public int profit;
+        public int deliveredPaidOrders;
+
+        public RecentMonthReport(int year, int month, String label, int revenue, int profit, int deliveredPaidOrders) {
+            this.year = year;
+            this.month = month;
+            this.label = label;
+            this.revenue = revenue;
+            this.profit = profit;
+            this.deliveredPaidOrders = deliveredPaidOrders;
+        }
+    }
+
+    public static class ReportDashboardData {
+        public ReportMetrics metrics;
+        public ArrayList<MonthRevenue> revenueByMonth;
+        public ArrayList<RecentMonthReport> recentSixMonths;
+    }
+
+    private static class OrderProfitSnapshot {
+        long orderId;
+        long createdAt;
+        int orderTotal;
+        double estimatedCost;
+    }
+
+    private static class MonthProfitAccumulator {
+        int year;
+        int month;
+        String label;
+        int revenue;
+        double profit;
+        int deliveredPaidOrders;
+    }
+
+    public ReportDashboardData getReportDashboardData() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ReportDashboardData data = new ReportDashboardData();
+        data.revenueByMonth = getDoanhThuTheoThang(db, Calendar.getInstance().get(Calendar.YEAR));
+        data.recentSixMonths = getRecentSixMonthReports(db);
+        data.metrics = buildReportMetrics(db, data.recentSixMonths);
+        return data;
     }
 
     public ArrayList<MonthRevenue> getDoanhThuTheoThang(int year) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        return getDoanhThuTheoThang(db, year);
+    }
+
+    private ArrayList<MonthRevenue> getDoanhThuTheoThang(SQLiteDatabase db, int year) {
         ArrayList<MonthRevenue> list = new ArrayList<>();
 
         Cursor c = db.rawQuery(
@@ -509,7 +584,10 @@ public class OrderDao {
     }
 
     public ReportMetrics getReportMetrics() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        return getReportDashboardData().metrics;
+    }
+
+    private ReportMetrics buildReportMetrics(SQLiteDatabase db, ArrayList<RecentMonthReport> recentSixMonths) {
         ReportMetrics metrics = new ReportMetrics();
         Cursor c = db.rawQuery(
                 "SELECT " +
@@ -540,12 +618,173 @@ public class OrderDao {
             metrics.cancelledOrders = c.isNull(3) ? 0 : c.getInt(3);
             metrics.recognizedRevenue = c.isNull(4) ? 0 : c.getInt(4);
             metrics.deliveredUnits = c.isNull(5) ? 0 : c.getInt(5);
-            metrics.averageDeliveredOrderValue = metrics.deliveredPaidOrders == 0
-                    ? 0
-                    : metrics.recognizedRevenue / metrics.deliveredPaidOrders;
         }
         c.close();
+
+        metrics.recognizedProfit = calculateRecognizedProfit(db);
+        metrics.averageDeliveredOrderValue = metrics.deliveredPaidOrders == 0
+                ? 0
+                : metrics.recognizedRevenue / metrics.deliveredPaidOrders;
+        metrics.recentSixMonthRevenue = sumRecentRevenue(recentSixMonths);
+        metrics.recentSixMonthProfit = sumRecentProfit(recentSixMonths);
+        metrics.recentSixMonthDeliveredPaidOrders = sumRecentDeliveredPaidOrders(recentSixMonths);
+        metrics.recentSixMonthAverageOrderValue = metrics.recentSixMonthDeliveredPaidOrders == 0
+                ? 0
+                : metrics.recentSixMonthRevenue / metrics.recentSixMonthDeliveredPaidOrders;
         return metrics;
+    }
+
+    private int calculateRecognizedProfit(SQLiteDatabase db) {
+        double totalProfit = 0d;
+        for (OrderProfitSnapshot snapshot : getDeliveredPaidOrderSnapshots(db)) {
+            totalProfit += snapshot.orderTotal - snapshot.estimatedCost;
+        }
+        return safeRoundCurrency(totalProfit);
+    }
+
+    private ArrayList<RecentMonthReport> getRecentSixMonthReports(SQLiteDatabase db) {
+        ArrayList<RecentMonthReport> reports = new ArrayList<>();
+        LinkedHashMap<String, MonthProfitAccumulator> buckets = initRecentSixMonthBuckets();
+        for (OrderProfitSnapshot snapshot : getDeliveredPaidOrderSnapshots(db)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(snapshot.createdAt);
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH) + 1;
+            String key = getMonthBucketKey(year, month);
+            MonthProfitAccumulator bucket = buckets.get(key);
+            if (bucket == null) {
+                continue;
+            }
+            bucket.revenue += snapshot.orderTotal;
+            bucket.profit += snapshot.orderTotal - snapshot.estimatedCost;
+            bucket.deliveredPaidOrders++;
+        }
+
+        for (MonthProfitAccumulator bucket : buckets.values()) {
+            reports.add(new RecentMonthReport(
+                    bucket.year,
+                    bucket.month,
+                    bucket.label,
+                    bucket.revenue,
+                    safeRoundCurrency(bucket.profit),
+                    bucket.deliveredPaidOrders
+            ));
+        }
+        return reports;
+    }
+
+    private LinkedHashMap<String, MonthProfitAccumulator> initRecentSixMonthBuckets() {
+        LinkedHashMap<String, MonthProfitAccumulator> buckets = new LinkedHashMap<>();
+        Calendar cursor = Calendar.getInstance();
+        cursor.set(Calendar.DAY_OF_MONTH, 1);
+        cursor.set(Calendar.HOUR_OF_DAY, 0);
+        cursor.set(Calendar.MINUTE, 0);
+        cursor.set(Calendar.SECOND, 0);
+        cursor.set(Calendar.MILLISECOND, 0);
+        cursor.add(Calendar.MONTH, -5);
+        for (int i = 0; i < 6; i++) {
+            MonthProfitAccumulator bucket = new MonthProfitAccumulator();
+            bucket.year = cursor.get(Calendar.YEAR);
+            bucket.month = cursor.get(Calendar.MONTH) + 1;
+            bucket.label = String.format(Locale.US, "%02d/%d", bucket.month, bucket.year);
+            buckets.put(getMonthBucketKey(bucket.year, bucket.month), bucket);
+            cursor.add(Calendar.MONTH, 1);
+        }
+        return buckets;
+    }
+
+    private ArrayList<OrderProfitSnapshot> getDeliveredPaidOrderSnapshots(SQLiteDatabase db) {
+        ArrayList<OrderProfitSnapshot> snapshots = new ArrayList<>();
+        Map<Long, Double> weightedAverageCostByProduct = getWeightedAverageCostByProduct(db);
+        Cursor c = db.rawQuery(
+                "SELECT o." + DBHelper.COL_ID + ", o." + DBHelper.COL_O_CREATED + ", o." + DBHelper.COL_O_TOTAL + ", " +
+                        "oi." + DBHelper.COL_OI_PRODUCT_ID + ", oi." + DBHelper.COL_OI_QTY + " " +
+                        "FROM " + DBHelper.TBL_ORDERS + " o " +
+                        "JOIN " + DBHelper.TBL_ORDER_ITEMS + " oi ON oi." + DBHelper.COL_OI_ORDER_ID + " = o." + DBHelper.COL_ID + " " +
+                        "WHERE o." + DBHelper.COL_O_ORDER_STATUS + "=? AND o." + DBHelper.COL_O_PAYMENT_STATUS + "=? " +
+                        "ORDER BY o." + DBHelper.COL_O_CREATED + " ASC, o." + DBHelper.COL_ID + " ASC, oi." + DBHelper.COL_ID + " ASC",
+                new String[]{OrderStatus.STATUS_DA_GIAO, PaymentStatus.STATUS_DA_THANH_TOAN}
+        );
+
+        OrderProfitSnapshot current = null;
+        long currentOrderId = -1L;
+        while (c.moveToNext()) {
+            long orderId = c.getLong(0);
+            if (current == null || currentOrderId != orderId) {
+                if (current != null) {
+                    snapshots.add(current);
+                }
+                current = new OrderProfitSnapshot();
+                current.orderId = orderId;
+                current.createdAt = c.getLong(1);
+                current.orderTotal = c.getInt(2);
+                current.estimatedCost = 0d;
+                currentOrderId = orderId;
+            }
+            long productId = c.getLong(3);
+            int quantity = c.getInt(4);
+            double unitCost = 0d;
+            Double weightedCost = weightedAverageCostByProduct.get(productId);
+            if (weightedCost != null) {
+                unitCost = weightedCost;
+            }
+            current.estimatedCost += unitCost * quantity;
+        }
+        c.close();
+        if (current != null) {
+            snapshots.add(current);
+        }
+        return snapshots;
+    }
+
+    private Map<Long, Double> getWeightedAverageCostByProduct(SQLiteDatabase db) {
+        LinkedHashMap<Long, Double> costs = new LinkedHashMap<>();
+        Cursor c = db.rawQuery(
+                "SELECT ri." + DBHelper.COL_RI_PRODUCT_ID + ", " +
+                        "SUM(ri." + DBHelper.COL_RI_QTY + " * ri." + DBHelper.COL_RI_UNIT_COST + ") * 1.0 / NULLIF(SUM(ri." + DBHelper.COL_RI_QTY + "), 0) AS weighted_cost " +
+                        "FROM " + DBHelper.TBL_RECEIPT_ITEMS + " ri " +
+                        "JOIN " + DBHelper.TBL_RECEIPTS + " r ON r." + DBHelper.COL_ID + " = ri." + DBHelper.COL_RI_RECEIPT_ID + " " +
+                        "WHERE r." + DBHelper.COL_R_STATUS + "=? " +
+                        "GROUP BY ri." + DBHelper.COL_RI_PRODUCT_ID,
+                new String[]{Receipt.STATUS_COMPLETED}
+        );
+        while (c.moveToNext()) {
+            costs.put(c.getLong(0), c.isNull(1) ? 0d : c.getDouble(1));
+        }
+        c.close();
+        return costs;
+    }
+
+    private int sumRecentRevenue(ArrayList<RecentMonthReport> recentSixMonths) {
+        int total = 0;
+        for (RecentMonthReport item : recentSixMonths) {
+            total += Math.max(0, item.revenue);
+        }
+        return total;
+    }
+
+    private int sumRecentProfit(ArrayList<RecentMonthReport> recentSixMonths) {
+        int total = 0;
+        for (RecentMonthReport item : recentSixMonths) {
+            total += item.profit;
+        }
+        return total;
+    }
+
+    private int sumRecentDeliveredPaidOrders(ArrayList<RecentMonthReport> recentSixMonths) {
+        int total = 0;
+        for (RecentMonthReport item : recentSixMonths) {
+            total += Math.max(0, item.deliveredPaidOrders);
+        }
+        return total;
+    }
+
+    private String getMonthBucketKey(int year, int month) {
+        return year + "-" + month;
+    }
+
+    private int safeRoundCurrency(double amount) {
+        return (int) Math.round(amount);
     }
 
     public ArrayList<String> getAllowedNextOrderStatuses(Order order) {
@@ -611,6 +850,85 @@ public class OrderDao {
                 && PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan);
     }
 
+    public int reconcileExpiredTransferOrders() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int reconciled = reconcileExpiredTransferOrders(db, System.currentTimeMillis());
+            db.setTransactionSuccessful();
+            return reconciled;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    private int reconcileExpiredTransferOrders(SQLiteDatabase db, long now) {
+        ArrayList<Long> expiredOrderIds = new ArrayList<>();
+        Cursor c = db.rawQuery(
+                "SELECT " + DBHelper.COL_ID +
+                        " FROM " + DBHelper.TBL_ORDERS +
+                        " WHERE " + DBHelper.COL_O_PAY_METHOD + "=?" +
+                        " AND " + DBHelper.COL_O_ORDER_STATUS + "=?" +
+                        " AND " + DBHelper.COL_O_PAYMENT_STATUS + "=?" +
+                        " AND " + DBHelper.COL_O_PAYMENT_DEADLINE + ">0" +
+                        " AND " + DBHelper.COL_O_PAYMENT_DEADLINE + "<=?" +
+                        " AND " + DBHelper.COL_O_EXPIRED_AT + "=0",
+                new String[]{
+                        CheckoutInfo.PAYMENT_BANK_TRANSFER,
+                        OrderStatus.STATUS_CHO_XAC_NHAN,
+                        PaymentStatus.STATUS_CHO_THANH_TOAN,
+                        String.valueOf(now)
+                }
+        );
+        while (c.moveToNext()) {
+            expiredOrderIds.add(c.getLong(0));
+        }
+        c.close();
+
+        int reconciled = 0;
+        for (Long orderId : expiredOrderIds) {
+            Order order = getOrderByIdInTransaction(db, orderId == null ? -1L : orderId);
+            if (order == null || !shouldExpireTransferOrder(order, now)) {
+                continue;
+            }
+
+            ContentValues values = new ContentValues();
+            values.put(DBHelper.COL_O_ORDER_STATUS, OrderStatus.STATUS_DA_HUY);
+            values.put(DBHelper.COL_O_PAYMENT_STATUS, PaymentStatus.STATUS_HET_HAN_THANH_TOAN);
+            values.put(DBHelper.COL_O_EXPIRED_AT, now);
+            values.put(DBHelper.COL_O_CANCELLED_AT, now);
+            values.put(DBHelper.COL_O_CANCEL_REASON, CANCEL_REASON_EXPIRED_TRANSFER);
+            values.put(DBHelper.COL_O_PAYMENT_DEADLINE, 0L);
+            values.put(DBHelper.COL_O_REFUND_STATUS, Order.REFUND_STATUS_NONE);
+            values.put(DBHelper.COL_O_REFUNDED_AT, 0L);
+            values.put(DBHelper.COL_O_REFUND_NOTE, "");
+
+            boolean updated = db.update(
+                    DBHelper.TBL_ORDERS,
+                    values,
+                    DBHelper.COL_ID + "=?",
+                    new String[]{String.valueOf(order.id)}
+            ) > 0;
+            if (!updated) {
+                continue;
+            }
+            if (restoreStockForOrder(db, order.id, getCancelRestockNote(order, true))) {
+                reconciled++;
+            }
+        }
+        return reconciled;
+    }
+
+    private boolean shouldExpireTransferOrder(Order order, long now) {
+        return order != null
+                && isBankTransfer(order)
+                && OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)
+                && PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan)
+                && order.paymentDeadline > 0
+                && order.paymentDeadline <= now
+                && order.expiredAt <= 0;
+    }
+
     private boolean isValidOrderStatus(String status) {
         return OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)
                 || OrderStatus.STATUS_DANG_XU_LY.equals(status)
@@ -621,7 +939,8 @@ public class OrderDao {
     private boolean isValidPaymentStatus(String status) {
         return PaymentStatus.STATUS_CHUA_THANH_TOAN.equals(status)
                 || PaymentStatus.STATUS_CHO_THANH_TOAN.equals(status)
-                || PaymentStatus.STATUS_DA_THANH_TOAN.equals(status);
+                || PaymentStatus.STATUS_DA_THANH_TOAN.equals(status)
+                || PaymentStatus.STATUS_HET_HAN_THANH_TOAN.equals(status);
     }
 
     private String validateCheckoutInfo(CheckoutInfo info) {
@@ -653,6 +972,62 @@ public class OrderDao {
         return normalized == null ? "" : normalized;
     }
 
+    private ContentValues buildOrderStatusUpdateValues(Order order, String newStatus) {
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.COL_O_ORDER_STATUS, newStatus);
+        if (OrderStatus.STATUS_DA_GIAO.equals(newStatus)) {
+            values.put(DBHelper.COL_O_PAYMENT_DEADLINE, 0L);
+            values.put(DBHelper.COL_O_EXPIRED_AT, 0L);
+            if (isCod(order) && !PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+                values.put(DBHelper.COL_O_PAYMENT_STATUS, PaymentStatus.STATUS_DA_THANH_TOAN);
+            }
+        }
+        if (OrderStatus.STATUS_DA_HUY.equals(newStatus)) {
+            long cancelledAt = System.currentTimeMillis();
+            values.put(DBHelper.COL_O_CANCELLED_AT, cancelledAt);
+            values.put(DBHelper.COL_O_PAYMENT_DEADLINE, 0L);
+            values.put(DBHelper.COL_O_EXPIRED_AT, order.expiredAt);
+            values.put(DBHelper.COL_O_CANCEL_REASON, getCancelReason(order));
+            if (isBankTransfer(order) && PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+                values.put(DBHelper.COL_O_REFUND_STATUS, Order.REFUND_STATUS_CHO_HOAN_TIEN);
+                values.put(DBHelper.COL_O_REFUND_NOTE, buildRefundNote(order));
+                values.put(DBHelper.COL_O_REFUNDED_AT, 0L);
+            } else {
+                values.put(DBHelper.COL_O_REFUND_STATUS, Order.REFUND_STATUS_NONE);
+                values.put(DBHelper.COL_O_REFUND_NOTE, "");
+                values.put(DBHelper.COL_O_REFUNDED_AT, 0L);
+            }
+        }
+        return values;
+    }
+
+    private boolean handleCancelledOrderStockAfterUpdate(SQLiteDatabase db, long orderId, ContentValues values, Order order) {
+        boolean alreadyCancelledBefore = order != null && OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon);
+        boolean alreadyExpiredBefore = order != null && order.expiredAt > 0;
+        if (alreadyCancelledBefore || alreadyExpiredBefore) {
+            return true;
+        }
+        return restoreStockForOrder(db, orderId, getCancelRestockNote(order, false));
+    }
+
+    private String getCancelReason(Order order) {
+        if (isBankTransfer(order) && PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            return CANCEL_REASON_CANCELLED_TRANSFER_PAID;
+        }
+        if (isBankTransfer(order)) {
+            return CANCEL_REASON_CANCELLED_TRANSFER_PENDING;
+        }
+        return CANCEL_REASON_CANCELLED_COD;
+    }
+
+    private String buildRefundNote(Order order) {
+        String base = getCancelReason(order);
+        if (order == null || order.ghiChu == null || order.ghiChu.trim().isEmpty()) {
+            return base;
+        }
+        return base + ". Ghi chú đơn: " + order.ghiChu.trim();
+    }
+
     private String buildOrderSelect(String extraColumns) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT ")
@@ -670,7 +1045,14 @@ public class OrderDao {
                 .append("o.").append(DBHelper.COL_O_PHONE).append(",")
                 .append("o.").append(DBHelper.COL_O_ADDRESS).append(",")
                 .append("o.").append(DBHelper.COL_O_PAY_METHOD).append(",")
-                .append("o.").append(DBHelper.COL_O_NOTE);
+                .append("o.").append(DBHelper.COL_O_NOTE).append(",")
+                .append("o.").append(DBHelper.COL_O_PAYMENT_DEADLINE).append(",")
+                .append("o.").append(DBHelper.COL_O_EXPIRED_AT).append(",")
+                .append("o.").append(DBHelper.COL_O_CANCELLED_AT).append(",")
+                .append("o.").append(DBHelper.COL_O_CANCEL_REASON).append(",")
+                .append("o.").append(DBHelper.COL_O_REFUND_STATUS).append(",")
+                .append("o.").append(DBHelper.COL_O_REFUNDED_AT).append(",")
+                .append("o.").append(DBHelper.COL_O_REFUND_NOTE);
         if (!TextUtils.isEmpty(extraColumns)) {
             builder.append(",").append(extraColumns);
         }
@@ -708,6 +1090,13 @@ public class OrderDao {
         order.diaChiNhan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_ADDRESS));
         order.phuongThucThanhToan = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_PAY_METHOD));
         order.ghiChu = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_NOTE));
+        order.paymentDeadline = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_PAYMENT_DEADLINE));
+        order.expiredAt = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_EXPIRED_AT));
+        order.cancelledAt = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_CANCELLED_AT));
+        order.cancelReason = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_CANCEL_REASON));
+        order.refundStatus = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUND_STATUS));
+        order.refundedAt = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUNDED_AT));
+        order.refundNote = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUND_NOTE));
 
         int usernameIndex = c.getColumnIndex(DBHelper.COL_USERNAME);
         if (usernameIndex >= 0) {
@@ -803,6 +1192,9 @@ public class OrderDao {
     }
 
     private boolean restoreStockForOrder(SQLiteDatabase db, long orderId, String note) {
+        if (hasRestockHistory(db, orderId)) {
+            return true;
+        }
         ArrayList<OrderItem> items = getOrderItemsInTransaction(db, orderId);
         for (OrderItem item : items) {
             db.execSQL(
@@ -825,9 +1217,25 @@ public class OrderDao {
         return true;
     }
 
-    private String getCancelRestockNote(Order order) {
+    private boolean hasRestockHistory(SQLiteDatabase db, long orderId) {
+        Cursor c = db.rawQuery(
+                "SELECT 1 FROM " + DBHelper.TBL_INVENTORY_HISTORY +
+                        " WHERE " + DBHelper.COL_H_REF_TYPE + "=?" +
+                        " AND " + DBHelper.COL_H_REF_ID + "=?" +
+                        " AND " + DBHelper.COL_H_ACTION + "=? LIMIT 1",
+                new String[]{REFERENCE_TYPE_ORDER, String.valueOf(orderId), InventoryHistoryDao.ACTION_CANCEL_RETURN}
+        );
+        boolean exists = c.moveToFirst();
+        c.close();
+        return exists;
+    }
+
+    private String getCancelRestockNote(Order order, boolean expiredTransfer) {
+        if (expiredTransfer) {
+            return "Hoàn kho do đơn chuyển khoản hết hạn thanh toán";
+        }
         if (isBankTransfer(order) && PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
-            return "Hoàn kho do hủy đơn chuyển khoản đã xác nhận thanh toán";
+            return "Hoàn kho do hủy đơn chuyển khoản đã thanh toán, chờ hoàn tiền";
         }
         if (isBankTransfer(order)) {
             return "Hoàn kho do hủy đơn chuyển khoản đang giữ hàng";

@@ -77,6 +77,7 @@ public class OrdersActivity extends BaseHomeActivity {
     }
 
     private void loadOrders() {
+        orderDao.reconcileExpiredTransferOrders();
         ArrayList<Order> list = orderDao.getOrdersByUser(session.getUserId());
         adapter.setData(list, false);
     }

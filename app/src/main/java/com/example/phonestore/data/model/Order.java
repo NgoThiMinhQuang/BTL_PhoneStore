@@ -1,6 +1,10 @@
 package com.example.phonestore.data.model;
 
 public class Order {
+    public static final String REFUND_STATUS_NONE = "";
+    public static final String REFUND_STATUS_CHO_HOAN_TIEN = "CHO_HOAN_TIEN";
+    public static final String REFUND_STATUS_DA_HOAN_TIEN = "DA_HOAN_TIEN";
+
     public long id;
     public long userId;
     public String username; // admin xem tất cả
@@ -18,4 +22,23 @@ public class Order {
     public String diaChiNhan;
     public String phuongThucThanhToan;
     public String ghiChu;
+    public long paymentDeadline;
+    public long expiredAt;
+    public long cancelledAt;
+    public String cancelReason;
+    public String refundStatus;
+    public long refundedAt;
+    public String refundNote;
+
+    public boolean hasPaymentDeadline() {
+        return paymentDeadline > 0;
+    }
+
+    public boolean isRefundPending() {
+        return REFUND_STATUS_CHO_HOAN_TIEN.equals(refundStatus);
+    }
+
+    public boolean isRefunded() {
+        return REFUND_STATUS_DA_HOAN_TIEN.equals(refundStatus);
+    }
 }

@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 14;
+    public static final int DB_VERSION = 15;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -67,6 +67,13 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_O_SHIPPING_FEE = "phi_van_chuyen";
     public static final String COL_O_DISCOUNT_CODE = "ma_giam_gia";
     public static final String COL_O_DISCOUNT_AMOUNT = "tien_giam";
+    public static final String COL_O_PAYMENT_DEADLINE = "payment_deadline";
+    public static final String COL_O_EXPIRED_AT = "expired_at";
+    public static final String COL_O_CANCELLED_AT = "cancelled_at";
+    public static final String COL_O_CANCEL_REASON = "cancel_reason";
+    public static final String COL_O_REFUND_STATUS = "refund_status";
+    public static final String COL_O_REFUNDED_AT = "refunded_at";
+    public static final String COL_O_REFUND_NOTE = "refund_note";
 
     public static final String TBL_ORDER_ITEMS = "hoa_don_ct";
     public static final String COL_OI_ORDER_ID = "hoa_don_id";
@@ -239,6 +246,13 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_O_SHIPPING_FEE + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_O_DISCOUNT_CODE + " TEXT, " +
                 COL_O_DISCOUNT_AMOUNT + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_PAYMENT_DEADLINE + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_EXPIRED_AT + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_CANCELLED_AT + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_CANCEL_REASON + " TEXT, " +
+                COL_O_REFUND_STATUS + " TEXT, " +
+                COL_O_REFUNDED_AT + " INTEGER NOT NULL DEFAULT 0, " +
+                COL_O_REFUND_NOTE + " TEXT, " +
                 "FOREIGN KEY(" + COL_O_USER_ID + ") REFERENCES " + TBL_USERS + "(" + COL_ID + ")" +
                 ");");
 
@@ -400,15 +414,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_INVENTORY_HISTORY);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_RECEIPT_ITEMS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_RECEIPTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_SUPPLIERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_ORDER_ITEMS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_ORDERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_CART);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_PRODUCTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TBL_USERS);
-        onCreate(db);
+        if (oldVersion < 15) {
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_PAYMENT_DEADLINE + " INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_EXPIRED_AT + " INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_CANCELLED_AT + " INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_CANCEL_REASON + " TEXT");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUND_STATUS + " TEXT");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUNDED_AT + " INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUND_NOTE + " TEXT");
+        }
     }
 }

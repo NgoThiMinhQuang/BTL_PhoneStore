@@ -34,11 +34,9 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Locale;
 
 public class AdminReportsActivity extends BaseHomeActivity {
-    private static final int PROFIT_RATE_PERCENT = 18;
 
     private OrderDao orderDao;
     private UserDao userDao;
@@ -97,27 +95,25 @@ public class AdminReportsActivity extends BaseHomeActivity {
         orderDao = new OrderDao(this);
         userDao = new UserDao(this);
 
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        OrderDao.ReportMetrics metrics = orderDao.getReportMetrics();
-        ArrayList<OrderDao.MonthRevenue> revenueByMonth = orderDao.getDoanhThuTheoThang(year);
-        ArrayList<OrderDao.MonthCount> ordersByMonth = orderDao.getSoDonTheoThang(year);
+        OrderDao.ReportDashboardData dashboardData = orderDao.getReportDashboardData();
+        OrderDao.ReportMetrics metrics = dashboardData.metrics;
+        ArrayList<OrderDao.MonthRevenue> revenueByMonth = dashboardData.revenueByMonth;
+        ArrayList<OrderDao.RecentMonthReport> recentSixMonths = dashboardData.recentSixMonths;
         ArrayList<OrderDao.ProductSale> topProducts = orderDao.getTopSanPhamBanChay(4);
         ArrayList<OrderDao.StatusCount> orderStatuses = orderDao.getSoDonTheoTrangThai();
 
         bindHeadlineKpis(metrics);
         bindLegacyKpis(metrics);
-        bindSummary(metrics, revenueByMonth, ordersByMonth);
+        bindSummary(metrics);
 
         LineChart chartRevenue = findViewById(R.id.chartRevenue);
-        BarChart chartTopProducts = findViewById(R.id.chartTopProducts);
         PieChart chartOrderStatus = findViewById(R.id.chartOrderStatus);
         BarChart chartRevenueProfit = findViewById(R.id.chartRevenueProfit);
         PieChart chartBestSellers = findViewById(R.id.chartBestSellers);
 
-        renderRevenueByMonth(chartRevenue, revenueByMonth, year);
-        renderTopProducts(chartTopProducts, topProducts);
+        renderRevenueByMonth(chartRevenue, revenueByMonth);
         renderOrderStatus(chartOrderStatus, orderStatuses);
-        renderRevenueProfit(chartRevenueProfit, revenueByMonth);
+        renderRevenueProfit(chartRevenueProfit, recentSixMonths);
         renderBestSellers(chartBestSellers, topProducts);
     }
 
@@ -128,9 +124,9 @@ public class AdminReportsActivity extends BaseHomeActivity {
         View cardOrders = findViewById(R.id.cardOrders);
 
         bindKpiCard(cardRevenue, R.string.admin_reports_kpi_delivered_revenue, formatMoneyShort(metrics.recognizedRevenue));
-        bindKpiCard(cardProfit, R.string.admin_reports_kpi_profit, formatMoneyShort(calculateProfit(metrics.recognizedRevenue)));
+        bindKpiCard(cardProfit, R.string.admin_reports_kpi_profit, formatMoneyShort(metrics.recognizedProfit));
         bindKpiCard(cardUnits, R.string.admin_reports_kpi_units, String.valueOf(metrics.deliveredUnits));
-        bindKpiCard(cardOrders, R.string.admin_reports_kpi_orders, String.valueOf(metrics.totalOrders));
+        bindKpiCard(cardOrders, R.string.admin_reports_kpi_orders, String.valueOf(metrics.deliveredPaidOrders));
     }
 
     private void bindLegacyKpis(OrderDao.ReportMetrics metrics) {
@@ -148,21 +144,14 @@ public class AdminReportsActivity extends BaseHomeActivity {
         }
     }
 
-    private void bindSummary(OrderDao.ReportMetrics metrics,
-                             ArrayList<OrderDao.MonthRevenue> revenueByMonth,
-                             ArrayList<OrderDao.MonthCount> ordersByMonth) {
-        int totalRevenue6m = sumLatestRevenue(revenueByMonth, 6);
-        int totalProfit6m = calculateProfit(totalRevenue6m);
-        int totalOrders6m = sumLatestOrders(ordersByMonth, 6);
-        int averageOrderValue = metrics.totalOrders == 0 ? 0 : metrics.recognizedRevenue / metrics.totalOrders;
-
-        ((TextView) findViewById(R.id.tvReportTotalRevenue6m)).setText(formatMoneyCompact(totalRevenue6m));
-        ((TextView) findViewById(R.id.tvReportTotalProfit6m)).setText(formatMoneyCompact(totalProfit6m));
-        ((TextView) findViewById(R.id.tvReportTotalOrders)).setText(String.valueOf(totalOrders6m));
-        ((TextView) findViewById(R.id.tvReportAverageOrder)).setText(formatMoneyShort(averageOrderValue));
+    private void bindSummary(OrderDao.ReportMetrics metrics) {
+        ((TextView) findViewById(R.id.tvReportTotalRevenue6m)).setText(formatMoneyCompact(metrics.recentSixMonthRevenue));
+        ((TextView) findViewById(R.id.tvReportTotalProfit6m)).setText(formatMoneyCompact(metrics.recentSixMonthProfit));
+        ((TextView) findViewById(R.id.tvReportTotalOrders)).setText(String.valueOf(metrics.recentSixMonthDeliveredPaidOrders));
+        ((TextView) findViewById(R.id.tvReportAverageOrder)).setText(formatMoneyShort(metrics.recentSixMonthAverageOrderValue));
     }
 
-    private void renderRevenueByMonth(LineChart chart, ArrayList<OrderDao.MonthRevenue> raw, int year) {
+    private void renderRevenueByMonth(LineChart chart, ArrayList<OrderDao.MonthRevenue> raw) {
         chart.setNoDataText(getString(R.string.admin_reports_empty_revenue));
         chart.getDescription().setEnabled(false);
 
@@ -176,7 +165,7 @@ public class AdminReportsActivity extends BaseHomeActivity {
             entries.add(new Entry(m, rev[m]));
         }
 
-        LineDataSet set = new LineDataSet(entries, getString(R.string.admin_reports_delivered_revenue_label, year));
+        LineDataSet set = new LineDataSet(entries, getString(R.string.admin_reports_delivered_revenue_year_label));
         set.setLineWidth(2.5f);
         set.setCircleRadius(3.5f);
         set.setValueTextSize(10f);
@@ -210,39 +199,6 @@ public class AdminReportsActivity extends BaseHomeActivity {
         chart.invalidate();
     }
 
-    private void renderTopProducts(BarChart chart, ArrayList<OrderDao.ProductSale> list) {
-        chart.setNoDataText(getString(R.string.admin_reports_empty_top_products));
-        chart.getDescription().setEnabled(false);
-        chart.getAxisRight().setEnabled(false);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        ArrayList<String> labels = new ArrayList<>();
-
-        for (int i = 0; i < list.size(); i++) {
-            OrderDao.ProductSale p = list.get(i);
-            entries.add(new BarEntry(i, p.qty));
-            labels.add(shortName(p.name));
-        }
-
-        BarDataSet set = new BarDataSet(entries, getString(R.string.admin_reports_top_products_label));
-        set.setColor(ContextCompat.getColor(this, R.color.admin_primary));
-        set.setValueTextSize(10f);
-
-        BarData data = new BarData(set);
-        data.setBarWidth(0.9f);
-
-        chart.setData(data);
-        chart.setFitBars(true);
-
-        XAxis x = chart.getXAxis();
-        x.setPosition(XAxis.XAxisPosition.BOTTOM);
-        x.setGranularity(1f);
-        x.setValueFormatter(new IndexAxisValueFormatter(labels));
-        x.setLabelRotationAngle(-30f);
-
-        chart.invalidate();
-    }
-
     private void renderOrderStatus(PieChart chart, ArrayList<OrderDao.StatusCount> list) {
         chart.setNoDataText(getString(R.string.admin_reports_empty_status));
         chart.getDescription().setEnabled(false);
@@ -267,26 +223,20 @@ public class AdminReportsActivity extends BaseHomeActivity {
         chart.invalidate();
     }
 
-    private void renderRevenueProfit(BarChart chart, ArrayList<OrderDao.MonthRevenue> revenueByMonth) {
+    private void renderRevenueProfit(BarChart chart, ArrayList<OrderDao.RecentMonthReport> recentSixMonths) {
         chart.setNoDataText(getString(R.string.admin_reports_empty_revenue));
         chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
         chart.setFitBars(true);
 
-        int[] revenue = new int[7];
-        for (OrderDao.MonthRevenue item : revenueByMonth) {
-            if (item.month >= 1 && item.month <= 6) {
-                revenue[item.month] = item.revenue;
-            }
-        }
-
         ArrayList<BarEntry> revenueEntries = new ArrayList<>();
         ArrayList<BarEntry> profitEntries = new ArrayList<>();
         ArrayList<String> labels = new ArrayList<>();
-        for (int month = 1; month <= 6; month++) {
-            revenueEntries.add(new BarEntry(month - 1, toMillions(revenue[month])));
-            profitEntries.add(new BarEntry(month - 1, toMillions(calculateProfit(revenue[month]))));
-            labels.add("T" + month);
+        for (int index = 0; index < recentSixMonths.size(); index++) {
+            OrderDao.RecentMonthReport item = recentSixMonths.get(index);
+            revenueEntries.add(new BarEntry(index, toMillions(item.revenue)));
+            profitEntries.add(new BarEntry(index, toMillions(item.profit)));
+            labels.add(item.label);
         }
 
         BarDataSet revenueSet = new BarDataSet(revenueEntries, getString(R.string.admin_reports_chart_revenue_label));
@@ -301,7 +251,7 @@ public class AdminReportsActivity extends BaseHomeActivity {
         chart.setData(data);
         chart.groupBars(-0.5f, 0.24f, 0.08f);
         chart.getXAxis().setAxisMinimum(-0.5f);
-        chart.getXAxis().setAxisMaximum(5.5f + 1f);
+        chart.getXAxis().setAxisMaximum(Math.max(0.5f, recentSixMonths.size() - 0.5f + 1f));
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -374,30 +324,6 @@ public class AdminReportsActivity extends BaseHomeActivity {
         }
         ((TextView) card.findViewById(R.id.tvKpiLabel)).setText(labelRes);
         ((TextView) card.findViewById(R.id.tvKpiValue)).setText(value);
-    }
-
-    private int sumLatestRevenue(ArrayList<OrderDao.MonthRevenue> revenues, int maxMonth) {
-        int total = 0;
-        for (OrderDao.MonthRevenue item : revenues) {
-            if (item.month >= 1 && item.month <= maxMonth) {
-                total += Math.max(0, item.revenue);
-            }
-        }
-        return total;
-    }
-
-    private int sumLatestOrders(ArrayList<OrderDao.MonthCount> orders, int maxMonth) {
-        int total = 0;
-        for (OrderDao.MonthCount item : orders) {
-            if (item.month >= 1 && item.month <= maxMonth) {
-                total += Math.max(0, item.count);
-            }
-        }
-        return total;
-    }
-
-    private int calculateProfit(int revenue) {
-        return Math.max(0, revenue * PROFIT_RATE_PERCENT / 100);
     }
 
     private float toMillions(int amount) {
