@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,7 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:contentDescription="@string/welcome_hero_content_desc"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:src="@drawable/drawable_welcome"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,125 +48,121 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/heroOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="344dp"
+        android:layout_height="341dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         app:layout_constraintBottom_toTopOf="@id/panel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSub">
+        app:layout_constraintTop_toBottomOf="@id/tvSub"
+        app:layout_constraintVertical_bias="0.34">
 
         <ImageView
             android:id="@+id/bubbleColors"
-            android:layout_width="118dp"
-            android:layout_height="118dp"
-            android:layout_marginStart="120dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="52dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/welcome_feature_colors_desc"
             android:elevation="10dp"
             android:src="@drawable/ic_mau_moi"
-            android:translationX="-72dp"
-            android:translationY="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/bubbleRepair"
-            android:layout_width="122dp"
-            android:layout_height="122dp"
+            android:layout_width="102dp"
+            android:layout_height="102dp"
+            android:layout_marginTop="36dp"
+            android:layout_marginEnd="4dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/welcome_feature_repair_desc"
             android:elevation="10dp"
             android:src="@drawable/ic_sua_chua_nhanh"
-            android:translationX="74dp"
-            android:translationY="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/bubbleSale"
-            android:layout_width="110dp"
-            android:layout_height="110dp"
-            android:layout_marginStart="64dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="80dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="148dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/welcome_feature_sale_desc"
             android:elevation="10dp"
             android:src="@drawable/ic_uu_dai_khung"
-            android:translationX="-86dp"
-            android:translationY="154dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/bubbleDelivery"
-            android:layout_width="104dp"
-            android:layout_height="104dp"
+            android:layout_width="86dp"
+            android:layout_height="86dp"
+            android:layout_marginTop="140dp"
+            android:layout_marginEnd="4dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/welcome_feature_delivery_desc"
             android:elevation="10dp"
             android:src="@drawable/ic_giao_hang"
-            android:translationX="88dp"
-            android:translationY="164dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/bubbleSupport"
-            android:layout_width="94dp"
-            android:layout_height="94dp"
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:layout_marginTop="238dp"
+            android:layout_marginEnd="44dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/welcome_feature_support_desc"
             android:elevation="10dp"
             android:src="@drawable/ic_ho_tro"
-            android:translationX="42dp"
-            android:translationY="254dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/dotTopLeft"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="126dp"
             android:alpha="0.96"
             android:background="@drawable/bg_welcome_dot_red"
-            android:translationX="-112dp"
-            android:translationY="126dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/dotTopRight"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginTop="124dp"
+            android:layout_marginEnd="6dp"
             android:alpha="0.96"
             android:background="@drawable/bg_welcome_dot_red"
-            android:translationX="112dp"
-            android:translationY="126dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/dotMidLeft"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="96dp"
+            android:layout_marginTop="150dp"
             android:alpha="0.85"
             android:background="@drawable/bg_welcome_dot_teal"
-            android:translationX="-36dp"
-            android:translationY="154dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/dotMidRight"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="218dp"
+            android:layout_marginEnd="68dp"
             android:alpha="0.85"
             android:background="@drawable/bg_welcome_dot_teal"
-            android:translationX="96dp"
-            android:translationY="224dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

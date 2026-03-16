@@ -30,8 +30,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_home"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/dashboard" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,8 +62,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_product_selling"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/cargo" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,8 +94,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_nav_products"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/mobile_phone" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -129,8 +126,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_dashboard_inventory"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/warehouse" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -162,8 +158,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_nav_customers"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/ic_user" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -195,8 +190,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:duplicateParentState="true"
-            android:src="@drawable/ic_nav_reports"
-            android:tint="@color/admin_bottom_bar_item_tint" />
+            android:src="@drawable/report" />
 
         <TextView
             android:layout_width="wrap_content"

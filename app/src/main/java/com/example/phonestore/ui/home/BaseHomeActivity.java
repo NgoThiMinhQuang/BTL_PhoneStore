@@ -150,18 +150,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (menuRes == 0) return true;
 
         getMenuInflater().inflate(menuRes, menu);
-        tintToolbarMenuIcon(menu, R.id.nav_profile);
-        tintToolbarMenuIcon(menu, R.id.nav_logout);
         return true;
-    }
-
-    private void tintToolbarMenuIcon(Menu menu, int itemId) {
-        MenuItem item = menu.findItem(itemId);
-        if (item == null || item.getIcon() == null) return;
-
-        Drawable icon = item.getIcon().mutate();
-        icon.setTint(getColor(android.R.color.white));
-        item.setIcon(icon);
     }
 
     @Override
@@ -246,6 +235,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (bottomNav != null) {
             bottomNav.getMenu().clear();
             bottomNav.inflateMenu(bottomMenuRes());
+            bottomNav.setItemIconTintList(null);
             bottomNav.setOnItemSelectedListener(item -> suppressBottomNavNavigation || handleBottomNavigation(item.getItemId()));
             bottomNav.setOnItemReselectedListener(item -> {
                 if (!suppressBottomNavNavigation) {

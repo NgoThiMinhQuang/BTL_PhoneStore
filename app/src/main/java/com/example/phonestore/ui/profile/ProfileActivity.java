@@ -69,13 +69,18 @@ public class ProfileActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected int shellLayoutRes() {
+        return isAdminSession() ? R.layout.activity_home_bottom_admin : super.shellLayoutRes();
+    }
+
+    @Override
     protected int contentLayoutRes() {
         return R.layout.activity_profile;
     }
 
     @Override
     protected int bottomMenuRes() {
-        return R.menu.menu_bottom_customer;
+        return isAdminSession() ? R.menu.menu_bottom_admin : R.menu.menu_bottom_customer;
     }
 
     @Override
@@ -85,7 +90,22 @@ public class ProfileActivity extends BaseHomeActivity {
 
     @Override
     protected int selectedBottomNavItemId() {
-        return R.id.nav_profile;
+        return isAdminSession() ? View.NO_ID : R.id.nav_profile;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return isAdminSession();
+    }
+
+    @Override
+    protected boolean shouldUseAdminBackButtonStyling() {
+        return isAdminSession();
+    }
+
+    @Override
+    protected boolean shouldShowBottomNavigation() {
+        return !isAdminSession();
     }
 
     @Override
@@ -306,4 +326,5 @@ public class ProfileActivity extends BaseHomeActivity {
     private int dp(int value) {
         return Math.round(getResources().getDisplayMetrics().density * value);
     }
+
 }

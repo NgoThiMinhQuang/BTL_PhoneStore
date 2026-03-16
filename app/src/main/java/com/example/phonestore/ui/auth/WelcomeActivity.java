@@ -38,14 +38,14 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void startFloatingAnimations() {
         applyFloatingAnimation(findViewById(R.id.bubbleColors), R.anim.bubble_float_slow, 0L);
-        applyFloatingAnimation(findViewById(R.id.bubbleRepair), R.anim.bubble_float_medium, 180L);
-        applyFloatingAnimation(findViewById(R.id.bubbleSale), R.anim.bubble_float_fast, 320L);
-        applyFloatingAnimation(findViewById(R.id.bubbleDelivery), R.anim.bubble_float_medium, 520L);
-        applyFloatingAnimation(findViewById(R.id.bubbleSupport), R.anim.bubble_float_slow, 700L);
-        applyFloatingAnimation(findViewById(R.id.dotTopLeft), R.anim.bubble_float_fast, 140L);
-        applyFloatingAnimation(findViewById(R.id.dotTopRight), R.anim.bubble_float_medium, 360L);
-        applyFloatingAnimation(findViewById(R.id.dotMidLeft), R.anim.bubble_float_slow, 540L);
-        applyFloatingAnimation(findViewById(R.id.dotMidRight), R.anim.bubble_float_fast, 780L);
+        applyFloatingAnimation(findViewById(R.id.bubbleRepair), R.anim.bubble_float_medium, 220L);
+        applyFloatingAnimation(findViewById(R.id.bubbleSale), R.anim.bubble_float_fast, 420L);
+        applyFloatingAnimation(findViewById(R.id.bubbleDelivery), R.anim.bubble_float_medium, 640L);
+        applyFloatingAnimation(findViewById(R.id.bubbleSupport), R.anim.bubble_float_slow, 860L);
+        applyFloatingAnimation(findViewById(R.id.dotTopLeft), R.anim.bubble_float_fast, 120L);
+        applyFloatingAnimation(findViewById(R.id.dotTopRight), R.anim.bubble_float_medium, 300L);
+        applyFloatingAnimation(findViewById(R.id.dotMidLeft), R.anim.bubble_float_slow, 520L);
+        applyFloatingAnimation(findViewById(R.id.dotMidRight), R.anim.bubble_float_fast, 760L);
     }
 
     private void applyFloatingAnimation(View view, int animRes, long startOffset) {

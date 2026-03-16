@@ -53,7 +53,7 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         app:itemBackground="@drawable/bottom_nav_item_background"
-        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemIconTint="@null"
         app:itemTextColor="@color/bottom_nav_item_color"
         app:labelVisibilityMode="labeled" />
 
