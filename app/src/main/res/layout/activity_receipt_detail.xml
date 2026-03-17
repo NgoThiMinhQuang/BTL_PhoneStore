@@ -312,6 +312,21 @@
                     android:layout_height="wrap_content" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConfirmReceipt"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:text="@string/receipt_confirm"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/admin_primary"
+                    app:cornerRadius="22dp" />
+
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="wrap_content" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPrintReceipt"
                     android:layout_width="0dp"
                     android:layout_height="50dp"

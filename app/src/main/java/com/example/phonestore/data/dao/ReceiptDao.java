@@ -36,6 +36,55 @@ public class ReceiptDao {
         return insertReceipt(supplierId, note, creatorName, Receipt.STATUS_COMPLETED, items, true);
     }
 
+    public boolean confirmDraftReceipt(long receiptId) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Receipt receipt = getReceiptById(db, receiptId);
+            if (receipt == null || !receipt.isDraft()) {
+                return false;
+            }
+
+            Supplier supplier = new SupplierDao(context).getById(receipt.supplierId);
+            if (supplier == null) {
+                return false;
+            }
+
+            ArrayList<ReceiptItem> storedItems = getReceiptItems(db, receiptId);
+            ArrayList<ReceiptItem> normalizedItems = normalizeItems(storedItems, supplier, new ProductDao(context));
+            if (normalizedItems.isEmpty() || normalizedItems.size() != storedItems.size()) {
+                return false;
+            }
+
+            int totalQty = 0;
+            int totalAmount = 0;
+            for (ReceiptItem item : normalizedItems) {
+                totalQty += item.quantity;
+                totalAmount += item.amount;
+            }
+
+            ContentValues receiptValues = new ContentValues();
+            receiptValues.put(DBHelper.COL_R_TOTAL_QTY, totalQty);
+            receiptValues.put(DBHelper.COL_R_TOTAL_AMOUNT, totalAmount);
+            receiptValues.put(DBHelper.COL_R_STATUS, Receipt.STATUS_COMPLETED);
+            int updated = db.update(
+                    DBHelper.TBL_RECEIPTS,
+                    receiptValues,
+                    DBHelper.COL_ID + "=? AND " + DBHelper.COL_R_STATUS + "=?",
+                    new String[]{String.valueOf(receiptId), Receipt.STATUS_DRAFT}
+            );
+            if (updated <= 0) {
+                return false;
+            }
+
+            applyInventoryImport(db, receiptId, normalizeNote(receipt.note), normalizedItems);
+            db.setTransactionSuccessful();
+            return true;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public Receipt getReceiptById(long receiptId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         return getReceiptById(db, receiptId);

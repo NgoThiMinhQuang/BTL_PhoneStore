@@ -321,7 +321,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         seedInitialReceipt(db, appleSupplierId, iphone15Id, "iPhone 15 Pro Max", 10, 24000000, "Nhập lô đầu tiên", Receipt.STATUS_COMPLETED, "Admin");
         seedInitialReceipt(db, samsungSupplierId, samsungS24Id, "Samsung S24 Ultra", 8, 20000000, "Bổ sung kho quý I", Receipt.STATUS_COMPLETED, "Admin");
-        seedInitialReceipt(db, xiaomiSupplierId, xiaomi14Id, "Xiaomi 14", 8, 12000000, "Chờ xác nhận bổ sung kho", Receipt.STATUS_DRAFT, "Admin");
+        seedInitialReceipt(db, xiaomiSupplierId, xiaomi14Id, "Xiaomi 14", 8, 12000000, "Chờ nhập kho bổ sung", Receipt.STATUS_DRAFT, "Admin");
     }
 
     private long seedProduct(SQLiteDatabase db,

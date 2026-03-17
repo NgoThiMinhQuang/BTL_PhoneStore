@@ -3,6 +3,7 @@ package com.example.phonestore.ui.home;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
     private ReceiptDao receiptDao;
     private long receiptId;
     private MaterialButton btnDeleteReceipt;
+    private MaterialButton btnConfirmReceipt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,8 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         );
         btnDeleteReceipt = findViewById(R.id.btnDeleteReceipt);
         btnDeleteReceipt.setOnClickListener(v -> confirmDelete());
+        btnConfirmReceipt = findViewById(R.id.btnConfirmReceipt);
+        btnConfirmReceipt.setOnClickListener(v -> confirmReceipt());
 
         loadReceipt();
     }
@@ -86,7 +90,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         bindHeader(receipt);
         bindItems(items);
         bindSummary(receipt, items);
-        bindDeleteRule(receipt);
+        bindActions(receipt);
     }
 
     private void bindHeader(Receipt receipt) {
@@ -149,13 +153,46 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         finish();
     }
 
-    private void bindDeleteRule(Receipt receipt) {
-        if (btnDeleteReceipt == null) {
+    private void confirmReceipt() {
+        Receipt receipt = receiptDao.getReceiptById(receiptId);
+        if (receipt == null) {
+            Toast.makeText(this, R.string.receipt_not_found, Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
-        boolean allowDelete = receipt != null && receipt.isDraft();
-        btnDeleteReceipt.setEnabled(allowDelete);
-        btnDeleteReceipt.setAlpha(allowDelete ? 1f : 0.5f);
+        if (!receipt.isDraft()) {
+            Toast.makeText(this, R.string.receipt_confirm_completed_blocked, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.receipt_confirm)
+                .setMessage(R.string.receipt_confirm_detail_prompt)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.receipt_confirm, (dialog, which) -> submitConfirmReceipt())
+                .show();
+    }
+
+    private void submitConfirmReceipt() {
+        boolean ok = receiptDao.confirmDraftReceipt(receiptId);
+        if (!ok) {
+            Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, R.string.receipt_confirmed, Toast.LENGTH_SHORT).show();
+        loadReceipt();
+    }
+
+    private void bindActions(Receipt receipt) {
+        boolean isDraft = receipt != null && receipt.isDraft();
+        if (btnDeleteReceipt != null) {
+            btnDeleteReceipt.setEnabled(isDraft);
+            btnDeleteReceipt.setAlpha(isDraft ? 1f : 0.5f);
+        }
+        if (btnConfirmReceipt != null) {
+            btnConfirmReceipt.setEnabled(isDraft);
+            btnConfirmReceipt.setVisibility(isDraft ? View.VISIBLE : View.GONE);
+        }
     }
 
     private String valueOrDash(String value) {

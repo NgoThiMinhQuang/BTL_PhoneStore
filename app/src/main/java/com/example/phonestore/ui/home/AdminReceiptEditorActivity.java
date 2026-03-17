@@ -241,6 +241,7 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
                 getString(confirmReceipt ? R.string.receipt_confirmed_with_code : R.string.receipt_saved_draft_with_code, receiptCode),
                 Toast.LENGTH_SHORT
         ).show();
+        setResult(RESULT_OK);
         finish();
     }
 
