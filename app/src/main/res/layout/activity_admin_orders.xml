@@ -8,112 +8,154 @@
     android:clipToPadding="false"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_panel_admin"
         android:elevation="6dp"
-        android:orientation="vertical">
+        app:cardBackgroundColor="@color/admin_surface"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/admin_stroke"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="18dp">
 
-            <include
-                android:id="@+id/cardOrdersCount"
-                layout="@layout/item_admin_kpi_compact" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/admin_orders_header_title"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-            <Space
-                android:layout_width="12dp"
-                android:layout_height="wrap_content" />
-
-            <include
-                android:id="@+id/cardOrdersPending"
-                layout="@layout/item_admin_kpi_compact" />
-        </LinearLayout>
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:scrollbars="none">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/admin_orders_header_summary"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:baselineAligned="false"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/chipAllOrders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_chip_admin"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="@string/admin_filter_all"
-                    android:textColor="@color/admin_primary"
-                    android:textStyle="bold" />
+                <include
+                    android:id="@+id/cardOrdersCount"
+                    layout="@layout/item_admin_kpi_compact" />
 
-                <TextView
-                    android:id="@+id/chipPendingOrders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_admin"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="@string/admin_orders_pending_filter"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textStyle="bold" />
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="wrap_content" />
 
-                <TextView
-                    android:id="@+id/chipProcessingOrders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_admin"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="Đang xử lý"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/chipCompletedOrders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_admin"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="Đã giao"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/chipCancelledOrders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_admin"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="Đã hủy"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textStyle="bold" />
+                <include
+                    android:id="@+id/cardOrdersPending"
+                    layout="@layout/item_admin_kpi_compact" />
             </LinearLayout>
-        </HorizontalScrollView>
-    </LinearLayout>
+
+            <EditText
+                android:id="@+id/edtSearchOrders"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_edittext_admin"
+                android:drawableStart="@drawable/ic_search_small"
+                android:drawablePadding="10dp"
+                android:hint="@string/admin_orders_search_hint"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:singleLine="true"
+                android:textColor="@color/admin_text_primary"
+                android:textColorHint="@color/admin_text_secondary" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chipAllOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_chip_admin"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/admin_filter_all"
+                        android:textColor="@color/admin_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/chipPendingOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip_admin"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/admin_orders_pending_filter"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/chipProcessingOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip_admin"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/order_status_processing"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/chipCompletedOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip_admin"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/order_status_delivered"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/chipCancelledOrders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip_admin"
+                        android:gravity="center"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/order_status_cancelled"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvOrders"

@@ -11,6 +11,7 @@ public class Order {
     public int tongTien;
     public int tamTinh;
     public int phiVanChuyen;
+    public int itemCount;
     public String maGiamGia;
     public int tienGiam;
     public long ngayTao;

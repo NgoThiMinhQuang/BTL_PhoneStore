@@ -150,10 +150,9 @@ public class ReceiptLineAdapter extends RecyclerView.Adapter<ReceiptLineAdapter.
             public void afterTextChanged(Editable s) {
                 item.unitCost = parsePositiveInt(s);
                 item.recalculateAmount();
-                holder.tvLineAmount.setText(holder.itemView.getContext().getString(
-                        R.string.receipt_line_amount_value,
+                holder.tvLineAmount.setText(
                         ReceiptUiFormatter.formatCurrency(holder.itemView.getContext(), item.amount)
-                ));
+                );
                 notifyChanged();
             }
         };
@@ -163,10 +162,9 @@ public class ReceiptLineAdapter extends RecyclerView.Adapter<ReceiptLineAdapter.
             public void afterTextChanged(Editable s) {
                 item.quantity = parsePositiveInt(s);
                 item.recalculateAmount();
-                holder.tvLineAmount.setText(holder.itemView.getContext().getString(
-                        R.string.receipt_line_amount_value,
+                holder.tvLineAmount.setText(
                         ReceiptUiFormatter.formatCurrency(holder.itemView.getContext(), item.amount)
-                ));
+                );
                 notifyChanged();
             }
         };

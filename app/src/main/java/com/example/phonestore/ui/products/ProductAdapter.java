@@ -62,7 +62,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             h.tvBrand.setVisibility(View.GONE);
         } else {
             h.tvBrand.setVisibility(View.VISIBLE);
-            h.tvBrand.setText(hang);
+            h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_meta_brand, hang));
         }
 
         h.tvSpecs.setText(buildSpecsText(p));
@@ -83,7 +83,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             h.tvOs.setVisibility(View.GONE);
         } else {
             h.tvOs.setVisibility(View.VISIBLE);
-            h.tvOs.setText(p.heDieuHanh.trim());
+            h.tvOs.setText(h.itemView.getContext().getString(R.string.product_meta_os, p.heDieuHanh.trim()));
         }
 
         int imageRes = resolveProductImage(p);

@@ -2,6 +2,7 @@ package com.example.phonestore.ui.orders;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +23,8 @@ public class OrdersActivity extends BaseHomeActivity {
 
     private OrderDao orderDao;
     private OrdersAdapter adapter;
+    private TextView tvOrdersSummaryCount;
+    private TextView tvOrdersSummaryHint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,9 @@ public class OrdersActivity extends BaseHomeActivity {
         }
 
         orderDao = new OrderDao(this);
+
+        tvOrdersSummaryCount = findViewById(R.id.tvOrdersSummaryCount);
+        tvOrdersSummaryHint = findViewById(R.id.tvOrdersSummaryHint);
 
         RecyclerView rv = findViewById(R.id.rvOrders);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -80,6 +86,14 @@ public class OrdersActivity extends BaseHomeActivity {
         orderDao.reconcileExpiredTransferOrders();
         ArrayList<Order> list = orderDao.getOrdersByUser(session.getUserId());
         adapter.setData(list, false);
+        if (tvOrdersSummaryCount != null) {
+            tvOrdersSummaryCount.setText(getString(R.string.orders_count_summary, list.size()));
+        }
+        if (tvOrdersSummaryHint != null) {
+            tvOrdersSummaryHint.setText(list.isEmpty()
+                    ? getString(R.string.orders_summary_empty_hint)
+                    : getString(R.string.orders_summary_hint));
+        }
     }
 
     private void showCheckoutSuccessIfNeeded(Intent intent) {

@@ -52,7 +52,7 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
         toolbar.setTitleMarginEnd(0);
         toolbar.setTitleMarginTop(0);
         toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle(R.string.receipt_detail_title);
+        toolbar.setTitle(getString(R.string.receipt_detail_title));
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -94,7 +94,8 @@ public class AdminReceiptDetailActivity extends AppCompatActivity {
     }
 
     private void bindHeader(Receipt receipt) {
-        ((TextView) findViewById(R.id.tvReceiptCode)).setText(receipt.getDisplayCode());
+        String receiptCode = receipt == null ? getString(R.string.receipt_detail_title) : receipt.getDisplayCode();
+        ((TextView) findViewById(R.id.tvReceiptCode)).setText(receiptCode);
         ((TextView) findViewById(R.id.tvReceiptDate)).setText(ReceiptUiFormatter.formatDate(receipt.createdAt));
         ((TextView) findViewById(R.id.tvReceiptSupplier)).setText(valueOrDash(receipt.supplierName));
         ((TextView) findViewById(R.id.tvReceiptCreator)).setText(valueOrDash(receipt.creatorName));

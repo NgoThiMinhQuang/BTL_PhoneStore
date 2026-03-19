@@ -65,7 +65,7 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
         toolbar.setTitleMarginEnd(0);
         toolbar.setTitleMarginTop(0);
         toolbar.setTitleMarginBottom(0);
-        toolbar.setTitle(R.string.receipt_create_title);
+        toolbar.setTitle(getString(R.string.receipt_create_title));
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -83,13 +83,14 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
     }
 
     private void bindHeader() {
-        ((TextView) findViewById(R.id.tvReceiptCode)).setText(R.string.receipt_code_pending);
+        ((TextView) findViewById(R.id.tvReceiptCode)).setText(getString(R.string.receipt_create_title));
         ((TextView) findViewById(R.id.tvReceiptCreator)).setText(creatorName);
     }
 
     private void setupSupplierSpinner() {
         Spinner spSupplier = findViewById(R.id.spSupplier);
-        ArrayAdapter<String> supplierAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> supplierAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_selected_admin, new ArrayList<>());
+        supplierAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown_admin);
         for (Supplier supplier : suppliers) {
             supplierAdapter.add(supplier.name);
         }
@@ -156,7 +157,8 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
         EditText edtUnitCost = view.findViewById(R.id.edtReceiptLineUnitCost);
         TextView tvEmptyMessage = view.findViewById(R.id.tvReceiptLineEmptyMessage);
 
-        ArrayAdapter<String> productAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> productAdapter = new ArrayAdapter<>(this, R.layout.item_spinner_selected_admin, new ArrayList<>());
+        productAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown_admin);
         for (Product product : availableProducts) {
             productAdapter.add(product.tenSanPham);
         }

@@ -1052,7 +1052,11 @@ public class OrderDao {
                 .append("o.").append(DBHelper.COL_O_CANCEL_REASON).append(",")
                 .append("o.").append(DBHelper.COL_O_REFUND_STATUS).append(",")
                 .append("o.").append(DBHelper.COL_O_REFUNDED_AT).append(",")
-                .append("o.").append(DBHelper.COL_O_REFUND_NOTE);
+                .append("o.").append(DBHelper.COL_O_REFUND_NOTE).append(",")
+                .append("(SELECT IFNULL(SUM(").append(DBHelper.COL_OI_QTY).append("), 0) FROM ")
+                .append(DBHelper.TBL_ORDER_ITEMS)
+                .append(" oi WHERE oi.").append(DBHelper.COL_OI_ORDER_ID).append(" = o.").append(DBHelper.COL_ID)
+                .append(") AS item_count");
         if (!TextUtils.isEmpty(extraColumns)) {
             builder.append(",").append(extraColumns);
         }
@@ -1097,6 +1101,11 @@ public class OrderDao {
         order.refundStatus = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUND_STATUS));
         order.refundedAt = c.getLong(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUNDED_AT));
         order.refundNote = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_O_REFUND_NOTE));
+
+        int itemCountIndex = c.getColumnIndex("item_count");
+        if (itemCountIndex >= 0) {
+            order.itemCount = c.getInt(itemCountIndex);
+        }
 
         int usernameIndex = c.getColumnIndex(DBHelper.COL_USERNAME);
         if (usernameIndex >= 0) {

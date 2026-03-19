@@ -57,9 +57,26 @@
                     android:orientation="vertical"
                     android:padding="18dp">
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/receipt_list_header_title"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/receipt_list_header_summary"
+                        android:textColor="@color/admin_text_secondary"
+                        android:textSize="13sp" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -107,11 +124,23 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <TextView
+                android:id="@+id/tvReceiptResultCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="16dp"
+                android:text="Hiển thị 0 phiếu nhập"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvReceipts"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:clipToPadding="false"
                 android:paddingStart="16dp"

@@ -11,6 +11,7 @@ public class Receipt {
     public String supplierName;
     public int totalQuantity;
     public int totalAmount;
+    public int lineCount;
     public long createdAt;
     public String note;
     public String status;

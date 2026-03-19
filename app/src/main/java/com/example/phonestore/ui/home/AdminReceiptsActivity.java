@@ -30,6 +30,7 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
     private ReceiptDao receiptDao;
     private ReceiptAdapter adapter;
     private String currentFilter = FILTER_ALL;
+    private TextView tvReceiptResultCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,8 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
+        tvReceiptResultCount = findViewById(R.id.tvReceiptResultCount);
+
         RecyclerView rvReceipts = findViewById(R.id.rvReceipts);
         rvReceipts.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ReceiptAdapter(receipt -> {
@@ -141,6 +144,9 @@ public class AdminReceiptsActivity extends BaseHomeActivity {
         }
 
         adapter.setData(filtered);
+        if (tvReceiptResultCount != null) {
+            tvReceiptResultCount.setText(getString(R.string.receipt_results_count, filtered.size()));
+        }
     }
 
     private boolean matchesFilter(Receipt receipt) {

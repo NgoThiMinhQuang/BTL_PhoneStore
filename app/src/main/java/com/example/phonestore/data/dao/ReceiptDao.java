@@ -272,7 +272,8 @@ public class ReceiptDao {
                 " r." + DBHelper.COL_R_CREATED + "," +
                 " r." + DBHelper.COL_R_NOTE + "," +
                 " r." + DBHelper.COL_R_STATUS + "," +
-                " r." + DBHelper.COL_R_CREATED_BY +
+                " r." + DBHelper.COL_R_CREATED_BY + "," +
+                " (SELECT COUNT(*) FROM " + DBHelper.TBL_RECEIPT_ITEMS + " ri WHERE ri." + DBHelper.COL_RI_RECEIPT_ID + " = r." + DBHelper.COL_ID + ") AS line_count" +
                 " FROM " + DBHelper.TBL_RECEIPTS + " r" +
                 " JOIN " + DBHelper.TBL_SUPPLIERS + " s ON s." + DBHelper.COL_ID + " = r." + DBHelper.COL_R_SUPPLIER_ID +
                 (suffix == null ? " ORDER BY r." + DBHelper.COL_ID + " DESC" : suffix);
@@ -346,6 +347,7 @@ public class ReceiptDao {
         receipt.note = c.getString(6);
         receipt.status = c.getString(7);
         receipt.creatorName = c.getString(8);
+        receipt.lineCount = c.getInt(9);
         return receipt;
     }
 

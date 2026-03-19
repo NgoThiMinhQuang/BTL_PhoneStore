@@ -94,15 +94,6 @@
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
 
-        <TextView
-            android:id="@+id/tvStockPolicyHint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/admin_product_stock_policy_hint"
-            android:textColor="@color/admin_text_secondary"
-            android:textSize="13sp" />
-
         <EditText
             android:id="@+id/edtDiscount"
             android:layout_width="match_parent"

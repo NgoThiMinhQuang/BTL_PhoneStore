@@ -3,6 +3,7 @@ package com.example.phonestore.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.UserDao;
 import com.google.android.material.button.MaterialButton;
+
+import java.util.Locale;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -53,40 +56,47 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void doRegister() {
-        String username = edtUsername.getText().toString().trim();
+        String usernameInput = edtUsername.getText().toString().trim();
+        String username = usernameInput.toLowerCase(Locale.ROOT);
         String fullname = edtFullName.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
         String confirm = edtConfirm.getText().toString().trim();
 
         if (TextUtils.isEmpty(username) || TextUtils.isEmpty(fullname)
                 || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirm)) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.auth_register_required_fields, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (!username.matches("[A-Za-z0-9_]{4,30}")) {
-            Toast.makeText(this, "Tên đăng nhập chỉ gồm chữ, số hoặc dấu gạch dưới và dài 4-30 ký tự", Toast.LENGTH_SHORT).show();
+        if (!isValidGmail(username)) {
+            Toast.makeText(this, R.string.auth_register_gmail_invalid, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (password.length() < 6) {
-            Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.auth_password_min_length, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!password.equals(confirm)) {
-            Toast.makeText(this, "Mật khẩu nhập lại không khớp", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.err_password_not_match, Toast.LENGTH_SHORT).show();
             return;
         }
 
         boolean ok = userDao.registerCustomer(fullname, username, password);
         if (!ok) {
-            Toast.makeText(this, "Không thể đăng ký. Tên đăng nhập có thể đã tồn tại", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.auth_register_exists_or_failed, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Toast.makeText(this, "Đăng ký thành công, mời đăng nhập", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.auth_register_success, Toast.LENGTH_SHORT).show();
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+
+    private boolean isValidGmail(String value) {
+        return !TextUtils.isEmpty(value)
+                && Patterns.EMAIL_ADDRESS.matcher(value).matches()
+                && value.endsWith("@gmail.com");
     }
 }

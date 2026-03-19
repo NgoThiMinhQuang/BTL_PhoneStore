@@ -2,7 +2,10 @@ package com.example.phonestore.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -28,6 +31,7 @@ public class AdminOrdersActivity extends BaseHomeActivity {
     private OrderDao orderDao;
     private OrdersAdapter adapter;
     private String currentFilter;
+    private String currentKeyword = "";
     private TextView tvOrdersCount;
     private TextView tvOrdersPending;
 
@@ -115,6 +119,25 @@ public class AdminOrdersActivity extends BaseHomeActivity {
         bindChip(findViewById(R.id.chipCompletedOrders), OrderStatus.STATUS_DA_GIAO);
         bindChip(findViewById(R.id.chipCancelledOrders), OrderStatus.STATUS_DA_HUY);
 
+        EditText edtSearchOrders = findViewById(R.id.edtSearchOrders);
+        if (edtSearchOrders != null) {
+            edtSearchOrders.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    currentKeyword = s == null ? "" : s.toString().trim();
+                    loadOrders();
+                }
+            });
+        }
+
         updateChipStates();
         loadOrders();
     }
@@ -158,7 +181,7 @@ public class AdminOrdersActivity extends BaseHomeActivity {
             if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
                 pendingCount++;
             }
-            if (matchesFilter(order)) {
+            if (matchesFilter(order) && matchesKeyword(order)) {
                 filteredOrders.add(order);
             }
         }
@@ -171,5 +194,20 @@ public class AdminOrdersActivity extends BaseHomeActivity {
     private boolean matchesFilter(Order order) {
         if (currentFilter == null) return true;
         return currentFilter.equals(order.trangThaiDon);
+    }
+
+    private boolean matchesKeyword(Order order) {
+        if (currentKeyword == null || currentKeyword.trim().isEmpty()) {
+            return true;
+        }
+        String keyword = currentKeyword.trim().toLowerCase();
+        return String.valueOf(order.id).contains(keyword)
+                || safeLower(order.nguoiNhan).contains(keyword)
+                || safeLower(order.sdtNhan).contains(keyword)
+                || safeLower(order.username).contains(keyword);
+    }
+
+    private String safeLower(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 }

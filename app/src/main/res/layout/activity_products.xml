@@ -1,164 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="4dp"
+        app:strokeColor="@color/panel_stroke"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/products_filter_title"
+                android:textColor="@color/text_sub"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/products_filter_summary"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtSearch"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_edittext"
+                android:drawableStart="@drawable/ic_search_small"
+                android:drawablePadding="10dp"
+                android:hint="@string/search_products_hint"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/layoutBrandFilters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/spSort"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_spinner_field"
+                    android:dropDownVerticalOffset="10dp"
+                    android:popupBackground="@drawable/bg_spinner_dropdown"
+                    android:spinnerMode="dropdown" />
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/spPrice"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_spinner_field"
+                    android:dropDownVerticalOffset="10dp"
+                    android:popupBackground="@drawable/bg_spinner_dropdown"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/spOs"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_spinner_field"
+                    android:dropDownVerticalOffset="10dp"
+                    android:popupBackground="@drawable/bg_spinner_dropdown"
+                    android:spinnerMode="dropdown" />
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/spRom"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_spinner_field"
+                    android:dropDownVerticalOffset="10dp"
+                    android:popupBackground="@drawable/bg_spinner_dropdown"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipInStock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_chip"
+                    android:gravity="center"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="Còn hàng"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/chipDiscounted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_chip"
+                    android:gravity="center"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="Đang giảm giá"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_panel"
-        android:orientation="vertical">
+        android:background="@drawable/bg_result_summary"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bộ lọc nhanh"
-            android:textColor="@color/text_sub"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_badge">
 
-        <EditText
-            android:id="@+id/edtSearch"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext"
-            android:drawableStart="@drawable/ic_search_small"
-            android:drawablePadding="8dp"
-            android:hint="Tìm theo tên máy / hãng..."
-            android:singleLine="true"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint" />
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/layoutBrandFilters"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-        </HorizontalScrollView>
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_search_small"
+                android:tint="@color/red_primary" />
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <Spinner
-                android:id="@+id/spSort"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:spinnerMode="dropdown" />
-
-            <Spinner
-                android:id="@+id/spPrice"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <Spinner
-                android:id="@+id/spOs"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:spinnerMode="dropdown" />
-
-            <Spinner
-                android:id="@+id/spRom"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_edittext"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/chipInStock"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_option_chip"
-                android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="Còn hàng"
-                android:textColor="@color/option_chip_text"
+                android:layout_height="wrap_content"
+                android:text="@string/products_results_title"
+                android:textColor="@color/text_sub"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/chipDiscounted"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_option_chip"
-                android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="Đang giảm giá"
-                android:textColor="@color/option_chip_text"
-                android:textSize="12sp"
+                android:id="@+id/tvResultCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Tìm thấy 0 sản phẩm"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvResultCount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp"
-        android:text="Tìm thấy 0 sản phẩm"
-        android:textColor="@color/text_sub"
-        android:textSize="13sp"
-        android:textStyle="bold" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="6dp">
+        android:layout_marginTop="10dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProducts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingStart="16dp"
+            android:paddingStart="10dp"
             android:paddingTop="0dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="20dp" />
+            android:paddingEnd="10dp"
+            android:paddingBottom="24dp" />
 
         <LinearLayout
             android:id="@+id/layoutEmpty"
@@ -172,7 +242,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Không tìm thấy sản phẩm"
+                android:text="@string/products_empty_title"
                 android:textColor="@color/text_primary"
                 android:textSize="17sp"
                 android:textStyle="bold" />
@@ -182,7 +252,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Hãy thử đổi bộ lọc, từ khóa tìm kiếm hoặc chọn hãng khác."
+                android:text="@string/products_empty_summary"
                 android:textColor="@color/text_sub"
                 android:textSize="13sp" />
         </LinearLayout>

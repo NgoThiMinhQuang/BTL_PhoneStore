@@ -50,6 +50,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
         } else {
             h.tvReceiptNote.setText(h.itemView.getContext().getString(R.string.receipt_note_value, receipt.note.trim()));
         }
+        h.tvReceiptLineCount.setText(h.itemView.getContext().getString(R.string.receipt_line_count_value, Math.max(0, receipt.lineCount)));
         h.tvReceiptQuantity.setText(h.itemView.getContext().getString(R.string.receipt_quantity_value, receipt.totalQuantity));
         h.tvReceiptAmount.setText(ReceiptUiFormatter.formatCurrency(h.itemView.getContext(), receipt.totalAmount));
         ReceiptUiFormatter.applyStatusBadge(h.tvReceiptStatus, receipt.status);
@@ -72,6 +73,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
         final TextView tvReceiptSupplier;
         final TextView tvReceiptCreator;
         final TextView tvReceiptNote;
+        final TextView tvReceiptLineCount;
         final TextView tvReceiptQuantity;
         final TextView tvReceiptAmount;
 
@@ -83,6 +85,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.VH> {
             tvReceiptSupplier = itemView.findViewById(R.id.tvReceiptSupplier);
             tvReceiptCreator = itemView.findViewById(R.id.tvReceiptCreator);
             tvReceiptNote = itemView.findViewById(R.id.tvReceiptNote);
+            tvReceiptLineCount = itemView.findViewById(R.id.tvReceiptLineCount);
             tvReceiptQuantity = itemView.findViewById(R.id.tvReceiptQuantity);
             tvReceiptAmount = itemView.findViewById(R.id.tvReceiptAmount);
         }

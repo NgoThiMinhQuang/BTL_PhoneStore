@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,6 +50,16 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private TextView tvOrderCode;
     private TextView tvOrderDate;
     private TextView tvStatusBadge;
+    private TextView tvPaymentBadge;
+    private TextView tvOrderMeta;
+    private TextView tvTimelinePendingDate;
+    private TextView tvTimelinePendingSummary;
+    private TextView tvTimelineProcessingDate;
+    private TextView tvTimelineProcessingSummary;
+    private TextView tvTimelineDeliveredDate;
+    private TextView tvTimelineDeliveredSummary;
+    private TextView tvTimelineCancelledDate;
+    private TextView tvTimelineCancelledSummary;
     private TextView tvCustomerName;
     private TextView tvCustomerPhone;
     private TextView tvCustomerAddress;
@@ -114,7 +125,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     @Override
     protected int contentLayoutRes() {
-        return R.layout.activity_order_detail;
+        return isAdminDetail() ? R.layout.activity_order_detail_admin : R.layout.activity_order_detail_customer;
     }
 
     @Override
@@ -185,6 +196,16 @@ public class OrderDetailActivity extends BaseHomeActivity {
         tvOrderCode = findViewById(R.id.tvOrderCode);
         tvOrderDate = findViewById(R.id.tvOrderDate);
         tvStatusBadge = findViewById(R.id.tvStatusBadge);
+        tvPaymentBadge = findViewById(R.id.tvPaymentBadge);
+        tvOrderMeta = findViewById(R.id.tvOrderMeta);
+        tvTimelinePendingDate = findViewById(R.id.tvTimelinePendingDate);
+        tvTimelinePendingSummary = findViewById(R.id.tvTimelinePendingSummary);
+        tvTimelineProcessingDate = findViewById(R.id.tvTimelineProcessingDate);
+        tvTimelineProcessingSummary = findViewById(R.id.tvTimelineProcessingSummary);
+        tvTimelineDeliveredDate = findViewById(R.id.tvTimelineDeliveredDate);
+        tvTimelineDeliveredSummary = findViewById(R.id.tvTimelineDeliveredSummary);
+        tvTimelineCancelledDate = findViewById(R.id.tvTimelineCancelledDate);
+        tvTimelineCancelledSummary = findViewById(R.id.tvTimelineCancelledSummary);
         tvCustomerName = findViewById(R.id.tvCustomerName);
         tvCustomerPhone = findViewById(R.id.tvCustomerPhone);
         tvCustomerAddress = findViewById(R.id.tvCustomerAddress);
@@ -225,16 +246,27 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void setupSpinners() {
-        spinnerOrderStatus.setAdapter(new ArrayAdapter<>(
+        if (spinnerOrderStatus == null || spinnerPaymentStatus == null) {
+            return;
+        }
+        int selectedLayout = isAdminDetail() ? R.layout.item_spinner_selected_admin : android.R.layout.simple_spinner_item;
+        int dropdownLayout = isAdminDetail() ? R.layout.item_spinner_dropdown_admin : android.R.layout.simple_spinner_dropdown_item;
+
+        ArrayAdapter<String> orderAdapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item,
+                selectedLayout,
                 new ArrayList<>()
-        ));
-        spinnerPaymentStatus.setAdapter(new ArrayAdapter<>(
+        );
+        orderAdapter.setDropDownViewResource(dropdownLayout);
+        spinnerOrderStatus.setAdapter(orderAdapter);
+
+        ArrayAdapter<String> paymentAdapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item,
+                selectedLayout,
                 new ArrayList<>()
-        ));
+        );
+        paymentAdapter.setDropDownViewResource(dropdownLayout);
+        spinnerPaymentStatus.setAdapter(paymentAdapter);
     }
 
     private void loadOrder(boolean shouldScrollToStatus) {
@@ -269,7 +301,12 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
         tvOrderCode.setText(getString(R.string.admin_order_code, order.id));
         tvOrderDate.setText(formatDate(order.ngayTao));
+        if (tvOrderMeta != null) {
+            tvOrderMeta.setText(getString(R.string.order_detail_meta_summary, Math.max(1, order.itemCount)));
+        }
         updateStatusBadge(order.trangThaiDon);
+        updatePaymentBadge(order.trangThaiThanhToan);
+        bindTimeline(order);
 
         tvCustomerName.setText(getString(R.string.order_customer_name) + " " + valueOrDash(order.nguoiNhan));
         tvCustomerPhone.setText(getString(R.string.order_customer_phone) + " " + valueOrDash(order.sdtNhan));
@@ -424,12 +461,14 @@ public class OrderDetailActivity extends BaseHomeActivity {
             labels.add(OrdersAdapter.formatOrderStatus(this, status));
         }
 
+        int selectedLayout = isAdminDetail() ? R.layout.item_spinner_selected_admin : android.R.layout.simple_spinner_item;
+        int dropdownLayout = isAdminDetail() ? R.layout.item_spinner_dropdown_admin : android.R.layout.simple_spinner_dropdown_item;
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item,
+                selectedLayout,
                 labels
         );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdapter.setDropDownViewResource(dropdownLayout);
         spinnerOrderStatus.setAdapter(spinnerAdapter);
 
         spinnerOrderStatus.setEnabled(enabled);
@@ -444,12 +483,14 @@ public class OrderDetailActivity extends BaseHomeActivity {
             labels.add(OrdersAdapter.formatPaymentStatus(this, status));
         }
 
+        int selectedLayout = isAdminDetail() ? R.layout.item_spinner_selected_admin : android.R.layout.simple_spinner_item;
+        int dropdownLayout = isAdminDetail() ? R.layout.item_spinner_dropdown_admin : android.R.layout.simple_spinner_dropdown_item;
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item,
+                selectedLayout,
                 labels
         );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdapter.setDropDownViewResource(dropdownLayout);
         spinnerPaymentStatus.setAdapter(spinnerAdapter);
 
         spinnerPaymentStatus.setEnabled(enabled);
@@ -500,15 +541,44 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void updateStatusBadge(String status) {
+        applyBadge(tvStatusBadge, OrdersAdapter.formatOrderStatus(this, status), getStatusBackgroundColor(status), getStatusAccentColor(status));
+    }
+
+    private void updatePaymentBadge(String status) {
+        if (tvPaymentBadge == null) {
+            return;
+        }
+        int backgroundColor;
+        int accentColor;
+        if (PaymentStatus.STATUS_DA_THANH_TOAN.equals(status)) {
+            backgroundColor = R.color.admin_success_soft;
+            accentColor = R.color.admin_success;
+        } else if (PaymentStatus.STATUS_HET_HAN_THANH_TOAN.equals(status)) {
+            backgroundColor = R.color.admin_danger_soft;
+            accentColor = R.color.admin_danger;
+        } else if (PaymentStatus.STATUS_CHO_THANH_TOAN.equals(status)) {
+            backgroundColor = isAdminDetail() ? R.color.admin_warning_soft : R.color.panel_soft;
+            accentColor = isAdminDetail() ? R.color.admin_warning : R.color.red_primary;
+        } else {
+            backgroundColor = isAdminDetail() ? R.color.admin_surface_soft : R.color.panel_soft;
+            accentColor = isAdminDetail() ? R.color.admin_primary : R.color.red_primary;
+        }
+        applyBadge(tvPaymentBadge, OrdersAdapter.formatPaymentStatus(this, status), backgroundColor, accentColor);
+    }
+
+    private void applyBadge(TextView view, String text, int backgroundColorRes, int accentColorRes) {
+        if (view == null) {
+            return;
+        }
         GradientDrawable badge = new GradientDrawable();
         badge.setShape(GradientDrawable.RECTANGLE);
         badge.setCornerRadius(dp(999));
-        badge.setColor(ContextCompat.getColor(this, getStatusBackgroundColor(status)));
-        badge.setStroke(dp(1), ContextCompat.getColor(this, getStatusAccentColor(status)));
+        badge.setColor(ContextCompat.getColor(this, backgroundColorRes));
+        badge.setStroke(dp(1), ContextCompat.getColor(this, accentColorRes));
 
-        tvStatusBadge.setBackground(badge);
-        tvStatusBadge.setText(OrdersAdapter.formatOrderStatus(this, status));
-        tvStatusBadge.setTextColor(ContextCompat.getColor(this, getStatusAccentColor(status)));
+        view.setBackground(badge);
+        view.setText(text);
+        view.setTextColor(ContextCompat.getColor(this, accentColorRes));
     }
 
     private int getStatusBackgroundColor(String status) {
@@ -541,6 +611,85 @@ public class OrderDetailActivity extends BaseHomeActivity {
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
         return R.color.red_primary;
+    }
+
+    private void bindTimeline(Order order) {
+        bindTimelineStep(
+                R.id.viewTimelinePendingDot,
+                OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)
+                        || OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon)
+                        || OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon)
+                        || OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon),
+                false,
+                tvTimelinePendingDate,
+                tvTimelinePendingSummary,
+                formatDate(order.ngayTao),
+                getString(R.string.order_status_pending_desc)
+        );
+
+        boolean processingReached = OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon)
+                || OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon);
+        bindTimelineStep(
+                R.id.viewTimelineProcessingDot,
+                processingReached,
+                OrderStatus.STATUS_DANG_XU_LY.equals(order.trangThaiDon),
+                tvTimelineProcessingDate,
+                tvTimelineProcessingSummary,
+                processingReached ? getString(R.string.order_timeline_status_value, OrdersAdapter.formatOrderStatus(this, OrderStatus.STATUS_DANG_XU_LY)) : getString(R.string.order_timeline_not_available),
+                getString(R.string.order_status_processing_desc)
+        );
+
+        boolean deliveredReached = OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon);
+        bindTimelineStep(
+                R.id.viewTimelineDeliveredDot,
+                deliveredReached,
+                deliveredReached,
+                tvTimelineDeliveredDate,
+                tvTimelineDeliveredSummary,
+                deliveredReached ? getString(R.string.order_timeline_status_value, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon)) : getString(R.string.order_timeline_not_available),
+                getString(R.string.order_status_delivered_desc)
+        );
+
+        boolean cancelledReached = OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon);
+        String cancelledDate = order.cancelledAt > 0 ? formatDate(order.cancelledAt) : getString(R.string.order_timeline_status_value, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon));
+        bindTimelineStep(
+                R.id.viewTimelineCancelledDot,
+                cancelledReached,
+                cancelledReached,
+                tvTimelineCancelledDate,
+                tvTimelineCancelledSummary,
+                cancelledReached ? cancelledDate : getString(R.string.order_timeline_not_available),
+                getString(R.string.order_status_cancelled_desc)
+        );
+    }
+
+    private void bindTimelineStep(int dotId,
+                                  boolean completed,
+                                  boolean current,
+                                  TextView dateView,
+                                  TextView summaryView,
+                                  String dateText,
+                                  String summaryText) {
+        View dot = findViewById(dotId);
+        if (dot != null) {
+            GradientDrawable drawable = new GradientDrawable();
+            drawable.setShape(GradientDrawable.OVAL);
+            int fill = completed ? (isAdminDetail() ? R.color.admin_primary : R.color.red_primary) : (isAdminDetail() ? R.color.admin_surface_soft : R.color.panel_soft);
+            int stroke = completed ? (isAdminDetail() ? R.color.admin_primary : R.color.red_primary) : (isAdminDetail() ? R.color.admin_stroke : R.color.panel_stroke);
+            drawable.setColor(ContextCompat.getColor(this, fill));
+            drawable.setStroke(dp(1), ContextCompat.getColor(this, stroke));
+            ViewCompat.setBackground(dot, drawable);
+            dot.setAlpha(completed || current ? 1f : 0.65f);
+        }
+        if (dateView != null) {
+            dateView.setText(dateText);
+            dateView.setTextColor(ContextCompat.getColor(this, completed || current
+                    ? (isAdminDetail() ? R.color.admin_text_primary : R.color.text_primary)
+                    : (isAdminDetail() ? R.color.admin_text_secondary : R.color.text_sub)));
+        }
+        if (summaryView != null) {
+            summaryView.setText(summaryText);
+        }
     }
 
     private int calculateTotal(ArrayList<OrderItem> items) {

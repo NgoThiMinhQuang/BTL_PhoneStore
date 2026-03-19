@@ -190,15 +190,10 @@ public class AdminProductsActivity extends BaseHomeActivity {
         EditText edtCamera = view.findViewById(R.id.edtCamera);
         EditText edtColors = view.findViewById(R.id.edtColors);
         EditText edtDesc = view.findViewById(R.id.edtDesc);
-        TextView tvStockHint = view.findViewById(R.id.tvStockPolicyHint);
-
         boolean editing = oldProduct != null;
         edtStock.setEnabled(false);
         edtStock.setFocusable(false);
         edtStock.setClickable(false);
-        if (tvStockHint != null) {
-            tvStockHint.setVisibility(View.VISIBLE);
-        }
         if (editing) {
             edtName.setText(oldProduct.tenSanPham);
             edtBrand.setText(oldProduct.hang);

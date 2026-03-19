@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
@@ -65,7 +65,7 @@ public class ProductsActivity extends BaseHomeActivity {
         productDao = new ProductDao(this);
 
         RecyclerView rv = findViewById(R.id.rvProducts);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new ProductAdapter();
         rv.setAdapter(adapter);
 
@@ -225,7 +225,8 @@ public class ProductsActivity extends BaseHomeActivity {
     }
 
     private void bindSpinner(Spinner spinner, String[] items, OnSpinnerChanged listener) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner_selected, items);
+        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
