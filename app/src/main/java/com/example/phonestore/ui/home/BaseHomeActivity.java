@@ -15,6 +15,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.phonestore.data.dao.UserDao;
+import com.example.phonestore.data.model.User;
+
 import androidx.annotation.LayoutRes;
 import androidx.annotation.MenuRes;
 import androidx.annotation.Nullable;
@@ -130,6 +133,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         updateShellNavigationVisibility();
+        bindCustomerHomeHeader();
 
         if (shouldSetupHomeInteractions()) {
             setupHomeBrandClicks();
@@ -276,6 +280,30 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (adminBottomBar != null) {
             adminBottomBar.setVisibility(visibility);
         }
+    }
+
+    private void bindCustomerHomeHeader() {
+        TextView tvHomeUserName = findViewById(R.id.tvHomeUserName);
+        if (tvHomeUserName == null) return;
+
+        TextView tvHomeGreeting = findViewById(R.id.tvHomeGreeting);
+        if (tvHomeGreeting != null) {
+            tvHomeGreeting.setText("Hello, Welcome");
+        }
+
+        String fallbackName = session == null ? "PhoneStore" : session.getUsername();
+        String displayName = fallbackName;
+        if (session != null && session.getUserId() > 0) {
+            User user = new UserDao(this).getById(session.getUserId());
+            if (user != null) {
+                String fullname = user.fullname == null ? "" : user.fullname.trim();
+                displayName = fullname.isEmpty() ? user.username : fullname;
+            }
+        }
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = "PhoneStore";
+        }
+        tvHomeUserName.setText(displayName);
     }
 
     private boolean handleBottomNavigation(int id) {

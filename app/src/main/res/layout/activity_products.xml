@@ -11,11 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="3dp"
         app:strokeColor="@color/panel_stroke"
         app:strokeWidth="1dp">
 
@@ -23,30 +23,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="18dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/products_filter_title"
-                android:textColor="@color/text_sub"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/products_filter_summary"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+            android:padding="14dp">
 
             <EditText
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="14dp"
+                android:layout_height="46dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/bg_edittext"
                 android:drawableStart="@drawable/ic_search_small"
                 android:drawablePadding="10dp"
@@ -58,7 +41,7 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="10dp"
                 android:scrollbars="none">
 
                 <LinearLayout
@@ -71,14 +54,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spSort"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_spinner_field"
                     android:dropDownVerticalOffset="10dp"
@@ -88,7 +71,7 @@
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spPrice"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="44dp"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_spinner_field"
@@ -100,14 +83,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spOs"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_spinner_field"
                     android:dropDownVerticalOffset="10dp"
@@ -117,7 +100,7 @@
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spRom"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="44dp"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_spinner_field"
@@ -126,99 +109,27 @@
                     android:spinnerMode="dropdown" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/chipInStock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:background="@drawable/bg_chip"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="Còn hàng"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/chipDiscounted"
-                    android:layout_width="wrap_content"
-                    android:layout_height="34dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_chip"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="Đang giảm giá"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvResultCount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_result_summary"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="14dp">
-
-        <FrameLayout
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_badge">
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_gravity="center"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_search_small"
-                android:tint="@color/red_primary" />
-        </FrameLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/products_results_title"
-                android:textColor="@color/text_sub"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvResultCount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Tìm thấy 0 sản phẩm"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
+        android:text="Hiển thị 0 sản phẩm"
+        android:textColor="@color/text_sub"
+        android:textSize="13sp"
+        android:textStyle="bold" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="6dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProducts"

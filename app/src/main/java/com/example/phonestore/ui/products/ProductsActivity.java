@@ -77,8 +77,8 @@ public class ProductsActivity extends BaseHomeActivity {
         spPrice = findViewById(R.id.spPrice);
         spOs = findViewById(R.id.spOs);
         spRom = findViewById(R.id.spRom);
-        chipInStock = findViewById(R.id.chipInStock);
-        chipDiscounted = findViewById(R.id.chipDiscounted);
+        chipInStock = findViewById(getResources().getIdentifier("chipInStock", "id", getPackageName()));
+        chipDiscounted = findViewById(getResources().getIdentifier("chipDiscounted", "id", getPackageName()));
 
         String initKey = getIntent().getStringExtra(EXTRA_QUERY);
         if (initKey == null) initKey = "";
@@ -92,8 +92,12 @@ public class ProductsActivity extends BaseHomeActivity {
         setupBrandFilters();
         setupSpinners();
         setupToggles();
-        chipInStock.setTextColor(getColor(R.color.text_primary));
-        chipDiscounted.setTextColor(getColor(R.color.text_primary));
+        if (chipInStock != null) {
+            chipInStock.setTextColor(getColor(R.color.text_primary));
+        }
+        if (chipDiscounted != null) {
+            chipDiscounted.setTextColor(getColor(R.color.text_primary));
+        }
         bindSearch();
         loadData();
     }
@@ -121,6 +125,11 @@ public class ProductsActivity extends BaseHomeActivity {
     @Override
     protected boolean shouldShowToolbarActions() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldShowBackButton() {
+        return true;
     }
 
     private void bindSearch() {
@@ -241,19 +250,27 @@ public class ProductsActivity extends BaseHomeActivity {
     }
 
     private void setupToggles() {
-        chipInStock.setOnClickListener(v -> {
-            chipInStock.setSelected(!chipInStock.isSelected());
-            chipInStock.setTextColor(getColor(chipInStock.isSelected() ? R.color.red_primary : R.color.text_primary));
-            filter.onlyInStock = chipInStock.isSelected();
-            loadData();
-        });
+        if (chipInStock != null) {
+            chipInStock.setOnClickListener(v -> {
+                chipInStock.setSelected(!chipInStock.isSelected());
+                chipInStock.setTextColor(getColor(chipInStock.isSelected() ? R.color.red_primary : R.color.text_primary));
+                filter.onlyInStock = chipInStock.isSelected();
+                loadData();
+            });
+        } else {
+            filter.onlyInStock = false;
+        }
 
-        chipDiscounted.setOnClickListener(v -> {
-            chipDiscounted.setSelected(!chipDiscounted.isSelected());
-            chipDiscounted.setTextColor(getColor(chipDiscounted.isSelected() ? R.color.red_primary : R.color.text_primary));
-            filter.onlyDiscounted = chipDiscounted.isSelected();
-            loadData();
-        });
+        if (chipDiscounted != null) {
+            chipDiscounted.setOnClickListener(v -> {
+                chipDiscounted.setSelected(!chipDiscounted.isSelected());
+                chipDiscounted.setTextColor(getColor(chipDiscounted.isSelected() ? R.color.red_primary : R.color.text_primary));
+                filter.onlyDiscounted = chipDiscounted.isSelected();
+                loadData();
+            });
+        } else {
+            filter.onlyDiscounted = false;
+        }
     }
 
     private void loadData() {

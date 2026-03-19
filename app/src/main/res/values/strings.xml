@@ -224,7 +224,6 @@
     <string name="auth_login_card_title">Đăng nhập</string>
     <string name="auth_login_card_subtitle">Đăng nhập bằng tài khoản hiện có để tiếp tục sử dụng ứng dụng.</string>
     <string name="auth_register_card_title">Tạo tài khoản PhoneStore</string>
-    <string name="auth_register_card_subtitle">Thông tin Gmail chỉ thay đổi theo giao diện hiển thị, vẫn dùng credential hiện tại của hệ thống.</string>
     <string name="auth_login_username_hint">Tài khoản hoặc Gmail</string>
     <string name="auth_register_gmail_hint">Gmail</string>
     <string name="auth_full_name_hint">Họ và Tên</string>
@@ -647,8 +646,6 @@
     <string name="receipt_line_total_label">Thành tiền</string>
     <string name="receipt_line_position">Dòng %1$d</string>
     <string name="receipt_editor_bottom_hint">Bạn có thể lưu nháp trước hoặc hoàn tất nhập kho ngay khi đã kiểm tra xong.</string>
-    <string name="products_filter_title">Bộ lọc nhanh</string>
-    <string name="products_filter_summary">Tìm đúng mẫu máy với bộ lọc gọn, rõ và bố cục lưới 2 cột dễ so sánh hơn.</string>
     <string name="products_results_title">Kết quả phù hợp</string>
     <string name="products_empty_title">Không tìm thấy sản phẩm</string>
     <string name="products_empty_summary">Hãy thử đổi bộ lọc, từ khóa tìm kiếm hoặc chọn hãng khác.</string>
