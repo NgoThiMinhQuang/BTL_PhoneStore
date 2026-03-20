@@ -24,7 +24,6 @@ public class OrdersActivity extends BaseHomeActivity {
     private OrderDao orderDao;
     private OrdersAdapter adapter;
     private TextView tvOrdersSummaryCount;
-    private TextView tvOrdersSummaryHint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,6 @@ public class OrdersActivity extends BaseHomeActivity {
         orderDao = new OrderDao(this);
 
         tvOrdersSummaryCount = findViewById(R.id.tvOrdersSummaryCount);
-        tvOrdersSummaryHint = findViewById(R.id.tvOrdersSummaryHint);
 
         RecyclerView rv = findViewById(R.id.rvOrders);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -88,11 +86,6 @@ public class OrdersActivity extends BaseHomeActivity {
         adapter.setData(list, false);
         if (tvOrdersSummaryCount != null) {
             tvOrdersSummaryCount.setText(getString(R.string.orders_count_summary, list.size()));
-        }
-        if (tvOrdersSummaryHint != null) {
-            tvOrdersSummaryHint.setText(list.isEmpty()
-                    ? getString(R.string.orders_summary_empty_hint)
-                    : getString(R.string.orders_summary_hint));
         }
     }
 

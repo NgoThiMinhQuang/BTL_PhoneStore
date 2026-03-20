@@ -4,132 +4,97 @@
     android:id="@+id/cardRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
+    android:layout_marginTop="10dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="1dp"
     app:cardBackgroundColor="@color/panel_light"
-    app:cardCornerRadius="24dp"
-    app:cardElevation="3dp"
     app:strokeColor="@color/panel_stroke"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="top"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <CheckBox
             android:id="@+id/cbSelect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"
-            android:buttonTint="@color/red_primary"
+            android:layout_marginEnd="8dp"
             android:contentDescription="chọn sản phẩm" />
 
-        <FrameLayout
-            android:layout_width="88dp"
-            android:layout_height="88dp"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/bg_image_soft">
-
-            <ImageView
-                android:id="@+id/ivThumb"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="hình thu nhỏ"
-                android:padding="10dp"
-                android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_gallery" />
-        </FrameLayout>
+        <ImageView
+            android:id="@+id/ivThumb"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="hình thu nhỏ"
+            android:src="@android:drawable/ic_menu_gallery" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
             android:layout_weight="1"
+            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tvName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="top"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:maxLines="3"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/btnDelete"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_badge"
-                    android:contentDescription="xóa"
-                    android:padding="7dp"
-                    android:src="@android:drawable/ic_menu_delete"
-                    android:tint="@color/red_primary" />
-            </LinearLayout>
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/red_primary"
-                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:background="@drawable/bg_badge"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="4dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/btnMinus"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="@drawable/bg_chip"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_edittext"
                     android:gravity="center"
                     android:text="-"
-                    android:textColor="@color/red_primary"
-                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvQty"
-                    android:layout_width="44dp"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="8dp"
-                    android:gravity="center"
                     android:text="1"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp"
+                    android:textAlignment="center"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/btnPlus"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="@drawable/bg_chip"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_edittext"
                     android:gravity="center"
                     android:text="+"
-                    android:textColor="@color/red_primary"
-                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="xóa"
+            android:src="@android:drawable/ic_menu_delete" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
