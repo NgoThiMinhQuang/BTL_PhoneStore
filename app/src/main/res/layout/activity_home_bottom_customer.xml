@@ -16,7 +16,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="100dp"
             android:background="@drawable/bg_home_customer_header" />
 
         <androidx.appcompat.widget.Toolbar
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="72dp"
             android:background="@android:color/transparent"
-            android:elevation="0dp"
+            android:elevation="8dp"
             android:paddingStart="18dp"
             android:paddingEnd="18dp"
             app:contentInsetStartWithNavigation="0dp"
@@ -39,6 +39,7 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="24dp"
+            android:elevation="10dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -145,10 +146,10 @@
             android:id="@+id/homeContentContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="82dp"
+            android:layout_marginTop="100dp"
             android:background="@android:color/transparent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
+            android:clipChildren="true"
+            android:clipToPadding="true"
             android:padding="0dp" />
     </FrameLayout>
 

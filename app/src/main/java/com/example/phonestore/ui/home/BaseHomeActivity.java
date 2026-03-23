@@ -385,25 +385,27 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         if (tvViewAllBrands != null) tvViewAllBrands.setOnClickListener(v -> openProducts(null, null));
 
         View.OnClickListener brandClick = v -> {
-            if (!(v instanceof TextView)) return;
-            TextView tv = (TextView) v;
+            String brandKey = String.valueOf(v.getTag()).trim();
+            if (brandKey.isEmpty()) return;
 
-            String title = tv.getText().toString().trim();
-            String brandKey = String.valueOf(tv.getTag()).trim();
+            String title = brandKey;
+            if ("Apple".equalsIgnoreCase(brandKey)) {
+                title = "Apple";
+            }
 
             openProducts(brandKey, title);
         };
 
-        TextView tvSamsung = findViewById(R.id.tvBrandSamsung);
+        View tvSamsung = findViewById(R.id.tvBrandSamsung);
         if (tvSamsung != null) tvSamsung.setOnClickListener(brandClick);
 
-        TextView tvIphone = findViewById(R.id.tvBrandIphone);
+        View tvIphone = findViewById(R.id.tvBrandIphone);
         if (tvIphone != null) tvIphone.setOnClickListener(brandClick);
 
-        TextView tvXiaomi = findViewById(R.id.tvBrandXiaomi);
+        View tvXiaomi = findViewById(R.id.tvBrandXiaomi);
         if (tvXiaomi != null) tvXiaomi.setOnClickListener(brandClick);
 
-        TextView tvOppo = findViewById(R.id.tvBrandOppo);
+        View tvOppo = findViewById(R.id.tvBrandOppo);
         if (tvOppo != null) tvOppo.setOnClickListener(brandClick);
     }
 
