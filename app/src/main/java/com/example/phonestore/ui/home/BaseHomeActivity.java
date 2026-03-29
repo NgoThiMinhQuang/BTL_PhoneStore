@@ -149,6 +149,21 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        syncBottomNavigationSelection();
+        updateShellNavigationVisibility();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        syncBottomNavigationSelection();
+        updateShellNavigationVisibility();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         int menuRes = toolbarMenuRes();
         if (menuRes == 0) return true;
@@ -246,9 +261,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
                     handleBottomNavigation(item.getItemId());
                 }
             });
-            suppressBottomNavNavigation = true;
-            bottomNav.setSelectedItemId(selectedBottomNavItemId());
-            suppressBottomNavNavigation = false;
+            syncBottomNavigationSelection();
             return;
         }
 
@@ -266,6 +279,16 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
             tab.setSelected(tabId == selectedBottomNavItemId());
             tab.setOnClickListener(v -> handleBottomNavigation(v.getId()));
         }
+    }
+
+    private void syncBottomNavigationSelection() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        if (bottomNav == null) {
+            return;
+        }
+        suppressBottomNavNavigation = true;
+        bottomNav.setSelectedItemId(selectedBottomNavItemId());
+        suppressBottomNavNavigation = false;
     }
 
     private void updateShellNavigationVisibility() {

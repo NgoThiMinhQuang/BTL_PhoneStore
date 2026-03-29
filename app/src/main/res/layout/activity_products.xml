@@ -1,171 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
+    android:background="@android:color/transparent"
+    android:clipChildren="true"
+    android:clipToPadding="true">
 
-    <com.google.android.material.card.MaterialCardView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProducts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="280dp"
+        android:clipToPadding="false"
+        android:paddingStart="10dp"
+        android:paddingTop="0dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="24dp" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="3dp"
-        app:strokeColor="@color/panel_stroke"
-        app:strokeWidth="1dp">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="14dp">
+            android:elevation="10dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/panel_stroke"
+            app:strokeWidth="1dp">
 
-            <EditText
-                android:id="@+id/edtSearch"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_edittext"
-                android:drawableStart="@drawable/ic_search_small"
-                android:drawablePadding="10dp"
-                android:hint="@string/search_products_hint"
-                android:singleLine="true"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_hint" />
-
-            <HorizontalScrollView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:scrollbars="none">
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <EditText
+                    android:id="@+id/edtSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext"
+                    android:drawableStart="@drawable/ic_search_small"
+                    android:drawablePadding="10dp"
+                    android:hint="@string/search_products_hint"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_hint" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/layoutBrandFilters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
 
                 <LinearLayout
-                    android:id="@+id/layoutBrandFilters"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
+                    android:layout_marginTop="10dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spSort"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_spinner_field"
+                        android:dropDownVerticalOffset="10dp"
+                        android:popupBackground="@drawable/bg_spinner_dropdown"
+                        android:spinnerMode="dropdown" />
 
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spSort"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_spinner_field"
-                    android:dropDownVerticalOffset="10dp"
-                    android:popupBackground="@drawable/bg_spinner_dropdown"
-                    android:spinnerMode="dropdown" />
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spPrice"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_spinner_field"
+                        android:dropDownVerticalOffset="10dp"
+                        android:popupBackground="@drawable/bg_spinner_dropdown"
+                        android:spinnerMode="dropdown" />
+                </LinearLayout>
 
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spPrice"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_spinner_field"
-                    android:dropDownVerticalOffset="10dp"
-                    android:popupBackground="@drawable/bg_spinner_dropdown"
-                    android:spinnerMode="dropdown" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spOs"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_spinner_field"
+                        android:dropDownVerticalOffset="10dp"
+                        android:popupBackground="@drawable/bg_spinner_dropdown"
+                        android:spinnerMode="dropdown" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/spRom"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_spinner_field"
+                        android:dropDownVerticalOffset="10dp"
+                        android:popupBackground="@drawable/bg_spinner_dropdown"
+                        android:spinnerMode="dropdown" />
+                </LinearLayout>
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spOs"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_spinner_field"
-                    android:dropDownVerticalOffset="10dp"
-                    android:popupBackground="@drawable/bg_spinner_dropdown"
-                    android:spinnerMode="dropdown" />
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spRom"
-                    android:layout_width="0dp"
-                    android:layout_height="44dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_spinner_field"
-                    android:dropDownVerticalOffset="10dp"
-                    android:popupBackground="@drawable/bg_spinner_dropdown"
-                    android:spinnerMode="dropdown" />
-            </LinearLayout>
-
-
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:id="@+id/tvResultCount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="16dp"
-        android:text="Hiển thị 0 sản phẩm"
-        android:textColor="@color/text_sub"
-        android:textSize="13sp"
-        android:textStyle="bold" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="6dp">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvProducts"
+        <TextView
+            android:id="@+id/tvResultCount"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingStart="10dp"
-            android:paddingTop="0dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="24dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Hiển thị 0 sản phẩm"
+            android:textColor="@color/text_sub"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/layoutEmpty"
+    <LinearLayout
+        android:id="@+id/layoutEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/products_empty_title"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:gravity="center"
-            android:orientation="vertical"
-            android:padding="24dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/products_empty_title"
-                android:textColor="@color/text_primary"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="@string/products_empty_summary"
-                android:textColor="@color/text_sub"
-                android:textSize="13sp" />
-        </LinearLayout>
-    </FrameLayout>
-</LinearLayout>
+            android:text="@string/products_empty_summary"
+            android:textColor="@color/text_sub"
+            android:textSize="13sp" />
+    </LinearLayout>
+</FrameLayout>

@@ -132,6 +132,15 @@ public class ProductsActivity extends BaseHomeActivity {
         return true;
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 8));
+        }
+    }
+
     private void bindSearch() {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}

@@ -148,8 +148,8 @@
             android:layout_height="match_parent"
             android:layout_marginTop="100dp"
             android:background="@android:color/transparent"
-            android:clipChildren="true"
-            android:clipToPadding="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:padding="0dp" />
     </FrameLayout>
 
@@ -157,10 +157,11 @@
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="60dp"
         android:background="@color/bottom_nav_bg"
         android:elevation="6dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
         app:itemBackground="@drawable/bottom_nav_item_background"
         app:itemIconTint="@null"
         app:itemTextColor="@color/bottom_nav_item_color"
