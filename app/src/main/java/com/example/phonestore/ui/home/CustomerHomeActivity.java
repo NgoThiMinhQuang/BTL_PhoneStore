@@ -55,6 +55,7 @@ public class CustomerHomeActivity extends BaseHomeActivity {
 
         setupFeaturedSection();
         setupFlashSaleSection();
+        setupSuggestedSection();
     }
 
     @Override
@@ -125,7 +126,7 @@ public class CustomerHomeActivity extends BaseHomeActivity {
         if (rvFlashSale == null) return;
 
         rvFlashSale.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        ProductAdapter flashSaleAdapter = new ProductAdapter();
+        ProductAdapter flashSaleAdapter = ProductAdapter.forFlashSale();
         rvFlashSale.setAdapter(flashSaleAdapter);
 
         ProductDao.ProductFilter filter = new ProductDao.ProductFilter();
@@ -133,23 +134,33 @@ public class CustomerHomeActivity extends BaseHomeActivity {
         filter.sortMode = SORT_DISCOUNT_DESC;
 
         ArrayList<Product> discountedProducts = new ProductDao(this).locSanPham(filter);
-        ArrayList<Product> previewProducts = new ArrayList<>();
-        int limit = Math.min(2, discountedProducts.size());
-        for (int i = 0; i < limit; i++) {
-            previewProducts.add(discountedProducts.get(i));
-        }
-        flashSaleAdapter.setData(previewProducts);
+        flashSaleAdapter.setData(discountedProducts);
 
         View emptyState = findViewById(R.id.layoutFlashSaleEmpty);
         if (emptyState != null) {
-            emptyState.setVisibility(previewProducts.isEmpty() ? View.VISIBLE : View.GONE);
+            emptyState.setVisibility(discountedProducts.isEmpty() ? View.VISIBLE : View.GONE);
         }
-        rvFlashSale.setVisibility(previewProducts.isEmpty() ? View.GONE : View.VISIBLE);
+        rvFlashSale.setVisibility(discountedProducts.isEmpty() ? View.GONE : View.VISIBLE);
 
         View viewAllFlashSale = findViewById(R.id.btnViewAllFlashSale);
         if (viewAllFlashSale != null) {
             viewAllFlashSale.setOnClickListener(v -> openFlashSaleProducts());
         }
+    }
+
+    private void setupSuggestedSection() {
+        RecyclerView rvSuggested = findViewById(R.id.rvSuggestedProducts);
+        if (rvSuggested == null) return;
+
+        rvSuggested.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        ProductAdapter suggestedAdapter = new ProductAdapter();
+        rvSuggested.setAdapter(suggestedAdapter);
+
+        ProductDao.ProductFilter filter = new ProductDao.ProductFilter();
+        filter.sortMode = SORT_DISCOUNT_DESC;
+
+        ArrayList<Product> suggestedProducts = new ProductDao(this).locSanPham(filter);
+        suggestedAdapter.setData(suggestedProducts);
     }
 
     private void openFlashSaleProducts() {

@@ -91,6 +91,20 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/tvStock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_product_grid_meta"
+            android:paddingStart="12dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="6dp"
+            android:textColor="@color/text_sub"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:id="@+id/tvPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -99,14 +113,26 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/tvOriginalPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paintFlags="strikeThruText"
+            android:textColor="#98A2B3"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
         <LinearLayout
+            android:id="@+id/layoutFlashMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <TextView
-                android:id="@+id/tvStock"
+                android:id="@+id/tvMetaPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_product_grid_meta"
@@ -117,6 +143,29 @@
                 android:textColor="@color/text_sub"
                 android:textSize="11sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMetaSecondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_product_grid_meta"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/text_sub"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutLegacyMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tvOs"

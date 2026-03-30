@@ -26,7 +26,20 @@ import java.util.Locale;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
     private final ArrayList<Product> data = new ArrayList<>();
+    private final boolean flashSaleMode;
     private Context ctx;
+
+    public ProductAdapter() {
+        this(false);
+    }
+
+    private ProductAdapter(boolean flashSaleMode) {
+        this.flashSaleMode = flashSaleMode;
+    }
+
+    public static ProductAdapter forFlashSale() {
+        return new ProductAdapter(true);
+    }
 
     private int selectedPosition = RecyclerView.NO_POSITION;
     private int pressedPosition = RecyclerView.NO_POSITION;
@@ -58,32 +71,41 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
         h.tvName.setText(ten.isEmpty() ? "Sản phẩm" : ten);
 
-        if (hang.isEmpty()) {
-            h.tvBrand.setVisibility(View.GONE);
+        if (flashSaleMode) {
+            bindFlashSaleCard(h, p, ten, hang);
         } else {
-            h.tvBrand.setVisibility(View.VISIBLE);
-            h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_meta_brand, hang));
-        }
+            if (hang.isEmpty()) {
+                h.tvBrand.setVisibility(View.GONE);
+            } else {
+                h.tvBrand.setVisibility(View.VISIBLE);
+                h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_meta_brand, hang));
+            }
 
-        h.tvSpecs.setText(buildSpecsText(p));
+            h.tvSpecs.setText(buildSpecsText(p));
 
-        String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
-        h.tvPrice.setText(giaText);
+            String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
+            h.tvPrice.setText(giaText);
+            h.tvOriginalPrice.setVisibility(View.GONE);
+            h.tvMetaPrimary.setVisibility(View.GONE);
+            h.tvMetaSecondary.setVisibility(View.GONE);
+            h.layoutFlashMeta.setVisibility(View.GONE);
+            h.layoutLegacyMeta.setVisibility(View.GONE);
 
-        if (p.giamGia > 0) {
-            h.tvDiscount.setVisibility(View.VISIBLE);
-            h.tvDiscount.setText("-" + p.giamGia + "%");
-        } else {
-            h.tvDiscount.setVisibility(View.GONE);
-        }
+            if (p.giamGia > 0) {
+                h.tvDiscount.setVisibility(View.VISIBLE);
+                h.tvDiscount.setText("-" + p.giamGia + "%");
+            } else {
+                h.tvDiscount.setVisibility(View.GONE);
+            }
 
-        bindStock(h, p.tonKho);
+            bindStock(h, p.tonKho);
 
-        if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
-            h.tvOs.setVisibility(View.GONE);
-        } else {
-            h.tvOs.setVisibility(View.VISIBLE);
-            h.tvOs.setText(h.itemView.getContext().getString(R.string.product_meta_os, p.heDieuHanh.trim()));
+            if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
+                h.tvOs.setVisibility(View.GONE);
+            } else {
+                h.tvOs.setVisibility(View.VISIBLE);
+                h.tvOs.setText(h.itemView.getContext().getString(R.string.product_meta_os, p.heDieuHanh.trim()));
+            }
         }
 
         int imageRes = resolveProductImage(p);
@@ -146,6 +168,42 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         }
     }
 
+    private void bindFlashSaleCard(VH holder, Product p, String ten, String hang) {
+        holder.tvBrand.setVisibility(View.GONE);
+        holder.layoutFlashMeta.setVisibility(View.VISIBLE);
+        holder.layoutLegacyMeta.setVisibility(View.GONE);
+        holder.tvOs.setVisibility(View.GONE);
+
+        holder.tvSpecs.setText(buildFlashSaleSpecsText(p));
+        holder.tvStock.setText(buildFlashSaleBadgeText(p));
+        holder.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
+        holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
+
+        holder.tvMetaPrimary.setVisibility(View.VISIBLE);
+        holder.tvMetaPrimary.setText(buildRatingText(p));
+
+        String soldText = buildSoldText(p);
+        if (soldText.isEmpty()) {
+            holder.tvMetaSecondary.setVisibility(View.GONE);
+        } else {
+            holder.tvMetaSecondary.setVisibility(View.VISIBLE);
+            holder.tvMetaSecondary.setText(soldText);
+        }
+
+        int salePrice = calculateSalePrice(p.gia, p.giamGia);
+        holder.tvPrice.setText(NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(salePrice) + "đ");
+
+        if (p.giamGia > 0) {
+            holder.tvDiscount.setVisibility(View.VISIBLE);
+            holder.tvDiscount.setText("-" + p.giamGia + "%");
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvOriginalPrice.setText(NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ");
+        } else {
+            holder.tvDiscount.setVisibility(View.GONE);
+            holder.tvOriginalPrice.setVisibility(View.GONE);
+        }
+    }
+
     private String buildSpecsText(Product p) {
         ArrayList<String> parts = new ArrayList<>();
         if (p.romGb > 0) parts.add(p.romGb + "GB");
@@ -156,6 +214,34 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             return moTa.isEmpty() ? "Chưa có mô tả" : moTa;
         }
         return android.text.TextUtils.join(" • ", parts);
+    }
+
+    private String buildFlashSaleSpecsText(Product p) {
+        ArrayList<String> parts = new ArrayList<>();
+        if (p.mauSac != null && !p.mauSac.trim().isEmpty()) parts.add(p.mauSac.trim());
+        if (p.romGb > 0) parts.add(p.romGb + "GB");
+        if (parts.isEmpty()) return buildSpecsText(p);
+        return android.text.TextUtils.join(" • ", parts);
+    }
+
+    private String buildFlashSaleBadgeText(Product p) {
+        String brand = p.hang == null ? "" : p.hang.trim();
+        return brand.isEmpty() ? "Flash deal" : "Hãng " + brand;
+    }
+
+    private String buildRatingText(Product p) {
+        float rating = p.danhGia > 0 ? p.danhGia : 4.8f;
+        return "★ " + String.format(Locale.getDefault(), "%.1f", rating);
+    }
+
+    private String buildSoldText(Product p) {
+        int sold = p.daBan > 0 ? p.daBan : 0;
+        return sold > 0 ? "(" + sold + " đã bán)" : "";
+    }
+
+    private int calculateSalePrice(int originalPrice, int discountPercent) {
+        if (discountPercent <= 0) return originalPrice;
+        return Math.max(0, originalPrice - (originalPrice * discountPercent / 100));
     }
 
     private void setSelectedPosition(int newPos) {
@@ -215,20 +301,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         MaterialCardView cardRoot;
         ImageView ivThumb;
         View viewInteractionOverlay;
-        TextView tvName, tvBrand, tvSpecs, tvDiscount, tvPrice, tvStock, tvOs;
+        View layoutFlashMeta, layoutLegacyMeta;
+        TextView tvName, tvBrand, tvSpecs, tvDiscount, tvPrice, tvOriginalPrice, tvStock, tvOs, tvMetaPrimary, tvMetaSecondary;
 
         VH(@NonNull View itemView) {
             super(itemView);
             cardRoot = itemView.findViewById(R.id.cardRoot);
             ivThumb = itemView.findViewById(R.id.ivThumb);
             viewInteractionOverlay = itemView.findViewById(R.id.viewInteractionOverlay);
+            layoutFlashMeta = itemView.findViewById(R.id.layoutFlashMeta);
+            layoutLegacyMeta = itemView.findViewById(R.id.layoutLegacyMeta);
             tvName = itemView.findViewById(R.id.tvName);
             tvBrand = itemView.findViewById(R.id.tvBrand);
             tvSpecs = itemView.findViewById(R.id.tvSpecs);
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
             tvPrice = itemView.findViewById(R.id.tvPrice);
+            tvOriginalPrice = itemView.findViewById(R.id.tvOriginalPrice);
             tvStock = itemView.findViewById(R.id.tvStock);
             tvOs = itemView.findViewById(R.id.tvOs);
+            tvMetaPrimary = itemView.findViewById(R.id.tvMetaPrimary);
+            tvMetaSecondary = itemView.findViewById(R.id.tvMetaSecondary);
         }
     }
 }
