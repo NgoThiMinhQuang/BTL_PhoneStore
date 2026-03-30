@@ -649,6 +649,12 @@
     <string name="products_results_title">Kết quả phù hợp</string>
     <string name="products_empty_title">Không tìm thấy sản phẩm</string>
     <string name="products_empty_summary">Hãy thử đổi bộ lọc, từ khóa tìm kiếm hoặc chọn hãng khác.</string>
+    <string name="flash_sale_title">Deal hot hôm nay</string>
+    <string name="flash_sale_subtitle">Ưu đãi đặc biệt cho khách hàng thân thiết</string>
+    <string name="flash_sale_empty">Hiện chưa có sản phẩm giảm giá hôm nay</string>
+    <string name="flash_sale_view_all">Khám phá ngay</string>
+    <string name="featured_products_title">Điện thoại nổi bật</string>
+    <string name="featured_products_empty">Hiện chưa có sản phẩm nổi bật</string>
     <string name="product_meta_brand">Hãng %1$s</string>
     <string name="product_meta_os">HĐH %1$s</string>
 </resources>

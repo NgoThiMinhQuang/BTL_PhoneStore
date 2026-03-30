@@ -29,6 +29,7 @@ public class ProductsActivity extends BaseHomeActivity {
     public static final String EXTRA_BRAND = "extra_brand";
     public static final String EXTRA_TITLE = "extra_title";
     public static final String EXTRA_QUERY = "extra_query";
+    public static final String EXTRA_ONLY_DISCOUNTED = "extra_only_discounted";
 
     private static final String SORT_DEFAULT = "default";
     private static final String SORT_PRICE_ASC = "price_asc";
@@ -84,7 +85,9 @@ public class ProductsActivity extends BaseHomeActivity {
         if (initKey == null) initKey = "";
         initKey = initKey.trim();
         filter.keyword = trimToNull(initKey);
-        filter.sortMode = SORT_DEFAULT;
+        boolean openDiscountedOnly = getIntent().getBooleanExtra(EXTRA_ONLY_DISCOUNTED, false);
+        filter.onlyDiscounted = openDiscountedOnly;
+        filter.sortMode = openDiscountedOnly ? SORT_DISCOUNT_DESC : SORT_DEFAULT;
 
         edtSearch.setText(initKey);
         edtSearch.setSelection(edtSearch.getText().length());
@@ -96,7 +99,8 @@ public class ProductsActivity extends BaseHomeActivity {
             chipInStock.setTextColor(getColor(R.color.text_primary));
         }
         if (chipDiscounted != null) {
-            chipDiscounted.setTextColor(getColor(R.color.text_primary));
+            chipDiscounted.setSelected(filter.onlyDiscounted);
+            chipDiscounted.setTextColor(getColor(filter.onlyDiscounted ? R.color.red_primary : R.color.text_primary));
         }
         bindSearch();
         loadData();

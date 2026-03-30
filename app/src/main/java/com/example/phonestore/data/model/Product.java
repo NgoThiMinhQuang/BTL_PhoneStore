@@ -17,5 +17,7 @@ public class Product {
     public String camera;
     public int pinMah;
     public String mauSac;
+    public float danhGia;
+    public int daBan;
     public boolean isActive = true;
 }

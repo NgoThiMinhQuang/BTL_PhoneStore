@@ -323,6 +323,8 @@ public class ProductDao {
         v.put(DBHelper.COL_P_CAMERA, p.camera);
         v.put(DBHelper.COL_P_BATTERY, p.pinMah);
         v.put(DBHelper.COL_P_COLORS, p.mauSac);
+        v.put(DBHelper.COL_P_RATING, p.danhGia);
+        v.put(DBHelper.COL_P_SOLD, p.daBan);
         v.put(DBHelper.COL_IS_ACTIVE, p.isActive ? 1 : 0);
         return v;
     }
@@ -345,6 +347,10 @@ public class ProductDao {
         p.camera = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_P_CAMERA));
         p.pinMah = c.getInt(c.getColumnIndexOrThrow(DBHelper.COL_P_BATTERY));
         p.mauSac = c.getString(c.getColumnIndexOrThrow(DBHelper.COL_P_COLORS));
+        int ratingIndex = c.getColumnIndex(DBHelper.COL_P_RATING);
+        p.danhGia = ratingIndex < 0 ? 0f : c.getFloat(ratingIndex);
+        int soldIndex = c.getColumnIndex(DBHelper.COL_P_SOLD);
+        p.daBan = soldIndex < 0 ? 0 : c.getInt(soldIndex);
         int activeIndex = c.getColumnIndex(DBHelper.COL_IS_ACTIVE);
         p.isActive = activeIndex < 0 || c.getInt(activeIndex) == 1;
         return p;

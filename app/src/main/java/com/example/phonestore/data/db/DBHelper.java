@@ -10,7 +10,7 @@ import com.example.phonestore.data.model.Receipt;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DB_NAME = "phonestore.db";
-    public static final int DB_VERSION = 15;
+    public static final int DB_VERSION = 16;
 
     // ===== USERS (SQLite: tiếng Việt không dấu) =====
     public static final String TBL_USERS = "nguoi_dung";
@@ -41,6 +41,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COL_P_CAMERA = "camera";
     public static final String COL_P_BATTERY = "pin_mah";
     public static final String COL_P_COLORS = "mau_sac";
+    public static final String COL_P_RATING = "danh_gia";
+    public static final String COL_P_SOLD = "da_ban";
 
     // ===== CART =====
     public static final String TBL_CART = "gio_hang";
@@ -174,49 +176,51 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_P_CAMERA + " TEXT, " +
                 COL_P_BATTERY + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_P_COLORS + " TEXT, " +
+                COL_P_RATING + " REAL NOT NULL DEFAULT 0, " +
+                COL_P_SOLD + " INTEGER NOT NULL DEFAULT 0, " +
                 COL_IS_ACTIVE + " INTEGER NOT NULL DEFAULT 1" +
                 ");");
 
         long iphone15Id = seedProduct(db, "iPhone 15 Pro Max", "Apple", 28990000, 0, 8,
                 "Flagship màn lớn, camera mạnh và pin bền bỉ cho nhu cầu cao cấp.", "ip_15",
                 "iOS", 256, 8, "Apple A17 Pro", "6.7\" Super Retina XDR", "48MP + 12MP + 12MP", 4422,
-                "Titan tự nhiên,Đen titan,Trắng titan,Xanh titan");
+                "Titan tự nhiên,Đen titan,Trắng titan,Xanh titan", 4.9f, 1200);
         seedProduct(db, "iPhone 15", "Apple", 21990000, 12, 5,
                 "Hiệu năng ổn định, camera đẹp và trải nghiệm iOS mượt mà hằng ngày.", "ip_15",
                 "iOS", 128, 6, "Apple A16 Bionic", "6.1\" Super Retina XDR", "48MP + 12MP", 3349,
-                "Đen,Xanh dương,Hồng,Vàng");
+                "Đen,Xanh dương,Hồng,Vàng", 4.8f, 860);
         seedProduct(db, "iPhone 14", "Apple", 16990000, 7, 12,
                 "Thiết kế quen thuộc, hiệu năng tốt và phù hợp nhu cầu sử dụng lâu dài.", "ic_iphone15",
                 "iOS", 128, 6, "Apple A15 Bionic", "6.1\" Super Retina XDR", "12MP + 12MP", 3279,
-                "Đen,Trắng,Tím,Xanh");
+                "Đen,Trắng,Tím,Xanh", 4.7f, 640);
         long samsungS24Id = seedProduct(db, "Samsung S24 Ultra", "Samsung", 24490000, 0, 10,
                 "Màn hình lớn, camera zoom mạnh và bút S Pen cho người dùng chuyên sâu.", "ss_s24_utra",
                 "Android", 512, 12, "Snapdragon 8 Gen 3", "6.8\" Dynamic AMOLED 2X", "200MP + 50MP + 12MP + 10MP", 5000,
-                "Đen,Tím,Xám,Vàng");
+                "Đen,Tím,Xám,Vàng", 4.8f, 930);
         seedProduct(db, "Samsung Galaxy S24", "Samsung", 19990000, 9, 7,
                 "Nhỏ gọn hơn dòng Ultra nhưng vẫn mạnh mẽ với AI và màn hình cao cấp.", "ss_s24_utra",
                 "Android", 256, 8, "Exynos 2400", "6.2\" Dynamic AMOLED 2X", "50MP + 12MP + 10MP", 4000,
-                "Đen,Xám,Tím,Vàng");
+                "Đen,Xám,Tím,Vàng", 4.7f, 720);
         seedProduct(db, "Samsung Galaxy A55", "Samsung", 9990000, 15, 15,
                 "Điện thoại tầm trung cân bằng giữa thiết kế đẹp, pin khỏe và màn hình tốt.", "ss_s24_utra",
                 "Android", 256, 8, "Exynos 1480", "6.6\" Super AMOLED", "50MP + 12MP + 5MP", 5000,
-                "Xanh navy,Xanh nhạt,Tím");
+                "Xanh navy,Xanh nhạt,Tím", 4.6f, 510);
         long xiaomi14Id = seedProduct(db, "Xiaomi 14", "Xiaomi", 15990000, 6, 6,
                 "Hiệu năng cao, sạc nhanh và camera Leica nổi bật trong phân khúc.", "",
                 "Android", 256, 12, "Snapdragon 8 Gen 3", "6.36\" AMOLED 120Hz", "50MP + 50MP + 50MP", 4610,
-                "Đen,Trắng,Xanh lá");
+                "Đen,Trắng,Xanh lá", 4.7f, 430);
         seedProduct(db, "Redmi Note 13 Pro", "Xiaomi", 8990000, 11, 10,
                 "Màn hình đẹp, pin lớn và camera độ phân giải cao cho nhu cầu phổ thông nâng cao.", "",
                 "Android", 256, 8, "Snapdragon 7s Gen 2", "6.67\" AMOLED 120Hz", "200MP + 8MP + 2MP", 5100,
-                "Đen,Tím,Xanh dương");
+                "Đen,Tím,Xanh dương", 4.6f, 380);
         seedProduct(db, "OPPO Reno11", "OPPO", 10990000, 10, 8,
                 "Thiết kế thời trang, camera chân dung đẹp và sạc nhanh tiện lợi.", "",
                 "Android", 256, 12, "Dimensity 7050", "6.7\" AMOLED 120Hz", "50MP + 32MP + 8MP", 5000,
-                "Bạc,Đen,Xanh ngọc");
+                "Bạc,Đen,Xanh ngọc", 4.5f, 290);
         seedProduct(db, "vivo V30", "vivo", 11990000, 9, 9,
                 "Mỏng nhẹ, pin lớn và hiệu năng ổn định cho giải trí lẫn công việc.", "",
                 "Android", 256, 12, "Snapdragon 7 Gen 3", "6.78\" AMOLED 120Hz", "50MP + 50MP", 5000,
-                "Đen,Tím,Xanh biển");
+                "Đen,Tím,Xanh biển", 4.5f, 250);
 
         db.execSQL("CREATE TABLE " + TBL_CART + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -328,7 +332,8 @@ public class DBHelper extends SQLiteOpenHelper {
                              String tenSanPham, String hang, int gia,
                              int tonKho, int giamGia, String moTa, String tenAnh,
                              String heDieuHanh, int romGb, int ramGb, String chipset,
-                             String manHinh, String camera, int pinMah, String mauSac) {
+                             String manHinh, String camera, int pinMah, String mauSac,
+                             float danhGia, int daBan) {
         ContentValues v = new ContentValues();
         v.put(COL_P_NAME, tenSanPham);
         v.put(COL_P_BRAND, hang);
@@ -345,6 +350,8 @@ public class DBHelper extends SQLiteOpenHelper {
         v.put(COL_P_CAMERA, camera);
         v.put(COL_P_BATTERY, pinMah);
         v.put(COL_P_COLORS, mauSac);
+        v.put(COL_P_RATING, danhGia);
+        v.put(COL_P_SOLD, daBan);
         v.put(COL_IS_ACTIVE, 1);
         return db.insert(TBL_PRODUCTS, null, v);
     }
@@ -422,6 +429,28 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUND_STATUS + " TEXT");
             db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUNDED_AT + " INTEGER NOT NULL DEFAULT 0");
             db.execSQL("ALTER TABLE " + TBL_ORDERS + " ADD COLUMN " + COL_O_REFUND_NOTE + " TEXT");
+        }
+        if (oldVersion < 16) {
+            db.execSQL("ALTER TABLE " + TBL_PRODUCTS + " ADD COLUMN " + COL_P_RATING + " REAL NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TBL_PRODUCTS + " ADD COLUMN " + COL_P_SOLD + " INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("UPDATE " + TBL_PRODUCTS + " SET " + COL_P_RATING + " = CASE " +
+                    "WHEN UPPER(" + COL_P_BRAND + ") = 'APPLE' THEN 4.9 " +
+                    "WHEN UPPER(" + COL_P_BRAND + ") = 'SAMSUNG' THEN 4.8 " +
+                    "WHEN UPPER(" + COL_P_BRAND + ") = 'XIAOMI' THEN 4.7 " +
+                    "WHEN UPPER(" + COL_P_BRAND + ") = 'OPPO' THEN 4.6 " +
+                    "ELSE 4.5 END");
+            db.execSQL("UPDATE " + TBL_PRODUCTS + " SET " + COL_P_SOLD + " = CASE " +
+                    "WHEN " + COL_P_NAME + " = 'iPhone 15 Pro Max' THEN 1200 " +
+                    "WHEN " + COL_P_NAME + " = 'Samsung S24 Ultra' THEN 930 " +
+                    "WHEN " + COL_P_NAME + " = 'iPhone 15' THEN 860 " +
+                    "WHEN " + COL_P_NAME + " = 'Samsung Galaxy S24' THEN 720 " +
+                    "WHEN " + COL_P_NAME + " = 'iPhone 14' THEN 640 " +
+                    "WHEN " + COL_P_NAME + " = 'Samsung Galaxy A55' THEN 510 " +
+                    "WHEN " + COL_P_NAME + " = 'Xiaomi 14' THEN 430 " +
+                    "WHEN " + COL_P_NAME + " = 'Redmi Note 13 Pro' THEN 380 " +
+                    "WHEN " + COL_P_NAME + " = 'OPPO Reno11' THEN 290 " +
+                    "WHEN " + COL_P_NAME + " = 'vivo V30' THEN 250 " +
+                    "ELSE 120 END");
         }
     }
 }
