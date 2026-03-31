@@ -58,24 +58,9 @@
     <string name="admin_customers_overview_message">Theo dõi nhanh tài khoản mua hàng, mức chi tiêu đã giao và khóa khách không còn sử dụng ngay trên từng card.</string>
     <string name="admin_customer_results_placeholder">Hiển thị 0 khách hàng</string>
 
-    <string name="add_product">Thêm sản phẩm</string>
-    <string name="edit_product">Sửa sản phẩm</string>
-    <string name="delete_product">Xóa sản phẩm</string>
-    <string name="delete_product_confirm">Bạn có chắc muốn xóa %1$s?</string>
     <string name="product_added">Đã thêm sản phẩm</string>
     <string name="product_updated">Đã cập nhật sản phẩm</string>
     <string name="product_deleted">Đã chuyển sản phẩm sang ngừng kinh doanh</string>
-
-    <string name="product_name">Tên sản phẩm</string>
-    <string name="product_brand">Hãng</string>
-    <string name="product_price">Giá</string>
-    <string name="product_stock">Tồn kho</string>
-    <string name="product_discount">Giảm giá (%)</string>
-    <string name="product_desc">Mô tả</string>
-    <string name="product_image">Tên ảnh (mipmap)</string>
-    <string name="product_brand_empty">Chưa có hãng</string>
-    <string name="product_stock_value">Kho %1$d</string>
-    <string name="product_discount_value">-%1$d%%</string>
 
     <string name="save">Lưu</string>
     <string name="add">Thêm</string>
