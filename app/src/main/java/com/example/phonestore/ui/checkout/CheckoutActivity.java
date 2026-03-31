@@ -191,7 +191,7 @@ public class CheckoutActivity extends BaseHomeActivity {
             return;
         }
 
-        if (phone.length() < 9 || phone.length() > 11) {
+        if (!phone.matches("0\\d{9}")) {
             Toast.makeText(this, R.string.invalid_phone, Toast.LENGTH_SHORT).show();
             return;
         }

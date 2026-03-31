@@ -67,7 +67,7 @@ public class ProductsActivity extends BaseHomeActivity {
 
         RecyclerView rv = findViewById(R.id.rvProducts);
         rv.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new ProductAdapter();
+        adapter = ProductAdapter.forCatalogCompact();
         rv.setAdapter(adapter);
 
         edtSearch = findViewById(R.id.edtSearch);

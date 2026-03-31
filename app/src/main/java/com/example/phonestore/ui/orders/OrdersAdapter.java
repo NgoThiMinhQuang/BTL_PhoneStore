@@ -83,7 +83,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
             }
         } else {
             h.tvTitle.setText(context.getString(R.string.admin_order_code, o.id));
-            h.tvSub.setText(context.getString(R.string.order_customer_card_items, Math.max(1, itemCount)));
+            h.tvSub.setText(buildOrderItemsPreview(o));
             if (h.tvMeta != null) {
                 h.tvMeta.setText(date);
             }
@@ -168,8 +168,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         if (orderChip) {
             if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
             if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger_soft;
-            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return adminMode ? R.color.admin_warning_soft : R.color.panel_soft;
-            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return adminMode ? R.color.admin_surface_soft : R.color.panel_soft;
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return adminMode ? R.color.admin_warning_soft : R.color.admin_warning_soft;
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return adminMode ? R.color.admin_surface_soft : R.color.admin_dashboard_purple_soft;
             return adminMode ? R.color.admin_surface_soft : R.color.panel_soft;
         }
 
@@ -183,8 +183,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         if (orderChip) {
             if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
             if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
-            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return adminMode ? R.color.admin_warning : R.color.red_primary;
-            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return adminMode ? R.color.admin_primary : R.color.red_primary;
+            if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return adminMode ? R.color.admin_warning : R.color.admin_warning;
+            if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return adminMode ? R.color.admin_primary : R.color.admin_dashboard_purple;
             return adminMode ? R.color.admin_primary : R.color.red_primary;
         }
 
@@ -192,6 +192,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         if (PaymentStatus.STATUS_HET_HAN_THANH_TOAN.equals(status)) return R.color.admin_danger;
         if (PaymentStatus.STATUS_CHO_THANH_TOAN.equals(status)) return adminMode ? R.color.admin_warning : R.color.red_primary;
         return adminMode ? R.color.admin_primary : R.color.red_primary;
+    }
+
+    private String buildOrderItemsPreview(Order order) {
+        int count = Math.max(1, order.itemCount);
+        return count == 1 ? "1 sản phẩm" : count + " sản phẩm";
     }
 
     private String valueOrDash(String value) {

@@ -953,7 +953,7 @@ public class OrderDao {
             return "Vui lòng nhập đủ Người nhận / SĐT / Địa chỉ";
         }
         String phone = normalizeText(info.receiverPhone);
-        if (!phone.matches("\\d{9,11}")) {
+        if (!phone.matches("0\\d{9}")) {
             return "Số điện thoại không hợp lệ";
         }
         if (!CheckoutInfo.PAYMENT_COD.equals(info.paymentMethod)

@@ -118,7 +118,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:paintFlags="strikeThruText"
             android:textColor="#98A2B3"
             android:textSize="11sp"
             android:visibility="gone" />

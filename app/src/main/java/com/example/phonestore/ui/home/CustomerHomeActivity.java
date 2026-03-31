@@ -153,7 +153,7 @@ public class CustomerHomeActivity extends BaseHomeActivity {
         if (rvSuggested == null) return;
 
         rvSuggested.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        ProductAdapter suggestedAdapter = new ProductAdapter();
+        ProductAdapter suggestedAdapter = ProductAdapter.forCompactCarousel();
         rvSuggested.setAdapter(suggestedAdapter);
 
         ProductDao.ProductFilter filter = new ProductDao.ProductFilter();
@@ -165,7 +165,7 @@ public class CustomerHomeActivity extends BaseHomeActivity {
 
     private void openFlashSaleProducts() {
         Intent intent = new Intent(this, ProductsActivity.class);
-        intent.putExtra(ProductsActivity.EXTRA_TITLE, getString(R.string.flash_sale_title));
+        intent.putExtra(ProductsActivity.EXTRA_TITLE, "Sản phẩm");
         intent.putExtra(ProductsActivity.EXTRA_ONLY_DISCOUNTED, true);
         startActivity(intent);
     }

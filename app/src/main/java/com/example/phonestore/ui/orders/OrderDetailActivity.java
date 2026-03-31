@@ -87,6 +87,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private MaterialButton btnUpdatePaymentStatus;
     private View cardStatusUpdate;
     private View cardStatusCompleted;
+    private View cardCancelledStatus;
     private View viewStatusDivider;
     private LinearLayout layoutOrderStatusAction;
     private LinearLayout layoutPaymentStatusAction;
@@ -233,6 +234,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
         btnUpdatePaymentStatus = findViewById(R.id.btnUpdatePaymentStatus);
         cardStatusUpdate = findViewById(R.id.cardStatusUpdate);
         cardStatusCompleted = findViewById(R.id.cardStatusCompleted);
+        cardCancelledStatus = findViewById(R.id.cardCancelledStatus);
         viewStatusDivider = findViewById(R.id.viewStatusDivider);
         layoutOrderStatusAction = findViewById(R.id.layoutOrderStatusAction);
         layoutPaymentStatusAction = findViewById(R.id.layoutPaymentStatusAction);
@@ -302,7 +304,7 @@ public class OrderDetailActivity extends BaseHomeActivity {
         tvOrderCode.setText(getString(R.string.admin_order_code, order.id));
         tvOrderDate.setText(formatDate(order.ngayTao));
         if (tvOrderMeta != null) {
-            tvOrderMeta.setText(getString(R.string.order_detail_meta_summary, Math.max(1, order.itemCount)));
+            tvOrderMeta.setText(buildOrderHeaderSummary(items));
         }
         updateStatusBadge(order.trangThaiDon);
         updatePaymentBadge(order.trangThaiThanhToan);
@@ -590,8 +592,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
             return R.color.admin_surface_soft;
         }
 
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.panel_soft;
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.panel_soft;
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning_soft;
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_dashboard_purple_soft;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success_soft;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger_soft;
         return R.color.panel_soft;
@@ -606,8 +608,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
             return R.color.admin_primary;
         }
 
-        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.red_primary;
-        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.red_primary;
+        if (OrderStatus.STATUS_CHO_XAC_NHAN.equals(status)) return R.color.admin_warning;
+        if (OrderStatus.STATUS_DANG_XU_LY.equals(status)) return R.color.admin_dashboard_purple;
         if (OrderStatus.STATUS_DA_GIAO.equals(status)) return R.color.admin_success;
         if (OrderStatus.STATUS_DA_HUY.equals(status)) return R.color.admin_danger;
         return R.color.red_primary;
@@ -652,6 +654,9 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
         boolean cancelledReached = OrderStatus.STATUS_DA_HUY.equals(order.trangThaiDon);
         String cancelledDate = order.cancelledAt > 0 ? formatDate(order.cancelledAt) : getString(R.string.order_timeline_status_value, OrdersAdapter.formatOrderStatus(this, order.trangThaiDon));
+        if (cardCancelledStatus != null) {
+            cardCancelledStatus.setVisibility(cancelledReached ? View.VISIBLE : View.GONE);
+        }
         bindTimelineStep(
                 R.id.viewTimelineCancelledDot,
                 cancelledReached,
@@ -688,7 +693,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
                     : (isAdminDetail() ? R.color.admin_text_secondary : R.color.text_sub)));
         }
         if (summaryView != null) {
-            summaryView.setText(summaryText);
+            summaryView.setVisibility(View.GONE);
+            summaryView.setText("");
         }
     }
 
@@ -705,6 +711,24 @@ public class OrderDetailActivity extends BaseHomeActivity {
                 R.string.admin_price_currency,
                 NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(amount)
         );
+    }
+
+    private String buildOrderHeaderSummary(ArrayList<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            return getString(R.string.order_products_summary, 0);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        int limit = Math.min(2, items.size());
+        for (int i = 0; i < limit; i++) {
+            OrderItem item = items.get(i);
+            if (i > 0) builder.append("\n");
+            builder.append(item.tenSanPham).append(" x").append(item.soLuong);
+        }
+        if (items.size() > limit) {
+            builder.append("\n+").append(items.size() - limit).append(" sản phẩm khác");
+        }
+        return builder.toString();
     }
 
     private void bindPaymentLifecycleInfo(Order order) {

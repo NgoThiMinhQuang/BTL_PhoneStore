@@ -3,6 +3,8 @@ package com.example.phonestore.ui.products;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Paint;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,23 +29,35 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
     private final ArrayList<Product> data = new ArrayList<>();
     private final boolean flashSaleMode;
+    private final boolean compactMode;
+    private final boolean catalogCompactMode;
     private Context ctx;
-
-    public ProductAdapter() {
-        this(false);
-    }
-
-    private ProductAdapter(boolean flashSaleMode) {
-        this.flashSaleMode = flashSaleMode;
-    }
-
-    public static ProductAdapter forFlashSale() {
-        return new ProductAdapter(true);
-    }
 
     private int selectedPosition = RecyclerView.NO_POSITION;
     private int pressedPosition = RecyclerView.NO_POSITION;
     private int hoveredPosition = RecyclerView.NO_POSITION;
+
+    public ProductAdapter() {
+        this(false, false, false);
+    }
+
+    private ProductAdapter(boolean flashSaleMode, boolean compactMode, boolean catalogCompactMode) {
+        this.flashSaleMode = flashSaleMode;
+        this.compactMode = compactMode;
+        this.catalogCompactMode = catalogCompactMode;
+    }
+
+    public static ProductAdapter forFlashSale() {
+        return new ProductAdapter(true, true, false);
+    }
+
+    public static ProductAdapter forCompactCarousel() {
+        return new ProductAdapter(false, true, true);
+    }
+
+    public static ProductAdapter forCatalogCompact() {
+        return new ProductAdapter(false, false, true);
+    }
 
     public void setData(ArrayList<Product> newData) {
         data.clear();
@@ -72,44 +86,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         h.tvName.setText(ten.isEmpty() ? "Sản phẩm" : ten);
 
         if (flashSaleMode) {
-            bindFlashSaleCard(h, p, ten, hang);
+            bindFlashSaleCard(h, p);
+        } else if (catalogCompactMode) {
+            bindCatalogCompactCard(h, p);
         } else {
-            if (hang.isEmpty()) {
-                h.tvBrand.setVisibility(View.GONE);
-            } else {
-                h.tvBrand.setVisibility(View.VISIBLE);
-                h.tvBrand.setText(h.itemView.getContext().getString(R.string.product_meta_brand, hang));
-            }
-
-            h.tvSpecs.setText(buildSpecsText(p));
-
-            String giaText = NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ";
-            h.tvPrice.setText(giaText);
-            h.tvOriginalPrice.setVisibility(View.GONE);
-            h.tvMetaPrimary.setVisibility(View.GONE);
-            h.tvMetaSecondary.setVisibility(View.GONE);
-            h.layoutFlashMeta.setVisibility(View.GONE);
-            h.layoutLegacyMeta.setVisibility(View.GONE);
-
-            if (p.giamGia > 0) {
-                h.tvDiscount.setVisibility(View.VISIBLE);
-                h.tvDiscount.setText("-" + p.giamGia + "%");
-            } else {
-                h.tvDiscount.setVisibility(View.GONE);
-            }
-
-            bindStock(h, p.tonKho);
-
-            if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
-                h.tvOs.setVisibility(View.GONE);
-            } else {
-                h.tvOs.setVisibility(View.VISIBLE);
-                h.tvOs.setText(h.itemView.getContext().getString(R.string.product_meta_os, p.heDieuHanh.trim()));
-            }
+            bindDefaultCard(h, p, hang);
         }
 
         int imageRes = resolveProductImage(p);
         h.ivThumb.setImageResource(imageRes != 0 ? imageRes : android.R.drawable.ic_menu_gallery);
+        applyItemSizing(h);
 
         boolean isActive = position == selectedPosition || position == pressedPosition || position == hoveredPosition;
         h.viewInteractionOverlay.setVisibility(isActive ? View.VISIBLE : View.GONE);
@@ -157,6 +143,92 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         return data.size();
     }
 
+    private void bindDefaultCard(VH holder, Product p, String hang) {
+        if (hang.isEmpty()) {
+            holder.tvBrand.setVisibility(View.GONE);
+        } else {
+            holder.tvBrand.setVisibility(View.VISIBLE);
+            holder.tvBrand.setText(holder.itemView.getContext().getString(R.string.product_meta_brand, hang));
+        }
+
+        holder.tvSpecs.setText(buildSpecsText(p));
+        holder.tvPrice.setText(formatMoney(p.gia));
+        holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        holder.tvOriginalPrice.setVisibility(View.GONE);
+        holder.tvMetaPrimary.setVisibility(View.GONE);
+        holder.tvMetaSecondary.setVisibility(View.GONE);
+        holder.layoutFlashMeta.setVisibility(View.GONE);
+        holder.layoutLegacyMeta.setVisibility(View.GONE);
+
+        if (p.giamGia > 0) {
+            holder.tvDiscount.setVisibility(View.VISIBLE);
+            holder.tvDiscount.setText("-" + p.giamGia + "%");
+        } else {
+            holder.tvDiscount.setVisibility(View.GONE);
+        }
+
+        bindStock(holder, p.tonKho);
+
+        if (p.heDieuHanh == null || p.heDieuHanh.trim().isEmpty()) {
+            holder.tvOs.setVisibility(View.GONE);
+        } else {
+            holder.tvOs.setVisibility(View.VISIBLE);
+            holder.tvOs.setText(holder.itemView.getContext().getString(R.string.product_meta_os, p.heDieuHanh.trim()));
+        }
+    }
+
+    private void bindFlashSaleCard(VH holder, Product p) {
+        bindCompactCard(holder, p, true, true);
+    }
+
+    private void bindCatalogCompactCard(VH holder, Product p) {
+        bindCompactCard(holder, p, false, false);
+        holder.layoutFlashMeta.setVisibility(View.GONE);
+        holder.tvOriginalPrice.setVisibility(View.GONE);
+    }
+
+    private void bindCompactCard(VH holder, Product p, boolean saleBadgeMode, boolean showMeta) {
+        holder.tvBrand.setVisibility(View.GONE);
+        holder.layoutLegacyMeta.setVisibility(View.GONE);
+        holder.tvOs.setVisibility(View.GONE);
+
+        holder.tvSpecs.setText(buildFlashSaleSpecsText(p));
+        holder.tvStock.setText(saleBadgeMode ? buildFlashSaleBadgeText(p) : buildCatalogCompactBadgeText(p));
+        holder.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
+        holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
+
+        holder.layoutFlashMeta.setVisibility(showMeta ? View.VISIBLE : View.GONE);
+        if (showMeta) {
+            holder.tvMetaPrimary.setVisibility(View.VISIBLE);
+            holder.tvMetaPrimary.setText(buildRatingText(p));
+
+            String soldText = buildSoldText(p);
+            if (soldText.isEmpty()) {
+                holder.tvMetaSecondary.setVisibility(View.GONE);
+            } else {
+                holder.tvMetaSecondary.setVisibility(View.VISIBLE);
+                holder.tvMetaSecondary.setText(soldText);
+            }
+        } else {
+            holder.tvMetaPrimary.setVisibility(View.GONE);
+            holder.tvMetaSecondary.setVisibility(View.GONE);
+        }
+
+        int salePrice = calculateSalePrice(p.gia, p.giamGia);
+        holder.tvPrice.setText(formatMoney(salePrice));
+        holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
+        if (p.giamGia > 0) {
+            holder.tvDiscount.setVisibility(View.VISIBLE);
+            holder.tvDiscount.setText("-" + p.giamGia + "%");
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvOriginalPrice.setText(formatMoney(p.gia));
+        } else {
+            holder.tvDiscount.setVisibility(View.GONE);
+            holder.tvOriginalPrice.setVisibility(View.GONE);
+        }
+    }
+
     private void bindStock(VH holder, int stock) {
         String status = InventoryPolicy.resolveStatus(stock);
         holder.tvStock.setText(InventoryPolicy.getCustomerStockText(holder.itemView.getContext(), stock));
@@ -165,42 +237,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
             holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
         } else {
             holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.red_primary));
-        }
-    }
-
-    private void bindFlashSaleCard(VH holder, Product p, String ten, String hang) {
-        holder.tvBrand.setVisibility(View.GONE);
-        holder.layoutFlashMeta.setVisibility(View.VISIBLE);
-        holder.layoutLegacyMeta.setVisibility(View.GONE);
-        holder.tvOs.setVisibility(View.GONE);
-
-        holder.tvSpecs.setText(buildFlashSaleSpecsText(p));
-        holder.tvStock.setText(buildFlashSaleBadgeText(p));
-        holder.tvStock.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.panel_soft)));
-        holder.tvStock.setTextColor(ContextCompat.getColor(ctx, R.color.text_sub));
-
-        holder.tvMetaPrimary.setVisibility(View.VISIBLE);
-        holder.tvMetaPrimary.setText(buildRatingText(p));
-
-        String soldText = buildSoldText(p);
-        if (soldText.isEmpty()) {
-            holder.tvMetaSecondary.setVisibility(View.GONE);
-        } else {
-            holder.tvMetaSecondary.setVisibility(View.VISIBLE);
-            holder.tvMetaSecondary.setText(soldText);
-        }
-
-        int salePrice = calculateSalePrice(p.gia, p.giamGia);
-        holder.tvPrice.setText(NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(salePrice) + "đ");
-
-        if (p.giamGia > 0) {
-            holder.tvDiscount.setVisibility(View.VISIBLE);
-            holder.tvDiscount.setText("-" + p.giamGia + "%");
-            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
-            holder.tvOriginalPrice.setText(NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(p.gia) + "đ");
-        } else {
-            holder.tvDiscount.setVisibility(View.GONE);
-            holder.tvOriginalPrice.setVisibility(View.GONE);
         }
     }
 
@@ -229,6 +265,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
         return brand.isEmpty() ? "Flash deal" : "Hãng " + brand;
     }
 
+    private String buildCatalogCompactBadgeText(Product p) {
+        int stock = p.tonKho;
+        if (stock <= 0) return "Hết hàng";
+        if (stock <= 10) return "Sắp hết: " + stock;
+        return "Còn: " + stock;
+    }
+
     private String buildRatingText(Product p) {
         float rating = p.danhGia > 0 ? p.danhGia : 4.8f;
         return "★ " + String.format(Locale.getDefault(), "%.1f", rating);
@@ -236,12 +279,38 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.VH> {
 
     private String buildSoldText(Product p) {
         int sold = p.daBan > 0 ? p.daBan : 0;
-        return sold > 0 ? "(" + sold + " đã bán)" : "";
+        return sold > 0 ? sold + " bán" : "";
+    }
+
+    private void applyItemSizing(VH holder) {
+        ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+        if (!(params instanceof RecyclerView.LayoutParams)) return;
+
+        RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) params;
+        if (flashSaleMode) {
+            layoutParams.width = dpToPx(248);
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        } else if (compactMode) {
+            layoutParams.width = dpToPx(228);
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        } else {
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        }
+        holder.itemView.setLayoutParams(layoutParams);
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, ctx.getResources().getDisplayMetrics());
     }
 
     private int calculateSalePrice(int originalPrice, int discountPercent) {
         if (discountPercent <= 0) return originalPrice;
         return Math.max(0, originalPrice - (originalPrice * discountPercent / 100));
+    }
+
+    private String formatMoney(int amount) {
+        return NumberFormat.getNumberInstance(new Locale("vi", "VN")).format(amount) + "đ";
     }
 
     private void setSelectedPosition(int newPos) {
