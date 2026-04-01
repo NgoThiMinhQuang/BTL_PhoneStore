@@ -266,13 +266,6 @@
                         android:textSize="17sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Chọn dung lượng và màu sắc phù hợp trước khi thêm vào giỏ hàng hoặc mua ngay."
-                        android:textColor="@color/text_sub"
-                        android:textSize="13sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -346,13 +339,6 @@
                         android:textSize="17sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Những điểm chính để bạn so sánh nhanh trước khi quyết định."
-                        android:textColor="@color/text_sub"
-                        android:textSize="13sp" />
 
                     <TextView
                         android:id="@+id/tvSpecScreen"
