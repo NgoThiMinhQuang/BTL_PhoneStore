@@ -228,10 +228,8 @@ public class ProductDao {
         }
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues v = new ContentValues();
-        v.put(DBHelper.COL_IS_ACTIVE, 0);
-        return db.update(DBHelper.TBL_PRODUCTS, v,
-                DBHelper.COL_ID + "=? AND " + DBHelper.COL_IS_ACTIVE + "=1",
+        return db.delete(DBHelper.TBL_PRODUCTS,
+                DBHelper.COL_ID + "=?",
                 new String[]{String.valueOf(id)}) > 0;
     }
 

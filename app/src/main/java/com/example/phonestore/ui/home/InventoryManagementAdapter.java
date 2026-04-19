@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.utils.InventoryPolicy;
+import com.example.phonestore.utils.ProductImageLoader;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
 
         if (alertMode) {
             if (holder.ivThumb != null) {
-                holder.ivThumb.setImageResource(resolveProductImage(context, item));
+                ProductImageLoader.load(holder.ivThumb, item.imageName, item.productName, item.brand);
             }
             if (holder.btnCreateReceipt != null) {
                 holder.btnCreateReceipt.setOnClickListener(v -> {
@@ -108,37 +109,6 @@ public class InventoryManagementAdapter extends RecyclerView.Adapter<InventoryMa
         }
     }
 
-    private int resolveProductImage(Context context, InventoryManagementItem item) {
-        int imageRes = findImageRes(context, item.imageName);
-        if (imageRes != 0) return imageRes;
-
-        String name = item.productName == null ? "" : item.productName.toLowerCase(Locale.ROOT);
-        String brand = item.brand == null ? "" : item.brand.toLowerCase(Locale.ROOT);
-
-        if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
-        if (name.contains("s24") || brand.contains("samsung")) return findExistingSamsungImage(context);
-        if (brand.contains("xiaomi")) return android.R.drawable.ic_menu_gallery;
-
-        return android.R.drawable.ic_menu_gallery;
-    }
-
-    private int findImageRes(Context context, String imageName) {
-        if (imageName == null || imageName.trim().isEmpty()) return 0;
-
-        String imageKey = imageName.trim();
-        int resId = context.getResources().getIdentifier(imageKey, "drawable", context.getPackageName());
-        if (resId != 0) return resId;
-
-        return context.getResources().getIdentifier(imageKey, "mipmap", context.getPackageName());
-    }
-
-    private int findExistingSamsungImage(Context context) {
-        int imageRes = findImageRes(context, "ss_s24_ultra");
-        if (imageRes != 0) return imageRes;
-        imageRes = findImageRes(context, "ss_s24_utra");
-        if (imageRes != 0) return imageRes;
-        return android.R.drawable.ic_menu_gallery;
-    }
 
     @Override
     public int getItemCount() {

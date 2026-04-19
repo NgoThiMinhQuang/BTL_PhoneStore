@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.Product;
 import com.example.phonestore.utils.InventoryPolicy;
+import com.example.phonestore.utils.ProductImageLoader;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -70,7 +71,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         h.tvDesc.setText(desc);
         h.tvPrice.setText(context.getString(R.string.admin_price_currency, currencyFormat.format(p.gia)));
         h.tvStock.setText(context.getString(R.string.admin_product_stock_short, Math.max(0, p.tonKho)));
-        h.ivThumb.setImageResource(resolveProductImage(context, p));
+        ProductImageLoader.load(h.ivThumb, p.tenAnh, p.tenSanPham, p.hang);
 
         if (p.giamGia > 0) {
             h.tvDiscount.setVisibility(View.VISIBLE);
@@ -98,37 +99,6 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         h.tvStock.setTextColor(appearance.stockColor);
     }
 
-    private int resolveProductImage(Context context, Product p) {
-        int imageRes = findImageRes(context, p.tenAnh);
-        if (imageRes != 0) return imageRes;
-
-        String name = p.tenSanPham == null ? "" : p.tenSanPham.toLowerCase(Locale.ROOT);
-        String brand = p.hang == null ? "" : p.hang.toLowerCase(Locale.ROOT);
-
-        if (name.contains("iphone") || brand.contains("apple")) return R.drawable.ip_15;
-        if (name.contains("s24") || brand.contains("samsung")) return findExistingSamsungImage(context);
-        if (brand.contains("xiaomi")) return android.R.drawable.ic_menu_gallery;
-
-        return android.R.drawable.ic_menu_gallery;
-    }
-
-    private int findImageRes(Context context, String imageName) {
-        if (imageName == null || imageName.trim().isEmpty()) return 0;
-
-        String imageKey = imageName.trim();
-        int resId = context.getResources().getIdentifier(imageKey, "drawable", context.getPackageName());
-        if (resId != 0) return resId;
-
-        return context.getResources().getIdentifier(imageKey, "mipmap", context.getPackageName());
-    }
-
-    private int findExistingSamsungImage(Context context) {
-        int imageRes = findImageRes(context, "ss_s24_ultra");
-        if (imageRes != 0) return imageRes;
-        imageRes = findImageRes(context, "ss_s24_utra");
-        if (imageRes != 0) return imageRes;
-        return android.R.drawable.ic_menu_gallery;
-    }
 
     static class VH extends RecyclerView.ViewHolder {
         ImageView ivThumb;

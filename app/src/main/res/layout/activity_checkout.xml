@@ -65,7 +65,8 @@
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_edittext"
                 android:hint="@string/receiver_phone"
-                android:inputType="phone"
+                android:inputType="number"
+                android:digits="0123456789"
                 android:maxLength="10"
                 android:singleLine="true"
                 android:textColorHint="@color/text_hint" />

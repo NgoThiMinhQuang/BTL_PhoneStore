@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.model.CartItem;
+import com.example.phonestore.utils.ProductImageLoader;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.NumberFormat;
@@ -74,8 +75,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
         h.tvPrice.setText("Giá: " + giaText + (it.giamGia > 0 ? " (" + it.giamGia + "%)" : ""));
         h.tvQty.setText(String.valueOf(it.soLuong));
 
-        int resId = resolveImageRes(it.tenAnh);
-        h.ivThumb.setImageResource(resId != 0 ? resId : android.R.drawable.ic_menu_gallery);
+        ProductImageLoader.load(h.ivThumb, it.tenAnh, it.tenSanPham, it.hang);
 
         boolean isSelected = selectedCartItemIds.contains(it.id);
         h.cbSelect.setOnCheckedChangeListener(null);
@@ -106,15 +106,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.VH> {
         h.cardRoot.setStrokeWidth((int) (ctx.getResources().getDisplayMetrics().density * (isSelected ? 2 : 1)));
     }
 
-    private int resolveImageRes(String imageName) {
-        if (imageName == null || imageName.trim().isEmpty()) return 0;
-
-        String imageKey = imageName.trim();
-        int resId = ctx.getResources().getIdentifier(imageKey, "drawable", ctx.getPackageName());
-        if (resId != 0) return resId;
-
-        return ctx.getResources().getIdentifier(imageKey, "mipmap", ctx.getPackageName());
-    }
 
     private String buildVariantLabel(CartItem item) {
         String storage = item.dungLuong == null ? "" : item.dungLuong.trim();

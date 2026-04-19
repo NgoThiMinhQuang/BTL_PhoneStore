@@ -50,12 +50,33 @@
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_edittext_admin"
-            android:hint="Tên file ảnh hoặc đường dẫn ảnh"
+            android:hint="URL ảnh (https://...) hoặc tên resource drawable/mipmap"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
+
+        <ImageView
+            android:id="@+id/ivImagePreview"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="12dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_admin_product_thumb"
+            android:contentDescription="Preview ảnh sản phẩm"
+            android:padding="8dp"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_gallery" />
+
+        <TextView
+            android:id="@+id/tvImagePreviewHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Preview ảnh theo URL hoặc resource bạn nhập"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,7 +93,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_edittext_admin"
-            android:hint="Giá bán"
+            android:hint="Giá bán (ví dụ: 29990000)"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
@@ -80,19 +101,6 @@
             android:textColor="@color/admin_text_primary"
             android:textColorHint="@color/admin_text_secondary" />
 
-        <EditText
-            android:id="@+id/edtStock"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_edittext_admin"
-            android:hint="@string/admin_product_stock_form_hint"
-            android:inputType="number"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:singleLine="true"
-            android:textColor="@color/admin_text_primary"
-            android:textColorHint="@color/admin_text_secondary" />
 
         <EditText
             android:id="@+id/edtDiscount"
@@ -100,7 +108,7 @@
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_edittext_admin"
-            android:hint="Phần trăm giảm giá"
+            android:hint="Phần trăm giảm giá (để trống hoặc 0 nếu không giảm)"
             android:inputType="number"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"

@@ -9,8 +9,11 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.phonestore.utils.ProductImageLoader;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -136,13 +139,74 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     private void loadData() {
-        ArrayList<Product> allProducts = productDao.layTatCaChoAdmin();
+        ArrayList<Product> allProducts = filterActiveProducts(productDao.layTatCaChoAdmin());
         String key = edtSearch.getText().toString().trim();
-        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : productDao.timKiemChoAdmin(key);
+        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : filterActiveProducts(productDao.timKiemChoAdmin(key));
 
         adapter.setData(filteredProducts);
         updateDashboard(allProducts, filteredProducts);
         updateEmptyState(filteredProducts);
+    }
+
+    private ArrayList<Product> filterActiveProducts(ArrayList<Product> products) {
+        ArrayList<Product> activeProducts = new ArrayList<>();
+        if (products == null) {
+            return activeProducts;
+        }
+        for (Product product : products) {
+            if (product != null && product.isActive) {
+                activeProducts.add(product);
+            }
+        }
+        return activeProducts;
+    }
+
+    private void bindImagePreview(ImageView ivImagePreview,
+                                  TextView tvImagePreviewHint,
+                                  EditText edtImage,
+                                  EditText edtName,
+                                  EditText edtBrand) {
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                refreshImagePreview(ivImagePreview, tvImagePreviewHint, edtImage, edtName, edtBrand);
+            }
+        };
+
+        edtImage.addTextChangedListener(watcher);
+        edtName.addTextChangedListener(watcher);
+        edtBrand.addTextChangedListener(watcher);
+        refreshImagePreview(ivImagePreview, tvImagePreviewHint, edtImage, edtName, edtBrand);
+    }
+
+    private void refreshImagePreview(ImageView ivImagePreview,
+                                     TextView tvImagePreviewHint,
+                                     EditText edtImage,
+                                     EditText edtName,
+                                     EditText edtBrand) {
+        String imageRef = edtImage.getText().toString().trim();
+        String productName = edtName.getText().toString().trim();
+        String brand = edtBrand.getText().toString().trim();
+
+        ProductImageLoader.load(ivImagePreview, imageRef, productName, brand);
+
+        if (imageRef.isEmpty()) {
+            tvImagePreviewHint.setText("Chưa nhập ảnh, đang dùng ảnh mặc định/fallback");
+            return;
+        }
+        if (!ProductImageLoader.isValidImageInput(imageRef)) {
+            tvImagePreviewHint.setText("URL ảnh không hợp lệ, đang dùng ảnh fallback");
+            return;
+        }
+        if (imageRef.regionMatches(true, 0, "http://", 0, 7)
+                || imageRef.regionMatches(true, 0, "https://", 0, 8)) {
+            tvImagePreviewHint.setText("Đang thử tải ảnh từ URL bạn nhập");
+            return;
+        }
+        tvImagePreviewHint.setText("Đang preview theo tên resource nội bộ");
     }
 
     private void updateDashboard(ArrayList<Product> allProducts, ArrayList<Product> filteredProducts) {
@@ -178,8 +242,9 @@ public class AdminProductsActivity extends BaseHomeActivity {
         EditText edtName = view.findViewById(R.id.edtName);
         EditText edtBrand = view.findViewById(R.id.edtBrand);
         EditText edtImage = view.findViewById(R.id.edtImage);
+        ImageView ivImagePreview = view.findViewById(R.id.ivImagePreview);
+        TextView tvImagePreviewHint = view.findViewById(R.id.tvImagePreviewHint);
         EditText edtPrice = view.findViewById(R.id.edtPrice);
-        EditText edtStock = view.findViewById(R.id.edtStock);
         EditText edtDiscount = view.findViewById(R.id.edtDiscount);
         EditText edtOs = view.findViewById(R.id.edtOs);
         EditText edtRom = view.findViewById(R.id.edtRom);
@@ -191,15 +256,11 @@ public class AdminProductsActivity extends BaseHomeActivity {
         EditText edtColors = view.findViewById(R.id.edtColors);
         EditText edtDesc = view.findViewById(R.id.edtDesc);
         boolean editing = oldProduct != null;
-        edtStock.setEnabled(false);
-        edtStock.setFocusable(false);
-        edtStock.setClickable(false);
         if (editing) {
             edtName.setText(oldProduct.tenSanPham);
             edtBrand.setText(oldProduct.hang);
             edtImage.setText(oldProduct.tenAnh);
             edtPrice.setText(String.valueOf(oldProduct.gia));
-            edtStock.setText(String.valueOf(Math.max(0, oldProduct.tonKho)));
             edtDiscount.setText(String.valueOf(oldProduct.giamGia));
             edtOs.setText(oldProduct.heDieuHanh);
             edtRom.setText(oldProduct.romGb > 0 ? String.valueOf(oldProduct.romGb) : "");
@@ -210,9 +271,9 @@ public class AdminProductsActivity extends BaseHomeActivity {
             edtCamera.setText(oldProduct.camera);
             edtColors.setText(oldProduct.mauSac);
             edtDesc.setText(oldProduct.moTa);
-        } else {
-            edtStock.setText(String.valueOf(0));
         }
+
+        bindImagePreview(ivImagePreview, tvImagePreviewHint, edtImage, edtName, edtBrand);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(editing ? R.string.admin_product_dialog_edit : R.string.admin_product_dialog_add)
@@ -286,6 +347,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         String colors = edtColors.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
+        if (!ProductImageLoader.isValidImageInput(image)) return "URL ảnh không hợp lệ";
         if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
         if (TextUtils.isEmpty(os)) return "Vui lòng nhập hệ điều hành";
         if (TextUtils.isEmpty(romStr)) return "Vui lòng nhập dung lượng ROM";

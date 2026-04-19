@@ -236,6 +236,10 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     private void bindRecentOrders(ArrayList<Order> orders) {
         LinearLayout container = findViewById(R.id.layoutRecentOrders);
+        TextView tvViewAllRecentOrders = findViewById(R.id.tvViewAllRecentOrders);
+        if (tvViewAllRecentOrders != null) {
+            tvViewAllRecentOrders.setOnClickListener(v -> openBottomTab(new Intent(this, AdminOrdersActivity.class)));
+        }
         container.removeAllViews();
 
         if (orders.isEmpty()) {

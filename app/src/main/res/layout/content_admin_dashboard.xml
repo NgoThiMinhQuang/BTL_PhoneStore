@@ -81,10 +81,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/admin_dashboard_surface"
+                    app:cardBackgroundColor="@color/admin_dashboard_green"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/admin_dashboard_stroke"
+                    app:strokeColor="#8CE1AE"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -98,7 +98,7 @@
                             android:layout_width="44dp"
                             android:layout_height="44dp"
                             android:background="@drawable/bg_dashboard_badge"
-                            android:backgroundTint="@color/admin_dashboard_blue_soft"
+                            android:backgroundTint="#FFFFFF22"
                             android:gravity="center">
 
                             <ImageView
@@ -106,7 +106,7 @@
                                 android:layout_height="22dp"
                                 android:contentDescription="@string/admin_revenue_month"
                                 android:src="@drawable/ic_dashboard_revenue"
-                                app:tint="@color/admin_dashboard_blue" />
+                                app:tint="@color/white" />
                         </LinearLayout>
 
                         <TextView
@@ -115,7 +115,7 @@
                             android:layout_marginTop="14dp"
                             android:gravity="center"
                             android:text="@string/admin_revenue_month"
-                            android:textColor="@color/admin_text_secondary"
+                            android:textColor="#F8FFFB"
                             android:textSize="12sp" />
 
                         <TextView
@@ -125,7 +125,7 @@
                             android:layout_marginTop="8dp"
                             android:gravity="center"
                             android:text="0đ"
-                            android:textColor="@color/admin_text_primary"
+                            android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -136,10 +136,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/admin_dashboard_surface"
+                    app:cardBackgroundColor="@color/admin_dashboard_blue"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/admin_dashboard_stroke"
+                    app:strokeColor="#84C5FF"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -153,7 +153,7 @@
                             android:layout_width="44dp"
                             android:layout_height="44dp"
                             android:background="@drawable/bg_dashboard_badge"
-                            android:backgroundTint="@color/admin_dashboard_green_soft"
+                            android:backgroundTint="#FFFFFF22"
                             android:gravity="center">
 
                             <ImageView
@@ -161,7 +161,7 @@
                                 android:layout_height="22dp"
                                 android:contentDescription="@string/admin_total_orders"
                                 android:src="@drawable/ic_nav_orders"
-                                app:tint="@color/admin_dashboard_green" />
+                                app:tint="@color/white" />
                         </LinearLayout>
 
                         <TextView
@@ -170,7 +170,7 @@
                             android:layout_marginTop="14dp"
                             android:gravity="center"
                             android:text="@string/admin_total_orders"
-                            android:textColor="@color/admin_text_secondary"
+                            android:textColor="#F4FAFF"
                             android:textSize="12sp" />
 
                         <TextView
@@ -180,7 +180,7 @@
                             android:layout_marginTop="8dp"
                             android:gravity="center"
                             android:text="0"
-                            android:textColor="@color/admin_text_primary"
+                            android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -198,10 +198,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/admin_dashboard_surface"
+                    app:cardBackgroundColor="@color/admin_dashboard_red"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/admin_dashboard_stroke"
+                    app:strokeColor="#F79A9A"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -215,7 +215,7 @@
                             android:layout_width="44dp"
                             android:layout_height="44dp"
                             android:background="@drawable/bg_dashboard_badge"
-                            android:backgroundTint="@color/admin_dashboard_orange_soft"
+                            android:backgroundTint="#FFFFFF22"
                             android:gravity="center">
 
                             <ImageView
@@ -223,7 +223,7 @@
                                 android:layout_height="22dp"
                                 android:contentDescription="@string/admin_total_customers"
                                 android:src="@drawable/ic_nav_customers"
-                                app:tint="@color/admin_dashboard_orange" />
+                                app:tint="@color/white" />
                         </LinearLayout>
 
                         <TextView
@@ -232,7 +232,7 @@
                             android:layout_marginTop="14dp"
                             android:gravity="center"
                             android:text="@string/admin_total_customers"
-                            android:textColor="@color/admin_text_secondary"
+                            android:textColor="#FFF5F5"
                             android:textSize="12sp" />
 
                         <TextView
@@ -242,7 +242,7 @@
                             android:layout_marginTop="8dp"
                             android:gravity="center"
                             android:text="0"
-                            android:textColor="@color/admin_text_primary"
+                            android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -253,10 +253,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/admin_dashboard_surface"
+                    app:cardBackgroundColor="@color/admin_dashboard_purple"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/admin_dashboard_stroke"
+                    app:strokeColor="#C9A6FF"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -270,7 +270,7 @@
                             android:layout_width="44dp"
                             android:layout_height="44dp"
                             android:background="@drawable/bg_dashboard_badge"
-                            android:backgroundTint="@color/admin_dashboard_purple_soft"
+                            android:backgroundTint="#FFFFFF22"
                             android:gravity="center">
 
                             <ImageView
@@ -278,7 +278,7 @@
                                 android:layout_height="22dp"
                                 android:contentDescription="@string/admin_total_products"
                                 android:src="@drawable/ic_nav_products"
-                                app:tint="@color/admin_dashboard_purple" />
+                                app:tint="@color/white" />
                         </LinearLayout>
 
                         <TextView
@@ -287,7 +287,7 @@
                             android:layout_marginTop="14dp"
                             android:gravity="center"
                             android:text="@string/admin_total_products"
-                            android:textColor="@color/admin_text_secondary"
+                            android:textColor="#FAF5FF"
                             android:textSize="12sp" />
 
                         <TextView
@@ -297,7 +297,7 @@
                             android:layout_marginTop="8dp"
                             android:gravity="center"
                             android:text="0"
-                            android:textColor="@color/admin_text_primary"
+                            android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -314,10 +314,10 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/admin_dashboard_surface"
+                    app:cardBackgroundColor="#FFB74D"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/admin_dashboard_stroke"
+                    app:strokeColor="#FFD79D"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -331,7 +331,7 @@
                             android:layout_width="52dp"
                             android:layout_height="52dp"
                             android:background="@drawable/bg_dashboard_badge"
-                            android:backgroundTint="@color/admin_dashboard_red_soft"
+                            android:backgroundTint="#FFFFFF22"
                             android:gravity="center">
 
                             <ImageView
@@ -339,7 +339,7 @@
                                 android:layout_height="24dp"
                                 android:contentDescription="@string/admin_low_stock"
                                 android:src="@drawable/ic_dashboard_alert"
-                                app:tint="@color/admin_dashboard_red" />
+                                app:tint="@color/white" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -353,7 +353,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="@string/admin_low_stock"
-                                android:textColor="@color/admin_text_secondary"
+                                android:textColor="#FFF8ED"
                                 android:textSize="12sp" />
 
                             <TextView
@@ -362,7 +362,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="6dp"
                                 android:text="0"
-                                android:textColor="@color/admin_text_primary"
+                                android:textColor="@color/white"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
 
@@ -371,7 +371,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:text="@string/admin_dashboard_low_stock_desc"
-                                android:textColor="@color/admin_text_secondary"
+                                android:textColor="#FFF8ED"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -761,13 +761,30 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/admin_recent_orders"
-                        android:textColor="@color/admin_text_primary"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/admin_recent_orders"
+                            android:textColor="@color/admin_text_primary"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvViewAllRecentOrders"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Xem tất cả"
+                            android:textColor="@color/admin_primary"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/layoutRecentOrders"

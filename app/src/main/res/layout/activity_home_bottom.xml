@@ -39,8 +39,8 @@
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/header_customer_content_offset"
             android:background="@android:color/transparent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
+            android:clipChildren="true"
+            android:clipToPadding="true"
             android:padding="0dp" />
     </FrameLayout>
 

@@ -3,11 +3,14 @@ package com.example.phonestore.ui.checkout;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.regex.Pattern;
 
 import com.example.phonestore.R;
 import com.example.phonestore.data.dao.CartDao;
@@ -24,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class CheckoutActivity extends BaseHomeActivity {
+
+    private static final Pattern NON_DIGIT_PATTERN = Pattern.compile("[^0-9]");
 
     public static final String EXTRA_BUY_NOW_PRODUCT_ID = "extra_buy_now_product_id";
     public static final String EXTRA_BUY_NOW_QTY = "extra_buy_now_qty";
@@ -78,6 +83,14 @@ public class CheckoutActivity extends BaseHomeActivity {
         edtDiscountCode = findViewById(R.id.edtDiscountCode);
         rbCod = findViewById(R.id.rbCod);
         rbBank = findViewById(R.id.rbChuyenKhoan);
+
+        edtPhone.setFilters(new InputFilter[]{
+                (source, start, end, dest, dstart, dend) -> {
+                    String filtered = NON_DIGIT_PATTERN.matcher(source).replaceAll("");
+                    return filtered.equals(source.toString()) ? null : filtered;
+                },
+                new InputFilter.LengthFilter(10)
+        });
 
         long[] selectedIds = getIntent().getLongArrayExtra(CartActivity.EXTRA_SELECTED_CART_ITEM_IDS);
         if (selectedIds != null) {

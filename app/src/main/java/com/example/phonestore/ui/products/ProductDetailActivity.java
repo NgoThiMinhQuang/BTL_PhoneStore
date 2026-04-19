@@ -26,6 +26,7 @@ import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.checkout.CheckoutActivity;
 import com.example.phonestore.ui.home.BaseHomeActivity;
 import com.example.phonestore.utils.InventoryPolicy;
+import com.example.phonestore.utils.ProductImageLoader;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
@@ -87,15 +88,7 @@ public class ProductDetailActivity extends BaseHomeActivity {
         MaterialButton btnAdd = findViewById(R.id.btnAddToCart);
         MaterialButton btnBuyNow = findViewById(R.id.btnBuyNow);
 
-        int resId = 0;
-        if (product.tenAnh != null && !product.tenAnh.trim().isEmpty()) {
-            String imageKey = product.tenAnh.trim();
-            resId = getResources().getIdentifier(imageKey, "drawable", getPackageName());
-            if (resId == 0) {
-                resId = getResources().getIdentifier(imageKey, "mipmap", getPackageName());
-            }
-        }
-        iv.setImageResource(resId != 0 ? resId : android.R.drawable.ic_menu_gallery);
+        ProductImageLoader.load(iv, product.tenAnh, product.tenSanPham, product.hang);
 
         String brand = (product.hang == null || product.hang.trim().isEmpty()) ? "PhoneStore" : product.hang.trim();
         tvName.setText(product.tenSanPham);
@@ -197,6 +190,17 @@ public class ProductDetailActivity extends BaseHomeActivity {
     @Override
     protected int toolbarMenuRes() {
         return R.menu.menu_product_detail_actions;
+    }
+
+    @Override
+    protected void onShellReady() {
+        super.onShellReady();
+        View contentContainer = findViewById(R.id.homeContentContainer);
+        if (contentContainer != null) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentContainer.getLayoutParams();
+            params.topMargin = getResources().getDimensionPixelSize(R.dimen.header_red_height);
+            contentContainer.setLayoutParams(params);
+        }
     }
 
     private String formatMoney(int value) {

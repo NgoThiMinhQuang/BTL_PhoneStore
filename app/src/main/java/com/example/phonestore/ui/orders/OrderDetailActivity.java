@@ -1,5 +1,6 @@
 package com.example.phonestore.ui.orders;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -41,6 +42,8 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     private final ArrayList<String> availableOrderStatuses = new ArrayList<>();
     private final ArrayList<String> availablePaymentStatuses = new ArrayList<>();
+    private final ArrayList<String> allOrderStatuses = new ArrayList<>();
+    private final ArrayList<String> allPaymentStatuses = new ArrayList<>();
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
@@ -83,12 +86,10 @@ public class OrderDetailActivity extends BaseHomeActivity {
     private TextView tvPaymentActionHint;
     private Spinner spinnerOrderStatus;
     private Spinner spinnerPaymentStatus;
-    private MaterialButton btnUpdateOrderStatus;
-    private MaterialButton btnUpdatePaymentStatus;
+    private MaterialButton btnUpdateStatus;
     private View cardStatusUpdate;
     private View cardStatusCompleted;
     private View cardCancelledStatus;
-    private View viewStatusDivider;
     private LinearLayout layoutOrderStatusAction;
     private LinearLayout layoutPaymentStatusAction;
 
@@ -113,8 +114,19 @@ public class OrderDetailActivity extends BaseHomeActivity {
             cardStatusUpdate.setVisibility(View.GONE);
         }
 
-        btnUpdateOrderStatus.setOnClickListener(v -> updateOrderStatus());
-        btnUpdatePaymentStatus.setOnClickListener(v -> updatePaymentStatus());
+        btnUpdateStatus.setOnClickListener(v -> confirmUpdateStatuses());
+
+        allOrderStatuses.clear();
+        allOrderStatuses.add(OrderStatus.STATUS_CHO_XAC_NHAN);
+        allOrderStatuses.add(OrderStatus.STATUS_DANG_XU_LY);
+        allOrderStatuses.add(OrderStatus.STATUS_DA_GIAO);
+        allOrderStatuses.add(OrderStatus.STATUS_DA_HUY);
+
+        allPaymentStatuses.clear();
+        allPaymentStatuses.add(PaymentStatus.STATUS_CHUA_THANH_TOAN);
+        allPaymentStatuses.add(PaymentStatus.STATUS_CHO_THANH_TOAN);
+        allPaymentStatuses.add(PaymentStatus.STATUS_DA_THANH_TOAN);
+        allPaymentStatuses.add(PaymentStatus.STATUS_HET_HAN_THANH_TOAN);
 
         loadOrder(true);
     }
@@ -230,12 +242,10 @@ public class OrderDetailActivity extends BaseHomeActivity {
         tvPaymentActionHint = findViewById(R.id.tvPaymentActionHint);
         spinnerOrderStatus = findViewById(R.id.spinnerOrderStatus);
         spinnerPaymentStatus = findViewById(R.id.spinnerPaymentStatus);
-        btnUpdateOrderStatus = findViewById(R.id.btnUpdateOrderStatus);
-        btnUpdatePaymentStatus = findViewById(R.id.btnUpdatePaymentStatus);
+        btnUpdateStatus = findViewById(R.id.btnUpdateStatus);
         cardStatusUpdate = findViewById(R.id.cardStatusUpdate);
         cardStatusCompleted = findViewById(R.id.cardStatusCompleted);
         cardCancelledStatus = findViewById(R.id.cardCancelledStatus);
-        viewStatusDivider = findViewById(R.id.viewStatusDivider);
         layoutOrderStatusAction = findViewById(R.id.layoutOrderStatusAction);
         layoutPaymentStatusAction = findViewById(R.id.layoutPaymentStatusAction);
     }
@@ -339,35 +349,56 @@ public class OrderDetailActivity extends BaseHomeActivity {
         bindStatusControls(order);
     }
 
-    private void updateOrderStatus() {
-        int selectedIndex = spinnerOrderStatus.getSelectedItemPosition();
-        if (selectedIndex < 0 || selectedIndex >= availableOrderStatuses.size()) {
+    private void confirmUpdateStatuses() {
+        int orderIndex = spinnerOrderStatus.getSelectedItemPosition();
+        int paymentIndex = spinnerPaymentStatus.getSelectedItemPosition();
+
+        final String nextOrderStatus = (orderIndex >= 0 && orderIndex < availableOrderStatuses.size())
+                ? availableOrderStatuses.get(orderIndex) : null;
+        final String nextPaymentStatus = (paymentIndex >= 0 && paymentIndex < availablePaymentStatuses.size())
+                ? availablePaymentStatuses.get(paymentIndex) : null;
+
+        if (nextOrderStatus == null && nextPaymentStatus == null) {
             return;
         }
 
-        boolean ok = orderDao.updateOrderStatus(orderId, availableOrderStatuses.get(selectedIndex));
-        if (!ok) {
-            Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
-            return;
+        StringBuilder message = new StringBuilder("Bạn có chắc chắn muốn thay đổi");
+        if (nextOrderStatus != null) {
+            message.append("\n- Trạng thái đơn hàng: ")
+                    .append(OrdersAdapter.formatOrderStatus(this, nextOrderStatus));
+        }
+        if (nextPaymentStatus != null) {
+            message.append("\n- Trạng thái thanh toán: ")
+                    .append(OrdersAdapter.formatPaymentStatus(this, nextPaymentStatus));
+        }
+        message.append("\nkhông?");
+
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận cập nhật")
+                .setMessage(message.toString())
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.update_order_status, (dialog, which) -> applyStatusUpdates(nextOrderStatus, nextPaymentStatus))
+                .show();
+    }
+
+    private void applyStatusUpdates(String nextOrderStatus, String nextPaymentStatus) {
+        if (nextOrderStatus != null) {
+            boolean ok = orderDao.updateOrderStatus(orderId, nextOrderStatus);
+            if (!ok) {
+                Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        if (nextPaymentStatus != null) {
+            boolean ok = orderDao.updatePaymentStatus(orderId, nextPaymentStatus);
+            if (!ok) {
+                Toast.makeText(this, R.string.payment_status_update_failed, Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         Toast.makeText(this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
-        loadOrder(true);
-    }
-
-    private void updatePaymentStatus() {
-        int selectedIndex = spinnerPaymentStatus.getSelectedItemPosition();
-        if (selectedIndex < 0 || selectedIndex >= availablePaymentStatuses.size()) {
-            return;
-        }
-
-        boolean ok = orderDao.updatePaymentStatus(orderId, availablePaymentStatuses.get(selectedIndex));
-        if (!ok) {
-            Toast.makeText(this, R.string.payment_status_update_failed, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Toast.makeText(this, R.string.payment_status_updated, Toast.LENGTH_SHORT).show();
         loadOrder(true);
     }
 
@@ -380,21 +411,25 @@ public class OrderDetailActivity extends BaseHomeActivity {
         cardStatusUpdate.setVisibility(View.VISIBLE);
         availableOrderStatuses.clear();
         availablePaymentStatuses.clear();
-        availableOrderStatuses.addAll(orderDao.getAllowedNextOrderStatuses(order));
-        availablePaymentStatuses.addAll(orderDao.getAllowedNextPaymentStatuses(order));
+        availableOrderStatuses.addAll(allOrderStatuses);
+        availablePaymentStatuses.addAll(allPaymentStatuses);
 
         boolean finalState = orderDao.isFinalOrderStatus(order.trangThaiDon);
-        boolean hasOrderActions = !availableOrderStatuses.isEmpty();
-        boolean hasPaymentActions = !availablePaymentStatuses.isEmpty();
+        boolean hasOrderActions = true;
+        boolean hasPaymentActions = true;
 
         bindActionHeader(order, finalState, hasOrderActions, hasPaymentActions);
         bindOrderStatusControls(order, hasOrderActions);
         bindPaymentStatusControls(order, hasPaymentActions);
         bindCompletedState(order, finalState);
 
-        layoutOrderStatusAction.setVisibility(!finalState && hasOrderActions ? View.VISIBLE : View.GONE);
-        layoutPaymentStatusAction.setVisibility(!finalState && hasPaymentActions ? View.VISIBLE : View.GONE);
-        viewStatusDivider.setVisibility(!finalState && hasOrderActions && hasPaymentActions ? View.VISIBLE : View.GONE);
+        boolean showActions = !finalState && (hasOrderActions || hasPaymentActions);
+        layoutOrderStatusAction.setVisibility(!finalState ? View.VISIBLE : View.GONE);
+        layoutPaymentStatusAction.setVisibility(!finalState ? View.VISIBLE : View.GONE);
+        if (btnUpdateStatus != null) {
+            btnUpdateStatus.setVisibility(showActions ? View.VISIBLE : View.GONE);
+            btnUpdateStatus.setEnabled(showActions);
+        }
     }
 
     private void bindActionHeader(Order order, boolean finalState, boolean hasOrderActions, boolean hasPaymentActions) {
@@ -472,10 +507,12 @@ public class OrderDetailActivity extends BaseHomeActivity {
         );
         spinnerAdapter.setDropDownViewResource(dropdownLayout);
         spinnerOrderStatus.setAdapter(spinnerAdapter);
+        int currentIndex = availableOrderStatuses.indexOf(order.trangThaiDon);
+        if (currentIndex >= 0) {
+            spinnerOrderStatus.setSelection(currentIndex, false);
+        }
 
         spinnerOrderStatus.setEnabled(enabled);
-        btnUpdateOrderStatus.setEnabled(enabled);
-        btnUpdateOrderStatus.setText(R.string.update_order_status);
         tvOrderActionHint.setText(getOrderActionHint(order, enabled));
     }
 
@@ -494,10 +531,12 @@ public class OrderDetailActivity extends BaseHomeActivity {
         );
         spinnerAdapter.setDropDownViewResource(dropdownLayout);
         spinnerPaymentStatus.setAdapter(spinnerAdapter);
+        int currentIndex = availablePaymentStatuses.indexOf(order.trangThaiThanhToan);
+        if (currentIndex >= 0) {
+            spinnerPaymentStatus.setSelection(currentIndex, false);
+        }
 
         spinnerPaymentStatus.setEnabled(enabled);
-        btnUpdatePaymentStatus.setEnabled(enabled);
-        btnUpdatePaymentStatus.setText(R.string.update_payment_status);
         tvPaymentActionHint.setText(getPaymentActionHint(order, enabled));
     }
 

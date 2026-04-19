@@ -393,20 +393,15 @@
 
                 <TextView
                     android:id="@+id/tvActionHeadline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textColor="@color/admin_text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvActionSummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:textColor="@color/admin_text_secondary"
-                    android:textSize="13sp" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardStatusCompleted"
@@ -461,19 +456,15 @@
 
                     <TextView
                         android:id="@+id/tvOrderStatusCurrent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="@color/admin_text_secondary"
-                        android:textSize="13sp" />
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tvOrderActionHint"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/admin_text_secondary"
-                        android:textSize="13sp" />
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
 
                     <Spinner
                         android:id="@+id/spinnerOrderStatus"
@@ -485,30 +476,13 @@
                         android:popupBackground="@drawable/bg_spinner_dropdown_admin"
                         android:spinnerMode="dropdown" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUpdateOrderStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="14dp"
-                        android:text="@string/update_order_status"
-                        android:textAllCaps="false"
-                        android:textColor="@android:color/white"
-                        app:backgroundTint="@color/admin_primary"
-                        app:cornerRadius="22dp" />
                 </LinearLayout>
-
-                <View
-                    android:id="@+id/viewStatusDivider"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="18dp"
-                    android:background="@color/admin_stroke" />
 
                 <LinearLayout
                     android:id="@+id/layoutPaymentStatusAction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="20dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -521,19 +495,15 @@
 
                     <TextView
                         android:id="@+id/tvPaymentStatusCurrent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="@color/admin_text_secondary"
-                        android:textSize="13sp" />
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tvPaymentActionHint"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/admin_text_secondary"
-                        android:textSize="13sp" />
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
 
                     <Spinner
                         android:id="@+id/spinnerPaymentStatus"
@@ -545,17 +515,20 @@
                         android:popupBackground="@drawable/bg_spinner_dropdown_admin"
                         android:spinnerMode="dropdown" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUpdatePaymentStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="14dp"
-                        android:text="@string/update_payment_status"
-                        android:textAllCaps="false"
-                        android:textColor="@android:color/white"
-                        app:backgroundTint="@color/admin_primary"
-                        app:cornerRadius="22dp" />
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnUpdateStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/update_order_status"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/admin_primary"
+                    app:cornerRadius="26dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

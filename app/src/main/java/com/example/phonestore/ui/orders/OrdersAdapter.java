@@ -1,7 +1,10 @@
 package com.example.phonestore.ui.orders;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +26,52 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
+public class OrdersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int VIEW_TYPE_SECTION = 0;
+    private static final int VIEW_TYPE_ORDER_CUSTOMER = 1;
+    private static final int VIEW_TYPE_ORDER_ADMIN = 2;
 
     public interface Listener {
         void onClick(Order order);
     }
 
-    private final ArrayList<Order> data = new ArrayList<>();
+    private final ArrayList<Object> data = new ArrayList<>();
     private final Listener listener;
     private boolean adminMode = false;
+
+    private static class SectionItem {
+        final String title;
+
+        SectionItem(String title) {
+            this.title = title;
+        }
+    }
+
+    static class SectionVH extends RecyclerView.ViewHolder {
+        TextView tvSectionTitle;
+
+        SectionVH(@NonNull View itemView) {
+            super(itemView);
+            tvSectionTitle = (TextView) itemView;
+        }
+    }
+
+    static class OrderVH extends RecyclerView.ViewHolder {
+        TextView tvTitle, tvSub, tvMeta, tvTotal, tvStatusChip, tvPaymentChip;
+        MaterialButton btnUpdateStatus;
+
+        OrderVH(@NonNull View itemView) {
+            super(itemView);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvSub = itemView.findViewById(R.id.tvSub);
+            tvMeta = itemView.findViewById(R.id.tvMeta);
+            tvTotal = itemView.findViewById(R.id.tvTotal);
+            tvStatusChip = itemView.findViewById(R.id.tvStatusChip);
+            tvPaymentChip = itemView.findViewById(R.id.tvPaymentChip);
+            btnUpdateStatus = itemView.findViewById(R.id.btnUpdateStatus);
+        }
+    }
 
     public OrdersAdapter(Listener listener) {
         this.listener = listener;
@@ -39,22 +79,53 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
 
     public void setData(ArrayList<Order> list, boolean adminMode) {
         data.clear();
-        data.addAll(list);
         this.adminMode = adminMode;
+
+        if (adminMode) {
+            data.addAll(list);
+        } else {
+            appendSection("Đơn đang xử lý", filterByStatus(list, OrderStatus.STATUS_CHO_XAC_NHAN, OrderStatus.STATUS_DANG_XU_LY));
+            appendSection("Đơn hoàn thành", filterByStatus(list, OrderStatus.STATUS_DA_GIAO));
+            appendSection("Đơn đã hủy", filterByStatus(list, OrderStatus.STATUS_DA_HUY));
+        }
+
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layoutRes = viewType == 1 ? R.layout.item_order_admin : R.layout.item_order_customer;
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SECTION) {
+            TextView tv = new TextView(parent.getContext());
+            RecyclerView.LayoutParams params = new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            params.topMargin = dp(parent.getContext(), 10);
+            params.bottomMargin = dp(parent.getContext(), 6);
+            tv.setLayoutParams(params);
+            tv.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.text_primary));
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+            tv.setTypeface(Typeface.DEFAULT_BOLD);
+            tv.setGravity(Gravity.START);
+            return new SectionVH(tv);
+        }
+
+        int layoutRes = viewType == VIEW_TYPE_ORDER_ADMIN ? R.layout.item_order_admin : R.layout.item_order_customer;
         View v = LayoutInflater.from(parent.getContext()).inflate(layoutRes, parent, false);
-        return new VH(v);
+        return new OrderVH(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH h, int position) {
-        Order o = data.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        Object item = data.get(position);
+        if (holder instanceof SectionVH) {
+            ((SectionVH) holder).tvSectionTitle.setText(((SectionItem) item).title);
+            return;
+        }
+
+        OrderVH h = (OrderVH) holder;
+        Order o = (Order) item;
         Context context = h.itemView.getContext();
 
         String total = context.getString(
@@ -108,7 +179,30 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
 
     @Override
     public int getItemViewType(int position) {
-        return adminMode ? 1 : 0;
+        Object item = data.get(position);
+        if (item instanceof SectionItem) {
+            return VIEW_TYPE_SECTION;
+        }
+        return adminMode ? VIEW_TYPE_ORDER_ADMIN : VIEW_TYPE_ORDER_CUSTOMER;
+    }
+
+    private void appendSection(String title, ArrayList<Order> orders) {
+        if (orders.isEmpty()) return;
+        data.add(new SectionItem(title));
+        data.addAll(orders);
+    }
+
+    private ArrayList<Order> filterByStatus(ArrayList<Order> orders, String... statuses) {
+        ArrayList<Order> result = new ArrayList<>();
+        for (Order order : orders) {
+            for (String status : statuses) {
+                if (status.equals(order.trangThaiDon)) {
+                    result.add(order);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     public static String formatOrderStatus(Context context, String status) {
@@ -207,19 +301,4 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.VH> {
         return Math.round(context.getResources().getDisplayMetrics().density * value);
     }
 
-    static class VH extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvSub, tvMeta, tvTotal, tvStatusChip, tvPaymentChip;
-        MaterialButton btnUpdateStatus;
-
-        VH(@NonNull View itemView) {
-            super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvSub = itemView.findViewById(R.id.tvSub);
-            tvMeta = itemView.findViewById(R.id.tvMeta);
-            tvTotal = itemView.findViewById(R.id.tvTotal);
-            tvStatusChip = itemView.findViewById(R.id.tvStatusChip);
-            tvPaymentChip = itemView.findViewById(R.id.tvPaymentChip);
-            btnUpdateStatus = itemView.findViewById(R.id.btnUpdateStatus);
-        }
-    }
 }
