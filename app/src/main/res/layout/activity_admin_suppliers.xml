@@ -17,7 +17,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/header_red_height"
-            android:background="@drawable/bg_toolbar_supplier" />
+            android:background="@drawable/bg_toolbar_supplier"
+            android:elevation="4dp" />
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"

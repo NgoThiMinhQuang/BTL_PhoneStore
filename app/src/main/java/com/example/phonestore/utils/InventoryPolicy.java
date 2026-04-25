@@ -84,9 +84,6 @@ public final class InventoryPolicy {
         return context.getString(R.string.product_stock_ok, Math.max(0, stock));
     }
 
-    public static int getLowStockThreshold() {
-        return LOW_STOCK_THRESHOLD;
-    }
 
     public static final class StatusAppearance {
         public final String status;

@@ -262,14 +262,6 @@ public class AdminReceiptEditorActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvTotalAmount)).setText(ReceiptUiFormatter.formatCurrency(this, adapter.getTotalAmount()));
     }
 
-    private Supplier getSelectedSupplier() {
-        Spinner spSupplier = findViewById(R.id.spSupplier);
-        int position = spSupplier == null ? 0 : spSupplier.getSelectedItemPosition();
-        if (position < 0 || position >= suppliers.size()) {
-            return null;
-        }
-        return suppliers.get(position);
-    }
 
     private int parsePositiveInt(String value) {
         if (value == null || value.trim().isEmpty()) {

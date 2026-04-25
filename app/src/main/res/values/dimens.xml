@@ -2,6 +2,6 @@
 <resources>
     <dimen name="header_red_height">100dp</dimen>
     <dimen name="header_customer_content_offset">60dp</dimen>
-    <dimen name="header_admin_content_offset">60dp</dimen>
-    <dimen name="header_panel_pull_up">20dp</dimen>
+    <dimen name="header_admin_content_offset">100dp</dimen>
+    <dimen name="header_panel_pull_up">-34dp</dimen>
 </resources>

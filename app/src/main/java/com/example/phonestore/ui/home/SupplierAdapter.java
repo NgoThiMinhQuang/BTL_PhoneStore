@@ -32,9 +32,6 @@ public class SupplierAdapter extends RecyclerView.Adapter<SupplierAdapter.VH> {
     private final ArrayList<Supplier> data = new ArrayList<>();
     private final Listener listener;
 
-    SupplierAdapter(Listener listener) {
-        this.listener = listener;
-    }
 
     SupplierAdapter(OnClick click, OnLongClick longClick) {
         this.listener = new Listener() {

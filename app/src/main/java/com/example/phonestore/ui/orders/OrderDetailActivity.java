@@ -110,11 +110,13 @@ public class OrderDetailActivity extends BaseHomeActivity {
         setupRecyclerView();
         setupSpinners();
 
-        if (!isAdminDetail()) {
+        if (isAdminDetail()) {
+            if (btnUpdateStatus != null) {
+                btnUpdateStatus.setOnClickListener(v -> confirmUpdateStatuses());
+            }
+        } else if (cardStatusUpdate != null) {
             cardStatusUpdate.setVisibility(View.GONE);
         }
-
-        btnUpdateStatus.setOnClickListener(v -> confirmUpdateStatuses());
 
         allOrderStatuses.clear();
         allOrderStatuses.add(OrderStatus.STATUS_CHO_XAC_NHAN);

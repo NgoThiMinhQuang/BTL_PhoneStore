@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="88dp"
             android:background="@android:color/transparent"
-            android:elevation="0dp"
+            android:elevation="8dp"
             android:gravity="center_vertical"
             android:minHeight="88dp"
             android:paddingStart="18dp"

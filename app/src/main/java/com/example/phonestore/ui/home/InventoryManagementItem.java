@@ -38,14 +38,4 @@ public class InventoryManagementItem {
         this.status = status;
     }
 
-    InventoryManagementItem(long productId,
-                            String productName,
-                            String brand,
-                            int currentStock,
-                            int minimumStock,
-                            int totalImport,
-                            int totalExport,
-                            String status) {
-        this(productId, productName, brand, null, currentStock, minimumStock, totalImport, totalExport, status);
-    }
 }

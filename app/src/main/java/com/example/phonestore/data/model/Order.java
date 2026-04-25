@@ -35,11 +35,4 @@ public class Order {
         return paymentDeadline > 0;
     }
 
-    public boolean isRefundPending() {
-        return REFUND_STATUS_CHO_HOAN_TIEN.equals(refundStatus);
-    }
-
-    public boolean isRefunded() {
-        return REFUND_STATUS_DA_HOAN_TIEN.equals(refundStatus);
-    }
 }

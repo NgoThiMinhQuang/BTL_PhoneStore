@@ -36,8 +36,4 @@ public class CheckoutInfo {
         return 0;
     }
 
-    public static int calculateFinalTotal(int subtotal, String rawCode) {
-        int discount = calculateDiscount(rawCode, subtotal);
-        return Math.max(0, subtotal + SHIPPING_FEE - discount);
-    }
 }
