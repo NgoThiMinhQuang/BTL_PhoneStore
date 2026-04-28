@@ -38,7 +38,6 @@ public class ProductDao {
 
         public boolean canDeactivate() {
             return product != null
-                    && !alreadyInactive
                     && currentStock <= 0
                     && activeCartCount <= 0
                     && openOrderCount <= 0;
@@ -219,6 +218,21 @@ public class ProductDao {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         return db.update(DBHelper.TBL_PRODUCTS, toValues(p),
                 DBHelper.COL_ID + "=?", new String[]{String.valueOf(p.maSanPham)}) > 0;
+    }
+
+    public boolean setActive(long id, boolean active) {
+        Product product = getById(id, true);
+        if (product == null) {
+            return false;
+        }
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.COL_IS_ACTIVE, active ? 1 : 0);
+        return db.update(DBHelper.TBL_PRODUCTS,
+                values,
+                DBHelper.COL_ID + "=?",
+                new String[]{String.valueOf(id)}) > 0;
     }
 
     public boolean delete(long id) {

@@ -94,6 +94,18 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
+        bindQuickActions();
+        bindInventoryShortcut();
+        loadDashboardData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDashboardData();
+    }
+
+    private void loadDashboardData() {
         if (orderDao == null || productDao == null || userDao == null) return;
 
         ArrayList<Order> orders = orderDao.getAllOrders();
@@ -102,8 +114,6 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
         bindKpis(orders, products, revenueByMonth);
         bindRevenueChart(revenueByMonth);
-        bindQuickActions();
-        bindInventoryShortcut();
         bindRecentOrders(orders);
     }
 

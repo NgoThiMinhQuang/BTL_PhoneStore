@@ -1,6 +1,7 @@
 package com.example.phonestore.ui.admin;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
@@ -24,6 +26,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
 
     public interface Listener {
         void onEdit(Product product);
+        void onToggleSale(Product product);
         void onDelete(Product product);
     }
 
@@ -80,9 +83,11 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
             h.tvDiscount.setVisibility(View.GONE);
         }
 
-        bindStatus(context, h, p.tonKho);
+        bindStatus(context, h, p);
+        bindSaleAction(context, h, p);
 
         h.btnEdit.setOnClickListener(v -> listener.onEdit(p));
+        h.btnToggleSale.setOnClickListener(v -> listener.onToggleSale(p));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(p));
     }
 
@@ -91,19 +96,39 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
         return data.size();
     }
 
-    private void bindStatus(Context context, VH h, int stock) {
-        InventoryPolicy.StatusAppearance appearance = InventoryPolicy.getAppearance(context, stock);
+    private void bindStatus(Context context, VH h, Product product) {
+        if (!product.isActive) {
+            h.tvStatus.setText(R.string.admin_product_status_stopped);
+            h.tvStatus.setTextColor(ContextCompat.getColor(context, R.color.admin_text_secondary));
+            h.tvStatus.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.admin_product_status_stopped_bg)));
+            h.tvStock.setTextColor(ContextCompat.getColor(context, R.color.admin_text_secondary));
+            return;
+        }
+
+        InventoryPolicy.StatusAppearance appearance = InventoryPolicy.getAppearance(context, product.tonKho);
         h.tvStatus.setText(appearance.label);
         h.tvStatus.setTextColor(appearance.labelColor);
         h.tvStatus.setBackgroundTintList(appearance.labelBackgroundTint);
         h.tvStock.setTextColor(appearance.stockColor);
     }
 
+    private void bindSaleAction(Context context, VH h, Product product) {
+        if (product.isActive) {
+            h.btnToggleSale.setContentDescription(context.getString(R.string.admin_stop_selling_product_action));
+            h.btnToggleSale.setIconResource(R.drawable.ic_stop_selling);
+            h.btnToggleSale.setIconTint(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.admin_warning)));
+            return;
+        }
+
+        h.btnToggleSale.setContentDescription(context.getString(R.string.admin_resume_selling_product_action));
+        h.btnToggleSale.setIconResource(R.drawable.ic_resume_selling);
+        h.btnToggleSale.setIconTint(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.admin_success)));
+    }
 
     static class VH extends RecyclerView.ViewHolder {
         ImageView ivThumb;
         TextView tvName, tvBrand, tvId, tvDesc, tvPrice, tvStock, tvDiscount, tvStatus;
-        MaterialButton btnEdit, btnDelete;
+        MaterialButton btnEdit, btnToggleSale, btnDelete;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -117,6 +142,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             btnEdit = itemView.findViewById(R.id.btnEdit);
+            btnToggleSale = itemView.findViewById(R.id.btnToggleSale);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

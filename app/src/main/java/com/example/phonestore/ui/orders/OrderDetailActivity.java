@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -42,8 +43,6 @@ public class OrderDetailActivity extends BaseHomeActivity {
 
     private final ArrayList<String> availableOrderStatuses = new ArrayList<>();
     private final ArrayList<String> availablePaymentStatuses = new ArrayList<>();
-    private final ArrayList<String> allOrderStatuses = new ArrayList<>();
-    private final ArrayList<String> allPaymentStatuses = new ArrayList<>();
 
     private OrderDao orderDao;
     private OrderItemsAdapter adapter;
@@ -117,18 +116,6 @@ public class OrderDetailActivity extends BaseHomeActivity {
         } else if (cardStatusUpdate != null) {
             cardStatusUpdate.setVisibility(View.GONE);
         }
-
-        allOrderStatuses.clear();
-        allOrderStatuses.add(OrderStatus.STATUS_CHO_XAC_NHAN);
-        allOrderStatuses.add(OrderStatus.STATUS_DANG_XU_LY);
-        allOrderStatuses.add(OrderStatus.STATUS_DA_GIAO);
-        allOrderStatuses.add(OrderStatus.STATUS_DA_HUY);
-
-        allPaymentStatuses.clear();
-        allPaymentStatuses.add(PaymentStatus.STATUS_CHUA_THANH_TOAN);
-        allPaymentStatuses.add(PaymentStatus.STATUS_CHO_THANH_TOAN);
-        allPaymentStatuses.add(PaymentStatus.STATUS_DA_THANH_TOAN);
-        allPaymentStatuses.add(PaymentStatus.STATUS_HET_HAN_THANH_TOAN);
 
         loadOrder(true);
     }
@@ -352,15 +339,38 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void confirmUpdateStatuses() {
+        Order order = orderDao.getOrderById(orderId);
+        if (order == null) {
+            Toast.makeText(this, R.string.order_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         int orderIndex = spinnerOrderStatus.getSelectedItemPosition();
         int paymentIndex = spinnerPaymentStatus.getSelectedItemPosition();
 
-        final String nextOrderStatus = (orderIndex >= 0 && orderIndex < availableOrderStatuses.size())
+        final String selectedOrderStatus = (orderIndex >= 0 && orderIndex < availableOrderStatuses.size())
                 ? availableOrderStatuses.get(orderIndex) : null;
-        final String nextPaymentStatus = (paymentIndex >= 0 && paymentIndex < availablePaymentStatuses.size())
+        final String selectedPaymentStatus = (paymentIndex >= 0 && paymentIndex < availablePaymentStatuses.size())
                 ? availablePaymentStatuses.get(paymentIndex) : null;
+        final String nextOrderStatus = TextUtils.equals(selectedOrderStatus, order.trangThaiDon) ? null : selectedOrderStatus;
+        final String nextPaymentStatus = TextUtils.equals(selectedPaymentStatus, order.trangThaiThanhToan) ? null : selectedPaymentStatus;
 
         if (nextOrderStatus == null && nextPaymentStatus == null) {
+            Toast.makeText(this, R.string.order_status_no_change, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (isBankTransfer(order)
+                && OrderStatus.STATUS_DA_GIAO.equals(nextOrderStatus)
+                && PaymentStatus.STATUS_CHO_THANH_TOAN.equals(order.trangThaiThanhToan)
+                && !PaymentStatus.STATUS_DA_THANH_TOAN.equals(nextPaymentStatus)) {
+            Toast.makeText(this, R.string.order_status_requires_paid, Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (isCod(order)
+                && PaymentStatus.STATUS_DA_THANH_TOAN.equals(nextPaymentStatus)
+                && !OrderStatus.STATUS_DA_GIAO.equals(nextOrderStatus)) {
+            Toast.makeText(this, R.string.payment_status_cod_requires_delivered, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -384,24 +394,54 @@ public class OrderDetailActivity extends BaseHomeActivity {
     }
 
     private void applyStatusUpdates(String nextOrderStatus, String nextPaymentStatus) {
-        if (nextOrderStatus != null) {
-            boolean ok = orderDao.updateOrderStatus(orderId, nextOrderStatus);
+        Order order = orderDao.getOrderById(orderId);
+        if (order == null) {
+            Toast.makeText(this, R.string.order_not_found, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        boolean codDeliveryWillMarkPaid = isCod(order)
+                && OrderStatus.STATUS_DA_GIAO.equals(nextOrderStatus)
+                && PaymentStatus.STATUS_DA_THANH_TOAN.equals(nextPaymentStatus);
+        if (nextPaymentStatus != null && !codDeliveryWillMarkPaid) {
+            boolean ok = orderDao.updatePaymentStatus(orderId, nextPaymentStatus);
             if (!ok) {
-                Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.payment_status_update_failed, Toast.LENGTH_SHORT).show();
+                loadOrder(true);
                 return;
             }
         }
 
-        if (nextPaymentStatus != null) {
-            boolean ok = orderDao.updatePaymentStatus(orderId, nextPaymentStatus);
-            if (!ok) {
-                Toast.makeText(this, R.string.payment_status_update_failed, Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (nextOrderStatus != null && !updateOrderStatusToTarget(nextOrderStatus)) {
+            Toast.makeText(this, R.string.order_status_update_failed, Toast.LENGTH_SHORT).show();
+            loadOrder(true);
+            return;
         }
 
         Toast.makeText(this, R.string.order_status_updated, Toast.LENGTH_SHORT).show();
         loadOrder(true);
+    }
+
+    private boolean updateOrderStatusToTarget(String targetStatus) {
+        Order order = orderDao.getOrderById(orderId);
+        if (order == null) {
+            return false;
+        }
+        if (TextUtils.equals(order.trangThaiDon, targetStatus)) {
+            return true;
+        }
+
+        if (OrderStatus.STATUS_DA_GIAO.equals(targetStatus)
+                && OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
+            if (!orderDao.updateOrderStatus(orderId, OrderStatus.STATUS_DANG_XU_LY)) {
+                return false;
+            }
+            order = orderDao.getOrderById(orderId);
+            return order != null && orderDao.updateOrderStatus(orderId, OrderStatus.STATUS_DA_GIAO);
+        }
+
+        return orderDao.updateOrderStatus(orderId, targetStatus);
     }
 
     private void bindStatusControls(Order order) {
@@ -413,16 +453,25 @@ public class OrderDetailActivity extends BaseHomeActivity {
         cardStatusUpdate.setVisibility(View.VISIBLE);
         availableOrderStatuses.clear();
         availablePaymentStatuses.clear();
-        availableOrderStatuses.addAll(allOrderStatuses);
-        availablePaymentStatuses.addAll(allPaymentStatuses);
+        availableOrderStatuses.add(order.trangThaiDon);
+        availableOrderStatuses.addAll(orderDao.getAllowedNextOrderStatuses(order));
+        if (canCompleteFromPendingInOneAction(order)) {
+            availableOrderStatuses.add(OrderStatus.STATUS_DA_GIAO);
+        }
+        availablePaymentStatuses.add(order.trangThaiThanhToan);
+        availablePaymentStatuses.addAll(orderDao.getAllowedNextPaymentStatuses(order));
+        if (isCod(order) && OrderStatus.STATUS_DA_GIAO.equals(order.trangThaiDon)
+                && !PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)) {
+            availablePaymentStatuses.add(PaymentStatus.STATUS_DA_THANH_TOAN);
+        }
 
         boolean finalState = orderDao.isFinalOrderStatus(order.trangThaiDon);
-        boolean hasOrderActions = true;
-        boolean hasPaymentActions = true;
+        boolean hasOrderActions = availableOrderStatuses.size() > 1;
+        boolean hasPaymentActions = availablePaymentStatuses.size() > 1;
 
         bindActionHeader(order, finalState, hasOrderActions, hasPaymentActions);
-        bindOrderStatusControls(order, hasOrderActions);
-        bindPaymentStatusControls(order, hasPaymentActions);
+        bindOrderStatusControls(order, !finalState && hasOrderActions);
+        bindPaymentStatusControls(order, !finalState && hasPaymentActions);
         bindCompletedState(order, finalState);
 
         boolean showActions = !finalState && (hasOrderActions || hasPaymentActions);
@@ -469,6 +518,17 @@ public class OrderDetailActivity extends BaseHomeActivity {
             tvActionHeadline.setText(R.string.order_admin_read_only_title);
             tvActionSummary.setText(R.string.order_admin_read_only_summary);
         }
+    }
+
+    private boolean canCompleteFromPendingInOneAction(Order order) {
+        if (order == null || !OrderStatus.STATUS_CHO_XAC_NHAN.equals(order.trangThaiDon)) {
+            return false;
+        }
+        if (isCod(order)) {
+            return true;
+        }
+        return PaymentStatus.STATUS_DA_THANH_TOAN.equals(order.trangThaiThanhToan)
+                || orderDao.canTransitionPayment(order, PaymentStatus.STATUS_DA_THANH_TOAN);
     }
 
     private void bindCompletedState(Order order, boolean finalState) {

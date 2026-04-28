@@ -53,6 +53,7 @@
     <color name="admin_product_status_low_bg">#FFEDD5</color>
     <color name="admin_product_status_empty">#B91C1C</color>
     <color name="admin_product_status_empty_bg">#FEE2E2</color>
+    <color name="admin_product_status_stopped_bg">#E5E7EB</color>
     <color name="admin_bottom_nav_active">#E11D48</color>
     <color name="admin_bottom_nav_inactive">#9CA3AF</color>
     <color name="admin_bottom_nav_indicator">#22E11D48</color>

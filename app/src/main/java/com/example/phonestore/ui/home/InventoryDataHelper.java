@@ -39,15 +39,19 @@ final class InventoryDataHelper {
 
     static InventoryManagementItem toInventoryItem(Context context, Product product, HashMap<Long, int[]> totalsByProduct) {
         int[] totals = totalsByProduct == null ? null : totalsByProduct.get(product.maSanPham);
+        int currentStock = Math.max(0, product.tonKho);
+        int historyImport = totals == null ? 0 : Math.max(0, totals[0]);
+        int totalExport = totals == null ? 0 : Math.max(0, totals[1]);
+        int totalImport = Math.max(historyImport, currentStock + totalExport);
         return new InventoryManagementItem(
                 product.maSanPham,
                 normalizeName(context, product.tenSanPham),
                 normalizeBrand(context, product.hang),
                 product.tenAnh,
-                Math.max(0, product.tonKho),
+                currentStock,
                 InventoryPolicy.LOW_STOCK_THRESHOLD,
-                totals == null ? 0 : totals[0],
-                totals == null ? 0 : totals[1],
+                totalImport,
+                totalExport,
                 InventoryPolicy.resolveStatus(product.tonKho)
         );
     }

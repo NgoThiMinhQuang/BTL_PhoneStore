@@ -46,6 +46,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
     private TextView tvTotalProducts;
     private TextView tvInStockProducts;
     private TextView tvLowStockProducts;
+    private TextView tvStoppedProducts;
     private TextView tvResultCount;
     private ActivityResultLauncher<String[]> imagePickerLauncher;
     private EditText activeImageField;
@@ -127,6 +128,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         tvTotalProducts = findViewById(R.id.tvTotalProducts);
         tvInStockProducts = findViewById(R.id.tvInStockProducts);
         tvLowStockProducts = findViewById(R.id.tvLowStockProducts);
+        tvStoppedProducts = findViewById(R.id.tvStoppedProducts);
         tvResultCount = findViewById(R.id.tvResultCount);
 
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
@@ -136,6 +138,11 @@ public class AdminProductsActivity extends BaseHomeActivity {
             @Override
             public void onEdit(Product product) {
                 showProductFormDialog(product);
+            }
+
+            @Override
+            public void onToggleSale(Product product) {
+                confirmToggleSale(product);
             }
 
             @Override
@@ -162,26 +169,13 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     private void loadData() {
-        ArrayList<Product> allProducts = filterActiveProducts(productDao.layTatCaChoAdmin());
+        ArrayList<Product> allProducts = productDao.layTatCaChoAdmin();
         String key = edtSearch.getText().toString().trim();
-        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : filterActiveProducts(productDao.timKiemChoAdmin(key));
+        ArrayList<Product> filteredProducts = key.isEmpty() ? allProducts : productDao.timKiemChoAdmin(key);
 
         adapter.setData(filteredProducts);
         updateDashboard(allProducts, filteredProducts);
         updateEmptyState(filteredProducts);
-    }
-
-    private ArrayList<Product> filterActiveProducts(ArrayList<Product> products) {
-        ArrayList<Product> activeProducts = new ArrayList<>();
-        if (products == null) {
-            return activeProducts;
-        }
-        for (Product product : products) {
-            if (product != null && product.isActive) {
-                activeProducts.add(product);
-            }
-        }
-        return activeProducts;
     }
 
     private void bindImagePreview(ImageView ivImagePreview,
@@ -240,10 +234,15 @@ public class AdminProductsActivity extends BaseHomeActivity {
         int total = allProducts == null ? 0 : allProducts.size();
         int inStock = 0;
         int lowStock = 0;
+        int stopped = 0;
 
         if (allProducts != null) {
             for (Product p : allProducts) {
-                if (p == null || !p.isActive) continue;
+                if (p == null) continue;
+                if (!p.isActive) {
+                    stopped++;
+                    continue;
+                }
                 if (!InventoryPolicy.isOutOfStock(p.tonKho)) inStock++;
                 if (InventoryPolicy.isLowStock(p)) lowStock++;
             }
@@ -252,6 +251,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         tvTotalProducts.setText(String.valueOf(total));
         tvInStockProducts.setText(String.valueOf(inStock));
         tvLowStockProducts.setText(String.valueOf(lowStock));
+        tvStoppedProducts.setText(String.valueOf(stopped));
 
         int resultCount = filteredProducts == null ? 0 : filteredProducts.size();
         tvResultCount.setText(getString(R.string.admin_product_results, resultCount));
@@ -434,6 +434,27 @@ public class AdminProductsActivity extends BaseHomeActivity {
         return null;
     }
 
+    private void confirmToggleSale(Product product) {
+        boolean stopSelling = product.isActive;
+        new AlertDialog.Builder(this)
+                .setTitle(stopSelling ? R.string.admin_stop_selling_product_title : R.string.admin_resume_selling_product_title)
+                .setMessage(getString(
+                        stopSelling ? R.string.admin_stop_selling_product_message : R.string.admin_resume_selling_product_message,
+                        product.tenSanPham
+                ))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(stopSelling ? R.string.admin_stop_selling_product_action : R.string.admin_resume_selling_product_action, (d, w) -> {
+                    boolean ok = productDao.setActive(product.maSanPham, !stopSelling);
+                    if (ok) {
+                        Toast.makeText(this, stopSelling ? R.string.product_stopped_selling : R.string.product_resumed_selling, Toast.LENGTH_SHORT).show();
+                        loadData();
+                    } else {
+                        Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
+    }
+
     private void confirmDelete(Product product) {
         ProductDao.ProductDeactivationCheck check = productDao.checkDeactivationEligibility(product.maSanPham);
         if (!check.canDeactivate()) {
@@ -460,9 +481,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
     private String buildDeactivateBlockedMessage(ProductDao.ProductDeactivationCheck check) {
         if (check == null || check.product == null) {
             return getString(R.string.action_failed);
-        }
-        if (check.alreadyInactive) {
-            return getString(R.string.admin_product_deactivate_blocked_inactive);
         }
         if (check.currentStock > 0) {
             return getString(R.string.admin_product_deactivate_blocked_stock, check.currentStock);

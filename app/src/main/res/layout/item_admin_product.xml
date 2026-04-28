@@ -158,6 +158,28 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleSale"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:contentDescription="@string/admin_stop_selling_product_action"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text=""
+                app:backgroundTint="@color/admin_product_action_bg"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_stop_selling"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="@color/admin_warning"
+                app:rippleColor="@color/admin_surface_soft"
+                app:strokeColor="@color/admin_stroke"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
                 android:layout_width="44dp"
                 android:layout_height="44dp"

@@ -40,6 +40,8 @@
     <string name="admin_customer_results_placeholder">Hiển thị 0 khách hàng</string>
 
     <string name="product_deleted">Đã xóa sản phẩm</string>
+    <string name="product_stopped_selling">Đã ngưng bán sản phẩm</string>
+    <string name="product_resumed_selling">Đã bán lại sản phẩm</string>
 
     <string name="save">Lưu</string>
     <string name="add">Thêm</string>
@@ -150,6 +152,9 @@
     <string name="orders_title_customer">Đơn hàng của tôi</string>
     <string name="order_status_update_failed">Cập nhật trạng thái đơn hàng thất bại</string>
     <string name="order_status_updated">Đã cập nhật trạng thái đơn hàng</string>
+    <string name="order_status_no_change">Chưa chọn trạng thái mới</string>
+    <string name="order_status_requires_paid">Vui lòng xác nhận đã thanh toán trước khi hoàn thành đơn chuyển khoản</string>
+    <string name="payment_status_cod_requires_delivered">Đơn COD chỉ được ghi nhận đã thanh toán khi chuyển đơn sang hoàn thành</string>
     <string name="payment_status_unpaid">Chưa thanh toán</string>
     <string name="payment_status_waiting">Chờ thanh toán</string>
     <string name="payment_status_paid">Đã thanh toán</string>
@@ -222,10 +227,16 @@
     <string name="admin_product_dialog_add">Thêm sản phẩm mới</string>
     <string name="admin_product_dialog_edit">Cập nhật sản phẩm</string>
     <string name="admin_product_stock_form_hint">Tồn kho hiện tại</string>
+    <string name="admin_stop_selling_product_title">Ngưng bán sản phẩm</string>
+    <string name="admin_stop_selling_product_message">Bạn có chắc chắn muốn ngưng bán &quot;%1$s&quot; không? Sản phẩm sẽ không hiển thị cho khách mua nữa.</string>
+    <string name="admin_stop_selling_product_action">Ngưng bán</string>
+    <string name="admin_resume_selling_product_title">Bán lại sản phẩm</string>
+    <string name="admin_resume_selling_product_message">Bạn có muốn bán lại &quot;%1$s&quot; không? Sản phẩm sẽ hiển thị lại cho khách hàng.</string>
+    <string name="admin_resume_selling_product_action">Bán lại</string>
     <string name="admin_deactivate_product_title">Xóa sản phẩm</string>
     <string name="admin_deactivate_product_message">Bạn có chắc muốn xóa hẳn &quot;%1$s&quot; không?</string>
     <string name="admin_deactivate_product_action">Xóa hẳn</string>
-    <string name="admin_product_deactivate_blocked_inactive">Sản phẩm này không còn tồn tại để xóa.</string>
+    <string name="admin_product_deactivate_blocked_inactive">Sản phẩm này đang ngưng bán. Nếu muốn xóa hẳn, sản phẩm cần hết tồn kho và không còn trong giỏ/đơn đang mở.</string>
     <string name="admin_product_deactivate_blocked_stock">Không thể xóa vì sản phẩm vẫn còn %1$d máy trong kho.</string>
     <string name="admin_product_deactivate_blocked_cart">Không thể xóa vì sản phẩm vẫn đang nằm trong %1$d giỏ hàng hoạt động.</string>
     <string name="admin_product_deactivate_blocked_order">Không thể xóa vì sản phẩm còn trong %1$d đơn hàng đang mở.</string>
@@ -258,6 +269,7 @@
     <string name="admin_product_status_in_stock">Còn hàng</string>
     <string name="admin_product_status_low_stock">Sắp hết</string>
     <string name="admin_product_status_out_of_stock">Hết hàng</string>
+    <string name="admin_product_status_stopped">Ngưng bán</string>
     <string name="admin_product_discount_short">-%1$d%%</string>
     <string name="admin_product_image">Ảnh sản phẩm</string>
     <string name="admin_add_short">Thêm</string>
@@ -339,6 +351,9 @@
     <string name="receipt_status_completed">Đã nhập kho</string>
     <string name="receipt_status_draft">Chờ nhập kho</string>
     <string name="receipt_print">In phiếu nhập</string>
+    <string name="receipt_print_title">Phiếu nhập kho</string>
+    <string name="receipt_print_job_name">Phieu_nhap_%1$s</string>
+    <string name="receipt_print_failed">Không thể tạo PDF phiếu nhập.</string>
     <string name="receipt_print_placeholder">Chức năng in phiếu nhập sẽ được bổ sung sau.</string>
     <string name="receipt_general_info">Thông tin chung</string>
     <string name="receipt_code_label">Mã phiếu nhập</string>

@@ -95,6 +95,18 @@ public class AdminReportsActivity extends BaseHomeActivity {
         orderDao = new OrderDao(this);
         userDao = new UserDao(this);
 
+        loadReportData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadReportData();
+    }
+
+    private void loadReportData() {
+        if (orderDao == null || userDao == null) return;
+
         OrderDao.ReportDashboardData dashboardData = orderDao.getReportDashboardData();
         OrderDao.ReportMetrics metrics = dashboardData.metrics;
         ArrayList<OrderDao.MonthRevenue> revenueByMonth = dashboardData.revenueByMonth;

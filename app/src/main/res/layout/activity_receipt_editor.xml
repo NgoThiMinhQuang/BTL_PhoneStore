@@ -9,14 +9,13 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipChildren="false"
-        android:clipToPadding="false">
+        android:layout_height="@dimen/header_admin_content_offset"
+        android:clipChildren="true"
+        android:clipToPadding="true">
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/header_red_height"
+            android:layout_height="match_parent"
             android:background="@drawable/bg_toolbar_admin" />
 
         <androidx.appcompat.widget.Toolbar
@@ -26,19 +25,21 @@
             android:background="@android:color/transparent"
             android:elevation="16dp"
             android:gravity="center_vertical"
-            android:translationZ="16dp"
             android:minHeight="88dp"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
+            android:translationZ="16dp"
             app:contentInsetStartWithNavigation="0dp"
             app:titleMargin="0dp"
             app:titleTextColor="@android:color/white" />
+    </FrameLayout>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/header_admin_content_offset"
-            android:fillViewport="true">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="true"
+        android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -49,7 +50,6 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/header_panel_pull_up"
                     app:cardBackgroundColor="@color/admin_surface"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
@@ -361,8 +361,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </ScrollView>
-    </FrameLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
