@@ -217,7 +217,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
             tvImagePreviewHint.setText("Chưa chọn ảnh, đang dùng ảnh mặc định/fallback");
             return;
         }
-        if (!ProductImageLoader.isValidImageInput(imageRef)) {
+        if (ProductImageLoader.isInvalidImageInput(imageRef)) {
             tvImagePreviewHint.setText("Ảnh đã chọn không hợp lệ, đang dùng ảnh fallback");
             return;
         }
@@ -401,7 +401,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         String colors = edtColors.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
-        if (!ProductImageLoader.isValidImageInput(image)) return "Ảnh đã chọn không hợp lệ";
+        if (ProductImageLoader.isInvalidImageInput(image)) return "Ảnh đã chọn không hợp lệ";
         if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
         if (TextUtils.isEmpty(os)) return "Vui lòng nhập hệ điều hành";
         if (TextUtils.isEmpty(romStr)) return "Vui lòng nhập dung lượng ROM";

@@ -60,31 +60,31 @@ public final class ProductImageLoader {
         return android.R.drawable.ic_menu_gallery;
     }
 
-    public static boolean isValidImageInput(String imageRef) {
+    public static boolean isInvalidImageInput(String imageRef) {
         if (imageRef == null) {
-            return true;
+            return false;
         }
         String trimmed = imageRef.trim();
         if (trimmed.isEmpty()) {
-            return true;
+            return false;
         }
         if (!looksLikeUri(trimmed)) {
-            return true;
+            return false;
         }
         Uri uri = Uri.parse(trimmed);
         String scheme = uri.getScheme();
         if ("content".equalsIgnoreCase(scheme)) {
-            return true;
+            return false;
         }
         String host = uri.getHost();
-        return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
-                && host != null
-                && !host.trim().isEmpty()
-                && !trimmed.contains(" ");
+        return !("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                || host == null
+                || host.trim().isEmpty()
+                || trimmed.contains(" ");
     }
 
     private static boolean isLoadableUri(String imageRef) {
-        if (!isValidImageInput(imageRef)) return false;
+        if (isInvalidImageInput(imageRef)) return false;
         String trimmed = imageRef == null ? "" : imageRef.trim();
         return looksLikeUrl(trimmed) || trimmed.regionMatches(true, 0, "content://", 0, 10);
     }
