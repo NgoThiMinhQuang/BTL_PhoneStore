@@ -2,12 +2,14 @@ package com.example.phonestore.ui.admin;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,6 +17,8 @@ import android.widget.Toast;
 
 import com.example.phonestore.utils.ProductImageLoader;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +47,8 @@ public class AdminProductsActivity extends BaseHomeActivity {
     private TextView tvInStockProducts;
     private TextView tvLowStockProducts;
     private TextView tvResultCount;
+    private ActivityResultLauncher<String[]> imagePickerLauncher;
+    private EditText activeImageField;
 
     @Override
     protected int shellLayoutRes() {
@@ -75,6 +81,17 @@ public class AdminProductsActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected void onShellReady() {
+        View contentContainer = findViewById(R.id.homeContentContainer);
+        if (contentContainer != null) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentContainer.getLayoutParams();
+            params.topMargin = dp(76);
+            contentContainer.setLayoutParams(params);
+        }
+        super.onShellReady();
+    }
+
+    @Override
     protected boolean shouldShowBackButton() {
         return true;
     }
@@ -87,6 +104,12 @@ public class AdminProductsActivity extends BaseHomeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+            if (uri == null || activeImageField == null) return;
+            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activeImageField.setText(uri.toString());
+        });
 
         session = new SessionManager(this);
         if (!session.isLoggedIn() || !DBHelper.ROLE_ADMIN.equals(session.getRole())) {
@@ -194,16 +217,20 @@ public class AdminProductsActivity extends BaseHomeActivity {
         ProductImageLoader.load(ivImagePreview, imageRef, productName, brand);
 
         if (imageRef.isEmpty()) {
-            tvImagePreviewHint.setText("Chưa nhập ảnh, đang dùng ảnh mặc định/fallback");
+            tvImagePreviewHint.setText("Chưa chọn ảnh, đang dùng ảnh mặc định/fallback");
             return;
         }
         if (!ProductImageLoader.isValidImageInput(imageRef)) {
-            tvImagePreviewHint.setText("URL ảnh không hợp lệ, đang dùng ảnh fallback");
+            tvImagePreviewHint.setText("Ảnh đã chọn không hợp lệ, đang dùng ảnh fallback");
+            return;
+        }
+        if (imageRef.regionMatches(true, 0, "content://", 0, 10)) {
+            tvImagePreviewHint.setText("Đang dùng ảnh đã chọn từ máy");
             return;
         }
         if (imageRef.regionMatches(true, 0, "http://", 0, 7)
                 || imageRef.regionMatches(true, 0, "https://", 0, 8)) {
-            tvImagePreviewHint.setText("Đang thử tải ảnh từ URL bạn nhập");
+            tvImagePreviewHint.setText("Đang thử tải ảnh từ URL cũ");
             return;
         }
         tvImagePreviewHint.setText("Đang preview theo tên resource nội bộ");
@@ -242,6 +269,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         EditText edtName = view.findViewById(R.id.edtName);
         EditText edtBrand = view.findViewById(R.id.edtBrand);
         EditText edtImage = view.findViewById(R.id.edtImage);
+        MaterialButton btnChooseImage = view.findViewById(R.id.btnChooseImage);
         ImageView ivImagePreview = view.findViewById(R.id.ivImagePreview);
         TextView tvImagePreviewHint = view.findViewById(R.id.tvImagePreviewHint);
         EditText edtPrice = view.findViewById(R.id.edtPrice);
@@ -274,6 +302,10 @@ public class AdminProductsActivity extends BaseHomeActivity {
         }
 
         bindImagePreview(ivImagePreview, tvImagePreviewHint, edtImage, edtName, edtBrand);
+        btnChooseImage.setOnClickListener(v -> {
+            activeImageField = edtImage;
+            imagePickerLauncher.launch(new String[]{"image/*"});
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(editing ? R.string.admin_product_dialog_edit : R.string.admin_product_dialog_add)
@@ -347,7 +379,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
         String colors = edtColors.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) return getString(R.string.err_name_required);
-        if (!ProductImageLoader.isValidImageInput(image)) return "URL ảnh không hợp lệ";
+        if (!ProductImageLoader.isValidImageInput(image)) return "Ảnh đã chọn không hợp lệ";
         if (TextUtils.isEmpty(priceStr)) return getString(R.string.err_price_required);
         if (TextUtils.isEmpty(os)) return "Vui lòng nhập hệ điều hành";
         if (TextUtils.isEmpty(romStr)) return "Vui lòng nhập dung lượng ROM";
@@ -442,6 +474,10 @@ public class AdminProductsActivity extends BaseHomeActivity {
             return getString(R.string.admin_product_deactivate_blocked_order, check.openOrderCount);
         }
         return getString(R.string.action_failed);
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @Override

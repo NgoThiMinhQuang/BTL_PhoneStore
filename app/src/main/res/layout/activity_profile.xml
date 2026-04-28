@@ -92,9 +92,13 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/itemOrdersOverview"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:gravity="center"
                     android:orientation="vertical">
 

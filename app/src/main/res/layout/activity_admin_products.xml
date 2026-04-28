@@ -4,18 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
+    android:clipChildren="true"
+    android:clipToPadding="true"
+    android:elevation="8dp"
+    android:orientation="vertical"
+    android:translationZ="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="0dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/bg_panel_admin"
-        android:elevation="6dp"
+        android:elevation="12dp"
+        android:translationZ="12dp"
         android:orientation="vertical">
 
         <LinearLayout

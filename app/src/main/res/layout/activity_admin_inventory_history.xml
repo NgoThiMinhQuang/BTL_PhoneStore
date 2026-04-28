@@ -24,28 +24,35 @@
             android:layout_width="match_parent"
             android:layout_height="88dp"
             android:background="@android:color/transparent"
-            android:elevation="8dp"
+            android:elevation="16dp"
+            android:gravity="center_vertical"
+            android:minHeight="88dp"
             android:paddingStart="18dp"
             android:paddingEnd="12dp"
+            android:translationZ="16dp"
             app:contentInsetStartWithNavigation="0dp"
+            app:titleMargin="0dp"
             app:titleTextColor="@android:color/white" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/header_admin_content_offset"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical">
+            android:layout_marginTop="76dp"
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:elevation="8dp"
+            android:orientation="vertical"
+            android:translationZ="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="@dimen/header_panel_pull_up"
+                android:layout_marginTop="0dp"
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/bg_panel_admin"
-                android:elevation="6dp"
+                android:elevation="12dp"
+                android:translationZ="12dp"
                 android:orientation="vertical">
 
                 <TextView

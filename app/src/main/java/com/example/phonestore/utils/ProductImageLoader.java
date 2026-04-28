@@ -17,7 +17,7 @@ public final class ProductImageLoader {
     public static void load(ImageView imageView, String imageRef, String productName, String brand) {
         Context context = imageView.getContext();
         int fallbackRes = resolveFallbackImage(context, imageRef, productName, brand);
-        if (isRemoteUrl(imageRef)) {
+        if (isLoadableUri(imageRef)) {
             Glide.with(imageView)
                     .load(imageRef.trim())
                     .placeholder(fallbackRes)
@@ -68,11 +68,14 @@ public final class ProductImageLoader {
         if (trimmed.isEmpty()) {
             return true;
         }
-        if (!looksLikeUrl(trimmed)) {
+        if (!looksLikeUri(trimmed)) {
             return true;
         }
         Uri uri = Uri.parse(trimmed);
         String scheme = uri.getScheme();
+        if ("content".equalsIgnoreCase(scheme)) {
+            return true;
+        }
         String host = uri.getHost();
         return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
                 && host != null
@@ -80,8 +83,14 @@ public final class ProductImageLoader {
                 && !trimmed.contains(" ");
     }
 
-    private static boolean isRemoteUrl(String imageRef) {
-        return isValidImageInput(imageRef) && looksLikeUrl(imageRef == null ? "" : imageRef.trim());
+    private static boolean isLoadableUri(String imageRef) {
+        if (!isValidImageInput(imageRef)) return false;
+        String trimmed = imageRef == null ? "" : imageRef.trim();
+        return looksLikeUrl(trimmed) || trimmed.regionMatches(true, 0, "content://", 0, 10);
+    }
+
+    private static boolean looksLikeUri(String value) {
+        return looksLikeUrl(value) || value.regionMatches(true, 0, "content://", 0, 10);
     }
 
     private static boolean looksLikeUrl(String value) {

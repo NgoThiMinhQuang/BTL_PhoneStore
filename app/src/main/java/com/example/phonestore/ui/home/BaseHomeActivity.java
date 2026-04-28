@@ -44,6 +44,7 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
 
     protected SessionManager session;
     private ScrollView homeScroll;
+    private View homeSearchCard;
     private boolean suppressBottomNavNavigation;
 
     @LayoutRes
@@ -446,9 +447,11 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
         homeScroll = findViewById(R.id.homeScroll);
         if (homeScroll == null) return;
 
+        homeSearchCard = findViewById(R.id.cardHomeSearch);
         homeScroll.setFillViewport(true);
         homeScroll.setFocusableInTouchMode(true);
         homeScroll.requestFocus();
+        homeScroll.setClipToOutline(true);
 
         View content = homeScroll.getChildAt(0);
         if (content != null) {
@@ -456,7 +459,17 @@ public abstract class BaseHomeActivity extends AppCompatActivity {
             content.requestFocus();
         }
 
+        homeScroll.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> updateHomeSearchOffset(scrollY));
+        homeScroll.post(() -> updateHomeSearchOffset(homeScroll.getScrollY()));
         homeScroll.setOnGenericMotionListener((v, event) -> handleHomeWheelScroll(event));
+    }
+
+    private void updateHomeSearchOffset(int scrollY) {
+        if (homeSearchCard == null) return;
+
+        float density = getResources().getDisplayMetrics().density;
+        homeSearchCard.setZ((scrollY == 0 ? 14f : 2f) * density);
+        homeSearchCard.setTranslationY(-Math.min(scrollY, homeSearchCard.getBottom()));
     }
 
     private boolean handleHomeWheelScroll(MotionEvent event) {

@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,25 @@ import java.util.Calendar;
 public class CustomerHomeActivity extends BaseHomeActivity {
 
     private static final String SORT_DISCOUNT_DESC = "discount_desc";
+    private static final int BANNER_INTERVAL_MS = 3000;
+
+    private final int[] homeBanners = {
+            R.drawable.drawable_anh_uu_dai,
+            R.drawable.dr_banner4,
+            R.drawable.dr_banner5
+    };
+    private int currentBannerIndex;
+    private FrameLayout homeBannerContainer;
+    private ImageView ivHomeBannerCurrent;
+    private ImageView ivHomeBannerNext;
+    private final Handler bannerHandler = new Handler(Looper.getMainLooper());
+    private final Runnable bannerTicker = new Runnable() {
+        @Override
+        public void run() {
+            showNextBanner();
+            bannerHandler.postDelayed(this, BANNER_INTERVAL_MS);
+        }
+    };
 
     private final Handler flashSaleHandler = new Handler(Looper.getMainLooper());
     private final Runnable flashSaleTicker = new Runnable() {
@@ -53,6 +74,7 @@ public class CustomerHomeActivity extends BaseHomeActivity {
             btnLogout.setOnClickListener(v -> showLogoutConfirmDialog());
         }
 
+        setupHomeBanner();
         setupFeaturedSection();
         setupFlashSaleSection();
         setupSuggestedSection();
@@ -61,11 +83,13 @@ public class CustomerHomeActivity extends BaseHomeActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        startHomeBannerRotation();
         startFlashSaleCountdown();
     }
 
     @Override
     protected void onPause() {
+        bannerHandler.removeCallbacks(bannerTicker);
         flashSaleHandler.removeCallbacks(flashSaleTicker);
         super.onPause();
     }
@@ -93,6 +117,46 @@ public class CustomerHomeActivity extends BaseHomeActivity {
     @Override
     protected boolean shouldShowToolbarActions() {
         return false;
+    }
+
+    private void setupHomeBanner() {
+        homeBannerContainer = findViewById(R.id.btnBannerBuyNow);
+        ivHomeBannerCurrent = findViewById(R.id.ivHomeBannerCurrent);
+        ivHomeBannerNext = findViewById(R.id.ivHomeBannerNext);
+        if (ivHomeBannerCurrent == null || ivHomeBannerNext == null) return;
+
+        currentBannerIndex = 0;
+        ivHomeBannerCurrent.setImageResource(homeBanners[currentBannerIndex]);
+        ivHomeBannerNext.setVisibility(View.INVISIBLE);
+    }
+
+    private void startHomeBannerRotation() {
+        bannerHandler.removeCallbacks(bannerTicker);
+        if (homeBannerContainer == null || ivHomeBannerCurrent == null || ivHomeBannerNext == null) return;
+        bannerHandler.postDelayed(bannerTicker, BANNER_INTERVAL_MS);
+    }
+
+    private void showNextBanner() {
+        if (homeBannerContainer == null || ivHomeBannerCurrent == null || ivHomeBannerNext == null) return;
+        if (homeBannerContainer.getWidth() <= 0) return;
+
+        int nextIndex = (currentBannerIndex + 1) % homeBanners.length;
+        int bannerWidth = homeBannerContainer.getWidth();
+        ivHomeBannerNext.setImageResource(homeBanners[nextIndex]);
+        ivHomeBannerNext.setTranslationX(bannerWidth);
+        ivHomeBannerNext.setVisibility(View.VISIBLE);
+        ivHomeBannerCurrent.animate().translationX(-bannerWidth).setDuration(320).start();
+        ivHomeBannerNext.animate()
+                .translationX(0f)
+                .setDuration(320)
+                .withEndAction(() -> {
+                    currentBannerIndex = nextIndex;
+                    ivHomeBannerCurrent.setImageResource(homeBanners[currentBannerIndex]);
+                    ivHomeBannerCurrent.setTranslationX(0f);
+                    ivHomeBannerNext.setVisibility(View.INVISIBLE);
+                    ivHomeBannerNext.setTranslationX(0f);
+                })
+                .start();
     }
 
     private void setupFeaturedSection() {

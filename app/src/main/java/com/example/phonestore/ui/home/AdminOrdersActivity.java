@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -91,6 +92,13 @@ public class AdminOrdersActivity extends BaseHomeActivity {
 
     @Override
     protected void onShellReady() {
+        View contentContainer = findViewById(R.id.homeContentContainer);
+        if (contentContainer != null) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) contentContainer.getLayoutParams();
+            params.topMargin = dp(76);
+            contentContainer.setLayoutParams(params);
+        }
+
         View cardOrdersCount = findViewById(R.id.cardOrdersCount);
         View cardOrdersPending = findViewById(R.id.cardOrdersPending);
         ((TextView) cardOrdersCount.findViewById(R.id.tvKpiLabel)).setText(R.string.admin_orders_count);
@@ -167,6 +175,10 @@ public class AdminOrdersActivity extends BaseHomeActivity {
     private void updateChip(TextView chip, boolean selected) {
         chip.setSelected(selected);
         chip.setTextColor(ContextCompat.getColor(this, selected ? android.R.color.white : R.color.admin_text_secondary));
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void loadOrders() {

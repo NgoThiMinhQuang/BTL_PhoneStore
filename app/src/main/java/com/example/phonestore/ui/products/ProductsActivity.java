@@ -1,9 +1,12 @@
 package com.example.phonestore.ui.products;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,12 +15,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.phonestore.R;
+import com.example.phonestore.data.dao.CartDao;
 import com.example.phonestore.data.dao.ProductDao;
 import com.example.phonestore.data.model.Product;
+import com.example.phonestore.ui.auth.LoginActivity;
+import com.example.phonestore.ui.cart.CartActivity;
 import com.example.phonestore.ui.home.BaseHomeActivity;
 
 import java.util.ArrayList;
@@ -38,10 +45,12 @@ public class ProductsActivity extends BaseHomeActivity {
     private static final String SORT_DISCOUNT_DESC = "discount_desc";
 
     private ProductDao productDao;
+    private CartDao cartDao;
     private ProductAdapter adapter;
 
     private EditText edtSearch;
     private TextView tvResultCount;
+    private TextView tvCartBadge;
     private LinearLayout layoutBrandFilters;
     private View layoutEmpty;
     private Spinner spSort;
@@ -64,6 +73,7 @@ public class ProductsActivity extends BaseHomeActivity {
         super.onCreate(savedInstanceState);
 
         productDao = new ProductDao(this);
+        cartDao = new CartDao(this);
 
         RecyclerView rv = findViewById(R.id.rvProducts);
         rv.setLayoutManager(new GridLayoutManager(this, 2));
@@ -137,12 +147,78 @@ public class ProductsActivity extends BaseHomeActivity {
     }
 
     @Override
+    protected int toolbarMenuRes() {
+        return R.menu.menu_product_detail_actions;
+    }
+
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 8));
+        alignProductToolbar();
+    }
+
+    private void alignProductToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar == null) return;
+
+        toolbar.setTitleMarginStart(Math.round(getResources().getDisplayMetrics().density * 6));
+        toolbar.setTitleMarginTop(0);
+        toolbar.setTitleMarginBottom(0);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean created = super.onCreateOptionsMenu(menu);
+        MenuItem cartItem = menu.findItem(R.id.action_cart);
+        if (cartItem == null) return created;
+
+        View actionView = cartItem.getActionView();
+        if (actionView != null) {
+            tvCartBadge = actionView.findViewById(R.id.tvCartBadge);
+            actionView.setOnClickListener(v -> openCartFromToolbar());
+            refreshCartBadge();
         }
+        return created;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_cart) {
+            openCartFromToolbar();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCartBadge();
+    }
+
+    private void openCartFromToolbar() {
+        if (!session.isLoggedIn()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
+        startActivity(new Intent(this, CartActivity.class));
+    }
+
+    private void refreshCartBadge() {
+        if (tvCartBadge == null || cartDao == null) return;
+        if (!session.isLoggedIn()) {
+            tvCartBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        int totalQty = cartDao.getTotalQty(session.getUserId());
+        if (totalQty <= 0) {
+            tvCartBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        tvCartBadge.setText(totalQty > 99 ? "99+" : String.valueOf(totalQty));
+        tvCartBadge.setVisibility(View.VISIBLE);
     }
 
     private void bindSearch() {

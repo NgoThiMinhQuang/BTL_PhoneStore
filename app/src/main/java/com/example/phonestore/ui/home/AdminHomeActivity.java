@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -21,6 +22,7 @@ import com.example.phonestore.ui.admin.AdminProductsActivity;
 import com.example.phonestore.ui.admin.AdminReportsActivity;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.orders.OrderDetailActivity;
+import com.example.phonestore.ui.profile.ProfileActivity;
 import com.example.phonestore.ui.orders.OrdersAdapter;
 import com.example.phonestore.utils.InventoryPolicy;
 import com.github.mikephil.charting.charts.BarChart;
@@ -57,11 +59,17 @@ public class AdminHomeActivity extends BaseHomeActivity {
         orderDao = new OrderDao(this);
         productDao = new ProductDao(this);
         userDao = new UserDao(this);
+
+        View avatar = findViewById(R.id.cardAvatarProfile);
+        if (avatar != null) {
+            avatar.setOnClickListener(v -> openBottomTab(new Intent(this, ProfileActivity.class)));
+        }
+
     }
 
     @Override
     protected int shellLayoutRes() {
-        return R.layout.activity_home_bottom_admin;
+        return R.layout.activity_home_bottom_admin_dashboard;
     }
 
     @Override
@@ -76,7 +84,7 @@ public class AdminHomeActivity extends BaseHomeActivity {
 
     @Override
     protected String screenTitle() {
-        return "Trang chủ";
+        return "";
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.example.phonestore.data.model.OrderStatus;
 import com.example.phonestore.data.model.User;
 import com.example.phonestore.ui.auth.WelcomeActivity;
 import com.example.phonestore.ui.home.BaseHomeActivity;
+import com.example.phonestore.ui.orders.OrdersActivity;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class ProfileActivity extends BaseHomeActivity {
     private TextView tvOrdersCount;
     private TextView tvProcessingCount;
     private TextView tvSpendTotal;
+    private View itemOrdersOverview;
     private View itemEditProfile;
     private View itemChangePassword;
     private View itemLogout;
@@ -127,12 +129,14 @@ public class ProfileActivity extends BaseHomeActivity {
         tvOrdersCount = findViewById(R.id.tvOrdersCount);
         tvProcessingCount = findViewById(R.id.tvProcessingCount);
         tvSpendTotal = findViewById(R.id.tvSpendTotal);
+        itemOrdersOverview = findViewById(R.id.itemOrdersOverview);
         itemEditProfile = findViewById(R.id.itemEditProfile);
         itemChangePassword = findViewById(R.id.itemChangePassword);
         itemLogout = findViewById(R.id.itemLogout);
     }
 
     private void bindActions() {
+        itemOrdersOverview.setOnClickListener(v -> startActivity(new Intent(this, OrdersActivity.class)));
         itemEditProfile.setOnClickListener(v -> showEditProfileDialog());
         itemChangePassword.setOnClickListener(v -> showChangePasswordDialog());
         itemLogout.setOnClickListener(v -> confirmLogout());

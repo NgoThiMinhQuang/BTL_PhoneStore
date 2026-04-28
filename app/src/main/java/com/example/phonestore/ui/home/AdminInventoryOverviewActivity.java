@@ -145,6 +145,7 @@ public class AdminInventoryOverviewActivity extends BaseHomeActivity {
     private void addFilterChip(LinearLayout container, String label, String filter) {
         TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, container, false);
         chip.setText(label);
+        chip.setBackgroundResource(R.drawable.bg_chip_admin);
         chip.setSelected(filter.equals(currentFilter));
         chip.setTextColor(getColor(filter.equals(currentFilter) ? android.R.color.white : R.color.admin_text_secondary));
         chip.setOnClickListener(v -> {
