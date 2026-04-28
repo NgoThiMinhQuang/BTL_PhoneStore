@@ -42,6 +42,7 @@
     <string name="product_deleted">Đã xóa sản phẩm</string>
     <string name="product_stopped_selling">Đã ngưng bán sản phẩm</string>
     <string name="product_resumed_selling">Đã bán lại sản phẩm</string>
+    <string name="product_image_permission_not_persisted">Đã chọn ảnh, nhưng nếu mở lại app mà ảnh mất thì hãy chọn lại từ thư mục chia sẻ.</string>
 
     <string name="save">Lưu</string>
     <string name="add">Thêm</string>

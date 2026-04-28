@@ -49,6 +49,7 @@ public class AdminProductsActivity extends BaseHomeActivity {
     private TextView tvStoppedProducts;
     private TextView tvResultCount;
     private ActivityResultLauncher<String[]> imagePickerLauncher;
+    private AlertDialog activeProductDialog;
     private EditText activeImageField;
 
     @Override
@@ -107,8 +108,10 @@ public class AdminProductsActivity extends BaseHomeActivity {
         super.onCreate(savedInstanceState);
 
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
-            if (uri == null || activeImageField == null) return;
-            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (uri == null || activeImageField == null || activeProductDialog == null || !activeProductDialog.isShowing()) {
+                return;
+            }
+            persistImageReadPermission(uri);
             activeImageField.setText(uri.toString());
         });
 
@@ -263,6 +266,14 @@ public class AdminProductsActivity extends BaseHomeActivity {
         rvProducts.setVisibility(isEmpty ? View.INVISIBLE : View.VISIBLE);
     }
 
+    private void persistImageReadPermission(Uri uri) {
+        try {
+            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (RuntimeException ignored) {
+            Toast.makeText(this, R.string.product_image_permission_not_persisted, Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void showProductFormDialog(Product oldProduct) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_admin_product_form, null, false);
 
@@ -302,10 +313,6 @@ public class AdminProductsActivity extends BaseHomeActivity {
         }
 
         bindImagePreview(ivImagePreview, tvImagePreviewHint, edtImage, edtName, edtBrand);
-        btnChooseImage.setOnClickListener(v -> {
-            activeImageField = edtImage;
-            imagePickerLauncher.launch(new String[]{"image/*"});
-        });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(editing ? R.string.admin_product_dialog_edit : R.string.admin_product_dialog_add)
@@ -314,35 +321,50 @@ public class AdminProductsActivity extends BaseHomeActivity {
                 .setPositiveButton(R.string.save, null)
                 .create();
 
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            Product p = editing ? oldProduct : new Product();
-            String error = fillAndValidateProductFromForm(
-                    p, editing, edtName, edtBrand, edtImage, edtPrice, edtDiscount,
-                    edtOs, edtRom, edtRam, edtBattery, edtChipset, edtScreen, edtCamera,
-                    edtColors, edtDesc
-            );
+        btnChooseImage.setOnClickListener(v -> {
+            activeProductDialog = dialog;
+            activeImageField = edtImage;
+            imagePickerLauncher.launch(new String[]{"image/*"});
+        });
 
-            if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
-                return;
+        dialog.setOnShowListener(d -> {
+            activeProductDialog = dialog;
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                Product p = editing ? oldProduct : new Product();
+                String error = fillAndValidateProductFromForm(
+                        p, editing, edtName, edtBrand, edtImage, edtPrice, edtDiscount,
+                        edtOs, edtRom, edtRam, edtBattery, edtChipset, edtScreen, edtCamera,
+                        edtColors, edtDesc
+                );
+
+                if (error != null) {
+                    Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                boolean ok;
+                if (editing) {
+                    ok = productDao.update(p);
+                } else {
+                    ok = productDao.insert(p) != -1;
+                }
+
+                if (!ok) {
+                    Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Toast.makeText(this, editing ? R.string.admin_product_updated_success : R.string.admin_product_added_success, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                loadData();
+            });
+        });
+        dialog.setOnDismissListener(d -> {
+            if (activeProductDialog == dialog) {
+                activeProductDialog = null;
+                activeImageField = null;
             }
-
-            boolean ok;
-            if (editing) {
-                ok = productDao.update(p);
-            } else {
-                ok = productDao.insert(p) != -1;
-            }
-
-            if (!ok) {
-                Toast.makeText(this, R.string.action_failed, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Toast.makeText(this, editing ? R.string.admin_product_updated_success : R.string.admin_product_added_success, Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-            loadData();
-        }));
+        });
 
         dialog.show();
     }

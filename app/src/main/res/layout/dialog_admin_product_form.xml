@@ -52,7 +52,7 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_edittext_admin"
             android:enabled="false"
-            android:hint="Chưa chọn ảnh từ máy"
+            android:hint="Chưa chọn ảnh từ thư viện Android/emulator"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:singleLine="true"
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
-            android:text="Chọn ảnh từ máy"
+            android:text="Chọn ảnh từ thiết bị"
             android:textAllCaps="false"
             android:textColor="@color/admin_primary"
             app:cornerRadius="18dp"
@@ -88,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Preview ảnh theo URL hoặc resource bạn nhập"
+            android:text="Preview ảnh đã chọn hoặc ảnh mặc định"
             android:textColor="@color/admin_text_secondary"
             android:textSize="12sp" />
 
